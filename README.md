@@ -11,21 +11,12 @@ A lightweight library for Arduino communication and control using JSON messages 
 - Support for multiple devices on the same network
 
 ## Installation
+   - Go to a folder in your system and type `git clone https://github.com/ruiseixasm/JsonTalkiePy.git`
+   - Go to that same folder and type `python talk.py`
 
-### Arduino Library
-1. **Using Arduino Library Manager**:
-   - Open Arduino IDE
-   - Go to `Sketch > Include Library > Manage Libraries`
-   - Search for "JsonTalkie"
-   - Click "Install"
-
-2. **Manual Installation**:
-   - Download the latest release from GitHub
-   - Extract to your Arduino libraries folder
-   - Restart Arduino IDE
-
-### JsonTalkie
-   - To be used in conjugation with the Arduino [JsonTalkie](https://github.com/ruiseixasm/JsonTalkie) library (version 3.0 or above)
+## JsonTalkie Arduino Library
+   - To be used with the Arduino [JsonTalkie](https://github.com/ruiseixasm/JsonTalkie) library (version 3.0 or above)
+   - Go to the site above for instructions in how to install it
 
 ## Python Command Line
 ### Typical usage
@@ -61,7 +52,8 @@ rui@acer:~/GitHub/JsonTalkie/Python$ python3.13 talk.py
 	Exiting...
 ```
 ### Channel setting
-In order to command multiple devices at once, instead of calling them by name call them by `channel`.
+In order to command multiple devices at once, instead of calling them by name you can call them by `channel`.
+This applies to all commands besides the `talk` one used bellow by `channel`.
 ```bash
 PS C:\Users\Utilizador\Documents\GitHub\JsonTalkiePy> python .\talk.py
         [Talker-ae] running. Type 'exit' to exit or 'talk' to make them talk.
