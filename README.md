@@ -24,10 +24,11 @@ A lightweight library for Arduino communication and control using JSON messages 
    - Extract to your Arduino libraries folder
    - Restart Arduino IDE
 
-### Dependencies
-   - Requires [ArduinoJson](https://arduinojson.org/) (any recent version)
+### JsonTalkie
+   - To be used in conjugation with the Arduino [JsonTalkie](https://github.com/ruiseixasm/JsonTalkie) library (version 3.0 or above)
 
 ## Python Command Line
+### Typical usage
 ```bash
 rui@acer:~/GitHub/JsonTalkie/Python$ python3.13 talk.py 
 	[Talker-1b] running. Type 'exit' to exit or 'talk' to make them talk.
@@ -58,4 +59,38 @@ rui@acer:~/GitHub/JsonTalkie/Python$ python3.13 talk.py
 	[help]                  Shows the present help.
 >>> exit
 	Exiting...
+```
+### Channel setting
+In order to command multiple devices at once, instead of calling them by name call them by `channel`.
+```bash
+PS C:\Users\Utilizador\Documents\GitHub\JsonTalkiePy> python .\talk.py
+        [Talker-ae] running. Type 'exit' to exit or 'talk' to make them talk.
+>>> talk
+        [Talker-ae talk]        A simple Talker!
+        [Nano talk]             I do a 500ms buzz!
+        [ESP32 talk]            I do a 500ms buzz!
+        [ESP66 talk]            I do a 500ms buzz!
+>>> * channel
+        [Talker-ae channel]     0
+        [Nano channel]          0
+        [ESP32 channel]         0
+        [ESP66 channel]         0
+>>> Nano channel 11
+        [Nano channel]          11
+>>> ESP66 channel 11
+        [ESP66 channel]         11
+>>> 0 talk
+        [Talker-ae talk]        A simple Talker!
+        [ESP32 talk]            I do a 500ms buzz!
+>>> 11 talk
+        [Nano talk]             I do a 500ms buzz!
+        [ESP66 talk]            I do a 500ms buzz!
+>>> * channel
+        [Talker-ae channel]     0
+        [Nano channel]          11
+        [ESP32 channel]         0
+        [ESP66 channel]         11
+>>> exit
+        Exiting...
+PS C:\Users\Utilizador\Documents\GitHub\JsonTalkiePy>
 ```
