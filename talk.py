@@ -92,10 +92,12 @@ class CommandLine:
                         json_talkie.talk(message)
                         return
                 else:
+                    message: dict = {}
                     try:    # Try as channel first
-                        message = {"t": int(words[0])}
+                        message["t"] = int(words[0])
                     except ValueError:
-                        message = {"t": words[0]}
+                        if words[0] != "*":
+                            message["t"] = words[0]
                     command_map = {
                         "talk": (0, 2),
                         "list": (1, 2),
