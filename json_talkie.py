@@ -97,7 +97,7 @@ class JsonTalkie:
         JsonTalkie.valid_checksum(message)
         if DEBUG:
             print(message)
-        # Avoids broadcasting flooding (no need to check for "*", never kept in the devices_address)
+        # Avoids broadcasting flooding
         if "t" in message and message["t"] in self._devices_address:
             return self._socket.send( JsonTalkie.encode(message), self._devices_address[message["t"]] )
         return self._socket.send( JsonTalkie.encode(message) )
@@ -115,7 +115,7 @@ class JsonTalkie:
                     if self.validate_message(message):
                         if DEBUG:
                             print(message)
-                        if "f" in message and message["f"] != "*":
+                        if "f" in message:
                             self._devices_address[message["f"]] = ip_port
                         self.receive(message)
                 except (UnicodeDecodeError, json.JSONDecodeError) as e:
@@ -249,15 +249,12 @@ class JsonTalkie:
                     return False
                 if not ("f" in message and "i" in message):
                     return False
-                if not (message["m"] == 0 or message["m"] == 5):
-                    if "t" not in message:
-                        return False
-                    if message["t"] != "*":
-                        if isinstance(message["t"], int):
-                            if message["t"] != self._channel:
-                                return False
-                        elif message["t"] != self._manifesto['talker']['name']:
+                if "t" in message:
+                    if isinstance(message["t"], int):
+                        if message["t"] != self._channel:
                             return False
+                    elif message["t"] != self._manifesto['talker']['name']:
+                        return False
             else:
                 return False
         else:
