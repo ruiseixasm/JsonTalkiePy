@@ -12,7 +12,7 @@ A lightweight library for Arduino communication and control using JSON messages 
 
 ## Installation
    - Go to a folder in your system and type `git clone https://github.com/ruiseixasm/JsonTalkiePy.git`
-   - Go to that same folder and type `python talk.py`
+   - Go to the newly created `JsonTalkiePy` folder and type `python talk.py`
 
 ## JsonTalkie Arduino Library
    - To be used with the Arduino [JsonTalkie](https://github.com/ruiseixasm/JsonTalkie) library (version 3.0 or above)
