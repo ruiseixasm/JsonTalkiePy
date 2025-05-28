@@ -171,6 +171,7 @@ class CommandLine:
         
         return "".join(parts)
 
+
     def echo(self, message: Dict[str, Any]) -> bool:
         """Handle echo messages with proper alignment"""
         try:
@@ -178,7 +179,11 @@ class CommandLine:
             padded_prefix = prefix.ljust(self.max_prefix_length)
             
             value = ""
-            if "v" in message:
+            if "g" in message:
+                value = {
+                    0: "ROGER", 1: "UNKNOWN", 2: "NONE"
+                }.get(message["g"], "FAIL")
+            elif "v" in message:
                 value = str(message["v"])
             elif "b" in message:
                 value = str(message["b"])
@@ -186,16 +191,13 @@ class CommandLine:
                 value = str(message["d"])
             elif "r" in message:
                 value = str(message["r"])
-            elif "g" in message:
-                value = {
-                    0: "ROGER", 1: "UNKNOWN", 2: "NONE"
-                }.get(message["g"], "FAIL")
             
             print(f"{padded_prefix}\t{value}")
             return True
         except Exception as e:
             print(f"\nFormat error: {e}")
             return False
+
 
     def error(self, message: Dict[str, Any]) -> bool:
         """Handle error messages"""
