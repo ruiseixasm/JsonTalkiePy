@@ -109,8 +109,8 @@ class CommandLine:
                     }
                     
                     if words[1] in command_map:
-                        code, expected_args = command_map[words[1]]
-                        if len(words) == expected_args or expected_args == 0:
+                        code, total_args = command_map[words[1]]
+                        if len(words) == total_args or total_args == 0:
                             message["m"] = code
                             if code == 8:   # channel
                                 if len(words) == 3:
@@ -119,7 +119,7 @@ class CommandLine:
                                     except ValueError:
                                         print(f"\t'{words[2]}' is not an integer!")
                                         return
-                            elif expected_args > 2:
+                            elif total_args > 2:
                                 message["n"] = words[2]
                             if words[1] == "set":
                                 try:
@@ -130,7 +130,7 @@ class CommandLine:
                             json_talkie.talk(message)
                             return
                         else:
-                            print(f"\t'{words[1]}' requires {expected_args-1} arguments!")
+                            print(f"\t'{words[1]}' requires {total_args - 2} argument(s)!")
                             return
                         
         self._print_help()
