@@ -64,10 +64,11 @@ DEBUG = False  # Set to False to disable debug prints
 
 class JsonTalkie:
 
-    def __init__(self, socket: BroadcastSocket, manifesto: Dict[str, Dict[str, Any]]):
+    def __init__(self, socket: BroadcastSocket, manifesto: Dict[str, Dict[str, Any]], verbose: bool = False):
         self._socket: BroadcastSocket = socket  # Composition over inheritance
         self._manifesto: Dict[str, Dict[str, Any]] = manifesto
         self._channel: int = 0
+        self._verbose: bool = verbose
         self._message_time: float = 0.0
         self._running: bool = False
         self._devices_address: Dict[str, Tuple[str, int]] = {}
@@ -95,7 +96,7 @@ class JsonTalkie:
         if "i" not in message:
             message["i"] = JsonTalkie.message_id()
         JsonTalkie.valid_checksum(message)
-        if DEBUG:
+        if self._verbose:
             print(message)
         # Avoids broadcasting flooding
         if "t" in message and message["t"] in self._devices_address:
@@ -109,17 +110,17 @@ class JsonTalkie:
             if received:
                 data, ip_port = received  # Explicitly ignore (ip, port)
                 try:
-                    if DEBUG:
+                    if self._verbose:
                         print(data)
                     message: Dict[str, Any] = JsonTalkie.decode(data)
                     if self.validate_message(message):
-                        if DEBUG:
+                        if self._verbose:
                             print(message)
                         if "f" in message:
                             self._devices_address[message["f"]] = ip_port
                         self.receive(message)
                 except (UnicodeDecodeError, json.JSONDecodeError) as e:
-                    if DEBUG:
+                    if self._verbose:
                         print(f"\tInvalid message: {e}")
                     pass
 

@@ -14,6 +14,7 @@ https://github.com/ruiseixasm/JsonTalkie
 import os
 import uuid
 import asyncio
+import argparse
 from typing import Dict, Any
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
@@ -218,8 +219,24 @@ class CommandLine:
         return True
 
 if __name__ == "__main__":
-    # Socket configuration
-    SOCKET = "UDP"  # Change to "SERIAL" or "DUMMY" as needed
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description="JSON Talkie Communication Tool")
+    parser.add_argument(
+        "--socket", 
+        choices=["UDP", "SERIAL", "DUMMY"], 
+        default="UDP",
+        help="Socket type to use (default: UDP)"
+    )
+    parser.add_argument(
+        "--verbose", 
+        type=None,
+        help="Enables verbose mode"
+    )
+    
+    args = parser.parse_args()
+    
+    # Socket configuration from command line
+    SOCKET = args.socket
     
     if SOCKET == "SERIAL":
         from broadcast_socket_serial import BroadcastSocket_Serial
