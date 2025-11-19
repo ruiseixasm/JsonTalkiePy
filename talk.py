@@ -228,15 +228,17 @@ if __name__ == "__main__":
         help="Socket type to use (default: UDP)"
     )
     parser.add_argument(
-        "--verbose", 
-        type=None,
+        "--verbose",
+        action="store_true",
+        default=False,
         help="Enables verbose mode"
     )
     
     args = parser.parse_args()
     
     # Socket configuration from command line
-    SOCKET = args.socket
+    SOCKET: str = args.socket
+    VERBOSE: bool = args.verbose
     
     if SOCKET == "SERIAL":
         from broadcast_socket_serial import BroadcastSocket_Serial
@@ -251,7 +253,7 @@ if __name__ == "__main__":
     from json_talkie import JsonTalkie
     
     cli = CommandLine()
-    json_talkie = JsonTalkie(broadcast_socket, cli.manifesto)
+    json_talkie = JsonTalkie(broadcast_socket, cli.manifesto, VERBOSE)
 
     if not json_talkie.on():
         print("\tFailed to turn jsonTalkie On!")
