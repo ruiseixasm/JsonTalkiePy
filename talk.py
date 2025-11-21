@@ -260,7 +260,7 @@ if __name__ == "__main__":
         exit(1)
     
     print(f"\t[{cli.manifesto['talker']['name']}] running. Type 'exit' to exit or 'talk' to make them talk.")
-    print(f"\tIMPORTANT NOTE: ALWAYS GIVE DIFFERENT MAC ADDRESSES TO YOUR DEVICES TO AVOID IP CONFLICT!")
+    print(f"\tWARNING: ALWAYS GIVE DIFFERENT MAC ADDRESSES TO YOUR DEVICES TO AVOID IP CONFLICT!")
     
     try:
         asyncio.run(cli.run())
