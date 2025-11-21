@@ -12,11 +12,49 @@ Lesser General Public License for more details.
 https://github.com/ruiseixasm/JsonTalkie
 '''
 import socket
+import ipaddress
 from typing import Optional, Tuple, Dict
+from broadcast_socket import BroadcastSocket
+
 
 DEBUG = False  # Set to False to disable debug prints
 
-from broadcast_socket import BroadcastSocket
+
+def get_my_broadcast():
+    """
+    Simple one-call function to get broadcast address - no internet required!
+    """
+    try:
+        # Get local IP without any external connections
+        hostname = socket.gethostname()
+        local_ip = socket.gethostbyname_ex(hostname)[2][0]  # First non-localhost IP
+        
+        # Skip localhost
+        if local_ip.startswith('127.'):
+            # Try to find another IP
+            all_ips = socket.gethostbyname_ex(hostname)[2]
+            for ip in all_ips:
+                if not ip.startswith('127.'):
+                    local_ip = ip
+                    break
+        
+        # Use appropriate subnet mask
+        if local_ip.startswith('192.168.'):
+            subnet_mask = '255.255.255.0'
+        elif local_ip.startswith('10.'):
+            subnet_mask = '255.255.255.0'
+        elif local_ip.startswith('172.'):
+            subnet_mask = '255.255.0.0'
+        else:
+            subnet_mask = '255.255.255.0'  # Default to /24
+        
+        interface = ipaddress.IPv4Interface(f"{local_ip}/{subnet_mask}")
+        return str(interface.network.broadcast_address)
+        
+    except Exception:
+        return '255.255.255.255'
+    
+
 
 class BroadcastSocket_UDP(BroadcastSocket):
     """UDP broadcast socket with explicit lifecycle control."""
@@ -100,7 +138,10 @@ class BroadcastSocket_UDP(BroadcastSocket):
             if device_address:
                 self._socket.sendto(data, device_address)
             else:
-                self._socket.sendto(data, ('255.255.255.255', self._port))
+                broadcast_address: str = get_my_broadcast()
+                if DEBUG:
+                    print(f"Generated broadcast address: {broadcast_address}")
+                self._socket.sendto(data, (broadcast_address, self._port))
             return True
         except Exception as e:
             print(f"Send failed: {e}")
