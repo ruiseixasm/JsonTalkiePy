@@ -259,8 +259,10 @@ if __name__ == "__main__":
         print("\tFailed to turn jsonTalkie On!")
         exit(1)
     
+    print(f"\tWARNINGS TO AVOID UNREACHABLE COMMANDS:")
+    print(f"\t\tALWAYS GIVE DIFFERENT MAC ADDRESSES TO YOUR DEVICES DUE TO IP CONFLICTS")
+    print(f"\t\tAVOID BROADCASTED (UNNAMED DEVICES) COMMANDS ON WIFI CONNECTED DEVICES DUE TO WIFI RESTRICTIONS")
     print(f"\t[{cli.manifesto['talker']['name']}] running. Type 'exit' to exit or 'talk' to make them talk.")
-    print(f"\tWARNING: ALWAYS GIVE DIFFERENT MAC ADDRESSES TO YOUR DEVICES TO AVOID IP CONFLICTS!")
     
     try:
         asyncio.run(cli.run())
