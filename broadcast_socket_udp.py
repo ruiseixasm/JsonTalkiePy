@@ -138,9 +138,10 @@ class BroadcastSocket_UDP(BroadcastSocket):
             if device_address:
                 self._socket.sendto(data, device_address)
             else:
-                broadcast_address: str = get_my_broadcast()
-                if DEBUG:
-                    print(f"Generated broadcast address: {broadcast_address}")
+                # broadcast_address: str = get_my_broadcast()
+                # if DEBUG:
+                #     print(f"Generated broadcast address: {broadcast_address}")
+                broadcast_address: str = '255.255.255.255'   # Many Arduino libraries only receive this address
                 self._socket.sendto(data, (broadcast_address, self._port))
             return True
         except Exception as e:
