@@ -20,8 +20,6 @@ import platform
 
 from broadcast_socket import BroadcastSocket
 
-DEBUG = False  # Set to False to disable debug prints
-
 # Keys:
 #     b: byte
 #     c: checksum

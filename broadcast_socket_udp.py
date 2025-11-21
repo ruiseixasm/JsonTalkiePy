@@ -14,6 +14,8 @@ https://github.com/ruiseixasm/JsonTalkie
 import socket
 from typing import Optional, Tuple, Dict
 
+DEBUG = False  # Set to False to disable debug prints
+
 from broadcast_socket import BroadcastSocket
 
 class BroadcastSocket_UDP(BroadcastSocket):
@@ -90,6 +92,8 @@ class BroadcastSocket_UDP(BroadcastSocket):
 
     def send(self, data: bytes, device_address: Tuple[str, int] = None) -> bool:
         """Broadcast data if socket is active."""
+        if DEBUG:
+            print(f"Socket send data: {data} to address {device_address}")
         if not self._socket:
             return False
         try:
