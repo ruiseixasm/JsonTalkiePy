@@ -186,20 +186,30 @@ class CommandLine:
             prefix = self.generate_prefix(message)
             padded_prefix = prefix.ljust(self.max_prefix_length)
             
-            value = ""
+            echo_reply: dict = {}
+
+            if "w" in message:
+                echo_reply[0] = {
+                    0: "talk", 1: "list", 2: "run",
+                    3: "set", 4: "get", 5: "sys", 8: "channel"
+                }.get(message.get("w"), "echo")
+
             if "g" in message:
-                value = {
+                echo_reply[1] = {
                     0: "ROGER", 1: "SAY AGAIN", 2: "NEGATIVE"
                 }.get(message["g"], "FAIL")
             elif "v" in message:
-                value = str(message["v"])
+                echo_reply[2] = str(message["v"])
             elif "b" in message:
-                value = str(message["b"])
+                echo_reply[1] = str(message["b"])
             elif "d" in message:
-                value = str(message["d"])
+                echo_reply[1] = str(message["d"])
             
-            print(f"{padded_prefix}\t{value}")
-            
+            if 1 in echo_reply:
+                print(f"{padded_prefix}\t{echo_reply[1]}")
+            if 2 in echo_reply:
+                print(f"{padded_prefix}\t{echo_reply[2]}")
+
             # If it carries a reply
             if "r" in message:	
                 print(f"{padded_prefix}\t{str(message["r"])}")
