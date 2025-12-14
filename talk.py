@@ -182,7 +182,7 @@ class CommandLine:
             value = ""
             if "g" in message:
                 value = {
-                    0: "ROGER", 1: "UNKNOWN", 2: "NONE"
+                    0: "ROGER", 1: "SAY AGAIN", 2: "NEGATIVE"
                 }.get(message["g"], "FAIL")
             elif "v" in message:
                 value = str(message["v"])
@@ -190,10 +190,13 @@ class CommandLine:
                 value = str(message["b"])
             elif "d" in message:
                 value = str(message["d"])
-            elif "r" in message:
-                value = str(message["r"])
             
             print(f"{padded_prefix}\t{value}")
+            
+            # If it carries a reply
+            if "r" in message:	
+                print(f"{padded_prefix}\t{str(message["r"])}")
+
             return True
         except Exception as e:
             print(f"\nFormat error: {e}")
