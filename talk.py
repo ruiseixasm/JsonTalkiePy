@@ -121,7 +121,10 @@ class CommandLine:
                                         print(f"\t'{words[2]}' is not an integer!")
                                         return
                             elif total_args > 2:
-                                message["n"] = words[2]
+                                try:    # Try as number first
+                                    message["N"] = int(words[2])
+                                except ValueError:
+                                    message["n"] = words[2]
                             if words[1] == "set":
                                 try:
                                     message["v"] = int(words[3])
