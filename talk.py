@@ -165,7 +165,11 @@ class CommandLine:
                 }.get(message.get("w"), "echo")
                 parts.append(f" {what}")
                 
-                if "n" in message:
+                if "N" in message:
+                    parts.append(f" {message['N']}")
+                    if "n" in message:
+                        parts.append(f"|{message['n']}")
+                elif "n" in message:
                     parts.append(f" {message['n']}")
             
             parts.append("]")
