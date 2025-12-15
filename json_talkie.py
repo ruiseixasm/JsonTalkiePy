@@ -198,17 +198,16 @@ class JsonTalkie:
                     if self.validate_message(message):
 
                         # Add info to echo message right away accordingly to the message original type
-                        if message[JsonChar.MESSAGE.value] == MessageCode.ECHO:
+                        if message[JsonChar.MESSAGE.value] == MessageCode.ECHO.value:
                             original_message_code = MessageCode(message[JsonChar.ORIGINAL.value])
                             match original_message_code:
                                 case MessageCode.SYS:
-                                    if message[JsonChar.SYSTEM.value] == SystemCode.PING:
+                                    if message[JsonChar.SYSTEM.value] == SystemCode.PING.value:
                                         message_id = message[JsonChar.IDENTITY.value]
-                                        if message_id in self._sent_messages:
-                                            out_time_ms: int = message_id
-                                            actual_time: int = self.message_id()
-                                            delay_ms: int = actual_time - out_time_ms
-                                            message["delay_ms"] = delay_ms
+                                        out_time_ms: int = message_id
+                                        actual_time: int = self.message_id()
+                                        delay_ms: int = actual_time - out_time_ms
+                                        message["delay_ms"] = delay_ms
 
 
                         if self._verbose:
