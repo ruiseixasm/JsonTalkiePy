@@ -132,9 +132,12 @@ class JsonTalkie:
         self._manifesto: Dict[str, Dict[str, Any]] = manifesto
         self._channel: int = 0
         self._verbose: bool = verbose
+        # State variables
+        self._sent_messages: dict[int, Dict[str, Any]] = {}
+        self._fifo_pool_100: list[int] = []
+        self._devices_address: Dict[str, Tuple[str, int]] = {}
         self._message_time: float = 0.0
         self._running: bool = False
-        self._devices_address: Dict[str, Tuple[str, int]] = {}
 
     def on(self) -> bool:
         """Start message processing (no network knowledge)."""
@@ -162,10 +165,26 @@ class JsonTalkie:
         if self._verbose:
             print(message)
         # Avoids broadcasting flooding
+        sent_result: bool = False
         if "t" in message and message["t"] in self._devices_address:
-            return self._socket.send( JsonTalkie.encode(message), self._devices_address[message["t"]] )
-        return self._socket.send( JsonTalkie.encode(message) )
+            sent_result = self._socket.send( JsonTalkie.encode(message), self._devices_address[message["t"]] )
+        else:
+            sent_result = self._socket.send( JsonTalkie.encode(message) )
+        # keeps the sent messages for a minute
+        message_id: int = message[JsonChar.IDENTITY.value]
+        self._sent_messages[message_id] = message
+        self._fifo_pool_100.insert(0, message_id)
+        return sent_result
     
+
+    def clean_messages_pool(self):
+        extra_messages: int = len(self._fifo_pool_100) - 100
+        if extra_messages > 0:
+            for _ in range(extra_messages):
+                message_id = self._fifo_pool_100.pop()
+                del(self._sent_messages[message_id])
+    
+
     def listen(self):
         """Processes raw bytes from socket."""
         while self._running:
@@ -177,10 +196,28 @@ class JsonTalkie:
                         print(data)
                     message: Dict[str, Any] = JsonTalkie.decode(data)
                     if self.validate_message(message):
+
+                        # Add info to echo message right away accordingly to the message original type
+                        if message[JsonChar.MESSAGE.value] == MessageCode.ECHO:
+                            original_message_code = MessageCode(message[JsonChar.ORIGINAL.value])
+                            match original_message_code:
+                                case MessageCode.SYS:
+                                    if message[JsonChar.SYSTEM.value] == SystemCode.PING:
+                                        message_id = message[JsonChar.IDENTITY.value]
+                                        if message_id in self._sent_messages:
+                                            out_time_ms: int = message_id
+                                            actual_time: int = self.message_id()
+                                            delay_ms: int = actual_time - out_time_ms
+                                            message["delay_ms"] = delay_ms
+
+
                         if self._verbose:
                             print(message)
                         if "f" in message:
                             self._devices_address[message["f"]] = ip_port
+
+
+                        self.clean_messages_pool()
                         self.receive(message)
                 except (UnicodeDecodeError, json.JSONDecodeError) as e:
                     if self._verbose:

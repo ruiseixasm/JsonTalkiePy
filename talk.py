@@ -208,6 +208,10 @@ class CommandLine:
                         case SystemCode.BOARD:
                             print(f"{padded_prefix}\t{str(message[JsonChar.DESCRIPTION.value])}")
 
+                        case SystemCode.PING:
+                            if "delay_ms" in message:
+                                print(f"{padded_prefix}\t{str(message["delay_ms"])}")
+
                         case _:
                             print(f"{padded_prefix}\t{str(message[JsonChar.VALUE.value])}")
                 case _:
@@ -218,10 +222,14 @@ class CommandLine:
                     if JsonChar.REPLY.value in message:
                         print(f"{padded_prefix}\t{str(message[JsonChar.REPLY.value])}")
 
+            # Remove the exceeding messages from the pool
+
+
             return True
         except Exception as e:
             print(f"\nFormat error: {e}")
             return False
+
 
 
     def error(self, message: Dict[str, Any]) -> bool:
