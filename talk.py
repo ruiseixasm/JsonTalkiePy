@@ -157,16 +157,22 @@ class CommandLine:
             parts.append(f"\t[{message['f']}")
             
             if "o" in message:
-                if MessageCode(message.get("o")) == MessageCode.LIST:
-                    action_name = str(MessageCode(message.get("a")))
-                    parts.append(f" {action_name}")
-                    
-                    if "x" in message:
-                        parts.append(f" {message['x']}")
-                        if "n" in message:
-                            parts.append(f"|{message['n']}")
-                    elif "n" in message:
-                        parts.append(f" {message['n']}")
+                original_message_code = MessageCode(message.get("o"))
+                match original_message_code:
+                    case MessageCode.LIST:
+                        action_name = str(MessageCode(message.get("a")))
+                        parts.append(f" {action_name}")
+                        if "x" in message:
+                            parts.append(f" {message['x']}")
+                            if "n" in message:
+                                parts.append(f"|{message['n']}")
+                        elif "n" in message:
+                            parts.append(f" {message['n']}")
+                    case MessageCode.SYS:
+                        parts.append(f" {str(original_message_code)}")
+                        parts.append(f" {str(SystemCode(message['s']))}")
+                        
+                        
             
             parts.append("]")
         
@@ -183,6 +189,11 @@ class CommandLine:
             match original_message_code:
                 case MessageCode.TALK | MessageCode.LIST:
                     print(f"{padded_prefix}\t{str(message["d"])}")
+                case MessageCode.SYS:
+                    system_code = SystemCode(message.get("s"))
+                    match system_code:
+                        case SystemCode.BOARD:
+                            print(f"{padded_prefix}\t{str(message["d"])}")
                 case _:
                     if "v" in message:
                         print(f"{padded_prefix}\t{str(message["v"])}")
