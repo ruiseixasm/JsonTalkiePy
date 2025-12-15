@@ -168,6 +168,9 @@ class CommandLine:
                                     except ValueError:
                                         print(f"\t'{words[2]}' is not an integer!")
                                         return
+                            case MessageCode.SYS:
+                                if len(words) > 2:
+                                    message["s"] = SystemCode.from_name(words[2]).value
                         json_talkie.talk(message)
                         return
                         
