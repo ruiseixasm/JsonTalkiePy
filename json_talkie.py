@@ -230,16 +230,17 @@ class JsonTalkie:
 
     def receive(self, message: Dict[str, Any]) -> bool:
         """Handles message content only."""
-        match message["m"]:
-            case 0:         # talk
-                message["t"] = message["f"]
-                message["o"] = message["m"]
+        if message[JsonChar.MESSAGE.value] != MessageCode.ECHO.value and message[JsonChar.MESSAGE.value] != MessageCode.ERROR.value:
+            message["t"] = message["f"]
+            message["o"] = message["m"]
+
+        match MessageCode(message[JsonChar.MESSAGE.value]):
+            case MessageCode.TALK:
                 message["m"] = 6
                 message["d"] = f"{self._manifesto['talker']['description']}"
                 return self.talk(message)
-            case 1:         # list
-                message["t"] = message["f"]
-                message["o"] = message["m"]
+            
+            case MessageCode.LIST:
                 message["m"] = 6
                 if 'run' in self._manifesto:
                     for name, content in self._manifesto['run'].items():
@@ -257,9 +258,8 @@ class JsonTalkie:
                         message["d"] = content['description']
                         self.talk(message)
                 return True
-            case 2:         # run
-                message["t"] = message["f"]
-                message["o"] = message["m"]
+            
+            case MessageCode.RUN:
                 message["m"] = 6
                 if "n" in message and 'run' in self._manifesto:
                     if message["n"] in self._manifesto['run']:
@@ -274,9 +274,8 @@ class JsonTalkie:
                     else:
                         message["r"] = "UNKNOWN"
                         self.talk(message)
-            case 3:         # set
-                message["t"] = message["f"]
-                message["o"] = message["m"]
+
+            case MessageCode.SET:
                 message["m"] = 6
                 if "v" in message and isinstance(message["v"], int) and "n" in message and 'set' in self._manifesto:
                     if message["n"] in self._manifesto['set']:
@@ -291,9 +290,8 @@ class JsonTalkie:
                     else:
                         message["r"] = "UNKNOWN"
                         self.talk(message)
-            case 4:         # get
-                message["t"] = message["f"]
-                message["o"] = message["m"]
+
+            case MessageCode.GET:
                 message["m"] = 6
                 if "n" in message and 'get' in self._manifesto:
                     if message["n"] in self._manifesto['get']:
@@ -305,13 +303,13 @@ class JsonTalkie:
                     else:
                         message["r"] = "UNKNOWN"
                         self.talk(message)
-            case 5:         # sys
-                message["t"] = message["f"]
-                message["o"] = message["m"]
+
+            case MessageCode.SYS:
                 message["m"] = 6
                 message["d"] = f"{platform.platform()}"
                 return self.talk(message)
-            case 6:         # echo
+            
+            case MessageCode.ECHO:
 
                 # Echo codes (g):
                 #     0 - ROGER
@@ -320,7 +318,8 @@ class JsonTalkie:
 
                 if "echo" in self._manifesto:
                     self._manifesto["echo"](message)
-            case 7:         # error
+
+            case MessageCode.ERROR:
 
                 # Error types:
                 #     0 - Unknown sender
@@ -332,9 +331,8 @@ class JsonTalkie:
 
                 if "error" in self._manifesto:
                     self._manifesto["error"](message)
-            case 8:         # channel
-                message["t"] = message["f"]
-                message["o"] = message["m"]
+
+            case MessageCode.CHANNEL:
                 if "b" in message and isinstance(message["b"], int):
                     self._channel = message["b"]
                 message["m"] = 6
