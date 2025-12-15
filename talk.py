@@ -110,7 +110,7 @@ class CommandLine:
                         match MessageCode.from_name(words[1]):
                             case MessageCode.RUN | MessageCode.GET:
                                 try:    # Try as number first
-                                    message["N"] = int(words[2])
+                                    message["x"] = int(words[2])
                                 except ValueError:
                                     message["n"] = words[2]
                             case MessageCode.SET:
