@@ -20,6 +20,7 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.patch_stdout import patch_stdout
 from enum import Enum
+from typing import Union
 
 
 class MessageCode(Enum):
@@ -30,12 +31,24 @@ class MessageCode(Enum):
         return self.name.lower()
     
     @classmethod
-    def from_name(cls, name: str) -> 'MessageCode':
+    def from_name(cls, name: str) -> Union['MessageCode', None]:
         """Returns the MessageCode based on a lower case name"""
         try:
-            return cls[name.lower()]  # Changed to lower()
+            return cls[name.upper()]    # MessageCode is in upper case
         except KeyError:
-            return cls.TALK  # Default
+            return None
+
+    @classmethod
+    def validate_to_words(cls, words: list[str]) -> bool:
+        if len(words) > 1 and MessageCode.from_name(words[1]):
+            match MessageCode.from_name(words[1]):  # word[0] is the device name
+                case MessageCode.RUN | MessageCode.GET:
+                    return len(words) == 3
+                case MessageCode.SET: return len(words) == 4
+                case MessageCode.SYS | MessageCode.CHANNEL:
+                    return True
+                case _: return len(words) == 2
+        return False
     
 
 class CommandLine:
@@ -106,54 +119,41 @@ class CommandLine:
                         message = {"m": MessageCode.TALK.value}
                         json_talkie.talk(message)
                         return
-                    elif words[0] == "sys":
+                    elif words[0] == str(MessageCode.SYS):
                         message = {"m": MessageCode.SYS.value}
                         json_talkie.talk(message)
                         return
-                else:
+                else:   # WITH TARGET NAME DEFINED
                     message: dict = {}
                     try:    # Try as channel first
                         message["t"] = int(words[0])
                     except ValueError:
                         if words[0] != "*":
                             message["t"] = words[0]
-                    command_map = {
-                        "talk": (MessageCode.TALK.value, 2),
-                        "list": (MessageCode.LIST.value, 2),
-                        "run": (MessageCode.RUN.value, 3),
-                        "set": (MessageCode.SET.value, 4),
-                        "get": (MessageCode.GET.value, 3),
-                        "sys": (MessageCode.SYS.value, 2),
-                        "channel": (MessageCode.CHANNEL.value, 0)
-                    }
-                    
-                    if words[1] in command_map:
-                        code, total_args = command_map[words[1]]
-                        if len(words) == total_args or total_args == 0:
-                            message["m"] = code
-                            if code == MessageCode.CHANNEL:
-                                if len(words) == 3:
-                                    try:
-                                        message["b"] = int(words[2])
-                                    except ValueError:
-                                        print(f"\t'{words[2]}' is not an integer!")
-                                        return
-                            elif total_args > 2:
+
+                    if MessageCode.validate_to_words(words):
+                        message["m"] = MessageCode.from_name(words[1]).value
+                        match MessageCode.from_name(words[1]):
+                            case MessageCode.RUN | MessageCode.GET:
                                 try:    # Try as number first
                                     message["N"] = int(words[2])
                                 except ValueError:
                                     message["n"] = words[2]
-                            if words[1] == "set":
+                            case MessageCode.SET:
                                 try:
                                     message["v"] = int(words[3])
                                 except ValueError:
                                     print(f"\t'{words[3]}' is not an integer!")
                                     return
-                            json_talkie.talk(message)
-                            return
-                        else:
-                            print(f"\t'{words[1]}' requires {total_args - 2} argument(s)!")
-                            return
+                            case MessageCode.CHANNEL:
+                                if len(words) > 2:
+                                    try:
+                                        message["b"] = int(words[2])
+                                    except ValueError:
+                                        print(f"\t'{words[2]}' is not an integer!")
+                                        return
+                        json_talkie.talk(message)
+                        return
                         
         self._print_help()
 
