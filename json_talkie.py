@@ -207,7 +207,8 @@ class JsonTalkie:
                                         out_time_ms: int = message_id
                                         actual_time: int = self.message_id()
                                         delay_ms: int = actual_time - out_time_ms
-                                        message["delay_ms"] = delay_ms
+                                        if delay_ms >= 0:
+                                            message["delay_ms"] = delay_ms
 
 
                         if self._verbose:
