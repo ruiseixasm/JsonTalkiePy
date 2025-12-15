@@ -79,16 +79,7 @@ class CommandLine:
         else:
             words = cmd.split()
             if words:
-                if words[0] == "port":
-                    if len(words) == 2:
-                        try:
-                            broadcast_socket.set_port(int(words[1]))
-                        except ValueError:
-                            print(f"\t'{words[1]}' is not an integer!")
-                    actual_port: int = broadcast_socket.get_port()
-                    print(f"\t[port]               \t{actual_port}")
-                    return
-                elif len(words) == 1:
+                if len(words) == 1:
                     if words[0] == str(MessageCode.TALK):
                         message = {"m": MessageCode.TALK.value}
                         json_talkie.talk(message)
@@ -153,24 +144,26 @@ class CommandLine:
     def generate_prefix(self, message: Dict[str, Any]) -> str:
         """Generate aligned prefix for messages"""
         parts = []
-        if "f" in message:
-            parts.append(f"\t[{message['f']}")
+        if JsonChar.FROM.value in message:
+            parts.append(f"\t[{message[JsonChar.FROM.value]}")  # VERY IMPORTANT, NEVER FORGET .value !!
             
-            if "o" in message:
-                original_message_code = MessageCode(message.get("o"))
+            if JsonChar.ORIGINAL.value in message:
+                original_message_code = MessageCode(message[JsonChar.ORIGINAL.value])
                 match original_message_code:
                     case MessageCode.LIST:
-                        action_name = str(MessageCode(message.get("a")))
+                        action_name = str(MessageCode(message[JsonChar.ACTION.value]))
                         parts.append(f" {action_name}")
-                        if "x" in message:
-                            parts.append(f" {message['x']}")
-                            if "n" in message:
-                                parts.append(f"|{message['n']}")
-                        elif "n" in message:
-                            parts.append(f" {message['n']}")
+                        if JsonChar.INDEX.value in message:
+                            parts.append(f" {message[JsonChar.INDEX.value]}")
+                            if JsonChar.NAME.value in message:
+                                parts.append(f"|{message[JsonChar.NAME.value]}")
+                        elif JsonChar.NAME.value in message:
+                            parts.append(f" {message[JsonChar.NAME.value]}")
+
                     case MessageCode.SYS:
                         parts.append(f" {str(original_message_code)}")
-                        parts.append(f" {str(SystemCode(message['s']))}")
+                        parts.append(f" {str(SystemCode(message[JsonChar.SYSTEM.value]))}")
+
                     case _:
                         parts.append(f" {str(original_message_code)}")
 
@@ -185,23 +178,23 @@ class CommandLine:
         try:
             prefix = self.generate_prefix(message)
             padded_prefix = prefix.ljust(self.max_prefix_length)
-            original_message_code = MessageCode(message.get("o"))
+            original_message_code = MessageCode(message[JsonChar.ORIGINAL.value])   # VERY IMPORTANT, NEVER FORGET .value !!
 
             match original_message_code:
                 case MessageCode.TALK | MessageCode.LIST:
-                    print(f"{padded_prefix}\t{str(message["d"])}")
+                    print(f"{padded_prefix}\t{str(message[JsonChar.DESCRIPTION.value])}")
                 case MessageCode.SYS:
-                    system_code = SystemCode(message.get("s"))
+                    system_code = SystemCode(message[JsonChar.SYSTEM.value])
                     match system_code:
                         case SystemCode.BOARD:
-                            print(f"{padded_prefix}\t{str(message["d"])}")
+                            print(f"{padded_prefix}\t{str(message[JsonChar.DESCRIPTION.value])}")
                 case _:
-                    if "v" in message:
-                        print(f"{padded_prefix}\t{str(message["v"])}")
+                    if JsonChar.VALUE.value in message:
+                        print(f"{padded_prefix}\t{str(message[JsonChar.VALUE.value])}")
                     else:
-                        print(f"{padded_prefix}\t{str(EchoCode(message["g"]))}")
-                    if  JsonChar.REPLY  in message:
-                        print(f"{padded_prefix}\t{str(message[ JsonChar.REPLY ])}")
+                        print(f"{padded_prefix}\t{str(EchoCode(message[JsonChar.ROGER.value]))}")
+                    if JsonChar.REPLY.value in message:
+                        print(f"{padded_prefix}\t{str(message[JsonChar.REPLY.value])}")
 
             return True
         except Exception as e:

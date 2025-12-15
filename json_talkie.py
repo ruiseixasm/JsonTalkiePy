@@ -35,6 +35,7 @@ class JsonChar(Enum):
     VALUE       = "v"
     REPLY       = "r"
     ROGER       = "g"
+    ACTION      = "a"
     NAME        = "n"
     INDEX       = "x"
     DESCRIPTION = "d"
