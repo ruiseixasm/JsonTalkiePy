@@ -75,7 +75,7 @@ class MessageCode(TalkieCode, Enum):
 
 
 class SystemCode(TalkieCode, Enum):
-    BOARD, PING, DROPS, DELAY, CHANNEL, PORT = range(6)
+    MUTE, UNMUTE, MUTED, BOARD, PING, DROPS, DELAY = range(7)
 
 
 class EchoCode(TalkieCode, Enum):
