@@ -85,8 +85,7 @@ class CommandLine:
                         json_talkie.talk(message)
                         return
                     elif words[0] == str(MessageCode.SYS):
-                        message = {"m": MessageCode.SYS.value}
-                        json_talkie.talk(message)
+                        self._print_sys()
                         return
                 else:   # WITH TARGET NAME DEFINED
                     message: dict = {}
@@ -130,19 +129,30 @@ class CommandLine:
         self._print_help()
 
     def _print_help(self):
-        """Print command help"""
-        print("\t[talk]               \tPrints all devices' 'name' and description.")
-        print("\t['device' list]      \tList the entire 'device' manifesto.")
-        print("\t['device' channel]   \tShows the Device channel.")
-        print("\t['device' channel n] \tSets the Device channel.")
-        print("\t['device' run 'what']\tRuns the named function.")
-        print("\t['device' set 'what']\tSets the named variable.")
-        print("\t['device' get 'what']\tGets the named variable value.")
-        print("\t[sys]                \tPrints the platform of the Device.")
-        print("\t[port]               \tGets the Broadcast Socket port.")
-        print("\t[port n]             \tSets the Broadcast Socket port.")
+        """Print help"""
+        print("\t[talk]               \tPrints all talkers' 'name' and 'description'.")
+        print("\t['talker' list]      \tList the entire 'talker' manifesto.")
+        print("\t['talker' channel]   \tShows the Device channel.")
+        print("\t['talker' channel n] \tSets the Device channel.")
+        print("\t['talker' run 'what']\tRuns the named function.")
+        print("\t['talker' set 'what']\tSets the named variable.")
+        print("\t['talker' get 'what']\tGets the named variable value.")
+        print("\t[sys]                \tPrints available options for the 'talker' system.")
+        print("\t[* 'action' '...']   \tThe wildcard '*' means all talkers.")
         print("\t[exit]               \tExits the command line (Ctrl+D).")
         print("\t[help]               \tShows the present help.")
+
+    def _print_sys(self):
+        """Print system help"""
+        print("\t['talker' sys mute]  \tMutes the talker so that becomes silent.")
+        print("\t['talker' sys unmute]\tUnmutes the talker if it's silent.")
+        print("\t['talker' sys muted] \tPrints '1' if the talker is muted.")
+        print("\t['talker' sys board] \tPrints the board description (OS).")
+        print("\t['talker' sys ping]  \tReturns the duration of the round-trip in milliseconds.")
+        print("\t['talker' sys drops] \tReturns the number of drops associated to out of time messages.")
+        print("\t['talker' sys delay] \tReturns the delay after which the message is dropped in milliseconds.")
+        print("\t['talker' sys delay d]\tSets a new delay, where 0 means no delay.")
+        
 
 
     def generate_prefix(self, message: Dict[str, Any]) -> str:
