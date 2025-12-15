@@ -220,8 +220,10 @@ class CommandLine:
                     case _:
                         if JsonChar.VALUE.value in message:
                             print(f"{padded_prefix}\t{str(message[JsonChar.VALUE.value])}")
-                        else:
+                        elif JsonChar.ROGER.value in message:
                             print(f"{padded_prefix}\t{str(EchoCode(message[JsonChar.ROGER.value]))}")
+                        else:
+                            print(f"{padded_prefix}\t{message[JsonChar.DESCRIPTION.value]}")
                         if JsonChar.REPLY.value in message:
                             print(f"{padded_prefix}\t{str(message[JsonChar.REPLY.value])}")
 
