@@ -192,37 +192,38 @@ class CommandLine:
         try:
             prefix = self.generate_prefix(message)
             padded_prefix = prefix.ljust(self.max_prefix_length)
-            original_message_code = MessageCode(message[JsonChar.ORIGINAL.value])   # VERY IMPORTANT, NEVER FORGET .value !!
+            if JsonChar.ORIGINAL.value in message:
+                original_message_code = MessageCode(message[JsonChar.ORIGINAL.value])   # VERY IMPORTANT, NEVER FORGET .value !!
 
-            match original_message_code:
-                case MessageCode.TALK | MessageCode.LIST:
-                    print(f"{padded_prefix}\t{str(message[JsonChar.DESCRIPTION.value])}")
-                case MessageCode.SYS:
-                    system_code = SystemCode(message[JsonChar.SYSTEM.value])
-                    match system_code:
-                        case SystemCode.MUTE | SystemCode.UNMUTE:
-                            print(f"{padded_prefix}\t{str(EchoCode(message[JsonChar.ROGER.value]))}")
-                            if JsonChar.REPLY.value in message:
-                                print(f"{padded_prefix}\t{str(message[JsonChar.REPLY.value])}")
-                    
-                        case SystemCode.BOARD:
-                            print(f"{padded_prefix}\t{str(message[JsonChar.DESCRIPTION.value])}")
+                match original_message_code:
+                    case MessageCode.TALK | MessageCode.LIST:
+                        print(f"{padded_prefix}\t{str(message[JsonChar.DESCRIPTION.value])}")
+                    case MessageCode.SYS:
+                        system_code = SystemCode(message[JsonChar.SYSTEM.value])
+                        match system_code:
+                            case SystemCode.MUTE | SystemCode.UNMUTE:
+                                print(f"{padded_prefix}\t{str(EchoCode(message[JsonChar.ROGER.value]))}")
+                                if JsonChar.REPLY.value in message:
+                                    print(f"{padded_prefix}\t{str(message[JsonChar.REPLY.value])}")
+                        
+                            case SystemCode.BOARD:
+                                print(f"{padded_prefix}\t{str(message[JsonChar.DESCRIPTION.value])}")
 
-                        case SystemCode.PING:
-                            if "delay_ms" in message:
-                                print(f"{padded_prefix}\t{str(message["delay_ms"])}")
-                            else:
-                                print(f"{padded_prefix}\t{"unknown"}")
+                            case SystemCode.PING:
+                                if "delay_ms" in message:
+                                    print(f"{padded_prefix}\t{str(message["delay_ms"])}")
+                                else:
+                                    print(f"{padded_prefix}\t{"unknown"}")
 
-                        case _:
+                            case _:
+                                print(f"{padded_prefix}\t{str(message[JsonChar.VALUE.value])}")
+                    case _:
+                        if JsonChar.VALUE.value in message:
                             print(f"{padded_prefix}\t{str(message[JsonChar.VALUE.value])}")
-                case _:
-                    if JsonChar.VALUE.value in message:
-                        print(f"{padded_prefix}\t{str(message[JsonChar.VALUE.value])}")
-                    else:
-                        print(f"{padded_prefix}\t{str(EchoCode(message[JsonChar.ROGER.value]))}")
-                    if JsonChar.REPLY.value in message:
-                        print(f"{padded_prefix}\t{str(message[JsonChar.REPLY.value])}")
+                        else:
+                            print(f"{padded_prefix}\t{str(EchoCode(message[JsonChar.ROGER.value]))}")
+                        if JsonChar.REPLY.value in message:
+                            print(f"{padded_prefix}\t{str(message[JsonChar.REPLY.value])}")
 
             # Remove the exceeding messages from the pool
 

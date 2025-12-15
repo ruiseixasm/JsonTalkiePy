@@ -199,16 +199,17 @@ class JsonTalkie:
 
                         # Add info to echo message right away accordingly to the message original type
                         if message[JsonChar.MESSAGE.value] == MessageCode.ECHO.value:
-                            original_message_code = MessageCode(message[JsonChar.ORIGINAL.value])
-                            match original_message_code:
-                                case MessageCode.SYS:
-                                    if message[JsonChar.SYSTEM.value] == SystemCode.PING.value:
-                                        message_id = message[JsonChar.IDENTITY.value]
-                                        out_time_ms: int = message_id
-                                        actual_time: int = self.message_id()
-                                        delay_ms: int = actual_time - out_time_ms
-                                        if delay_ms >= 0:
-                                            message["delay_ms"] = delay_ms
+                            if JsonChar.ORIGINAL.value in message:
+                                original_message_code = MessageCode(message[JsonChar.ORIGINAL.value])
+                                match original_message_code:
+                                    case MessageCode.SYS:
+                                        if message[JsonChar.SYSTEM.value] == SystemCode.PING.value:
+                                            message_id = message[JsonChar.IDENTITY.value]
+                                            out_time_ms: int = message_id
+                                            actual_time: int = self.message_id()
+                                            delay_ms: int = actual_time - out_time_ms
+                                            if delay_ms >= 0:
+                                                message["delay_ms"] = delay_ms
 
 
                         if self._verbose:
@@ -227,35 +228,31 @@ class JsonTalkie:
     def receive(self, message: Dict[str, Any]) -> bool:
         """Handles message content only."""
         message["t"] = message["f"]
+        message["o"] = message["m"]
         match message["m"]:
             case 0:         # talk
-                message["w"] = 0
                 message["m"] = 6
                 message["d"] = f"{self._manifesto['talker']['description']}"
                 return self.talk(message)
             case 1:         # list
                 message["m"] = 6
                 if 'run' in self._manifesto:
-                    message["w"] = 2
                     for name, content in self._manifesto['run'].items():
                         message["n"] = name
                         message["d"] = content['description']
                         self.talk(message)
                 if 'set' in self._manifesto:
-                    message["w"] = 3
                     for name, content in self._manifesto['set'].items():
                         message["n"] = name
                         message["d"] = content['description']
                         self.talk(message)
                 if 'get' in self._manifesto:
-                    message["w"] = 4
                     for name, content in self._manifesto['get'].items():
                         message["n"] = name
                         message["d"] = content['description']
                         self.talk(message)
                 return True
             case 2:         # run
-                message["w"] = 2
                 message["m"] = 6
                 if "n" in message and 'run' in self._manifesto:
                     if message["n"] in self._manifesto['run']:
@@ -271,7 +268,6 @@ class JsonTalkie:
                         message["r"] = "UNKNOWN"
                         self.talk(message)
             case 3:         # set
-                message["w"] = 3
                 message["m"] = 6
                 if "v" in message and isinstance(message["v"], int) and "n" in message and 'set' in self._manifesto:
                     if message["n"] in self._manifesto['set']:
@@ -287,7 +283,6 @@ class JsonTalkie:
                         message["r"] = "UNKNOWN"
                         self.talk(message)
             case 4:         # get
-                message["w"] = 4
                 message["m"] = 6
                 if "n" in message and 'get' in self._manifesto:
                     if message["n"] in self._manifesto['get']:
@@ -300,7 +295,6 @@ class JsonTalkie:
                         message["r"] = "UNKNOWN"
                         self.talk(message)
             case 5:         # sys
-                message["w"] = 5
                 message["m"] = 6
                 message["d"] = f"{platform.platform()}"
                 return self.talk(message)
@@ -329,7 +323,6 @@ class JsonTalkie:
                 if "b" in message and isinstance(message["b"], int):
                     self._channel = message["b"]
                 message["m"] = 6
-                message["w"] = 8
                 message["b"] = self._channel
                 return self.talk(message)
             case _:
