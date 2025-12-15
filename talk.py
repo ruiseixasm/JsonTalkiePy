@@ -158,8 +158,8 @@ class CommandLine:
             
             if "o" in message:
                 if MessageCode(message.get("o")) == MessageCode.LIST:
-                    original_message_name = str(MessageCode(message.get("o")))
-                    parts.append(f" {original_message_name}")
+                    action_name = str(MessageCode(message.get("a")))
+                    parts.append(f" {action_name}")
                     
                     if "x" in message:
                         parts.append(f" {message['x']}")
