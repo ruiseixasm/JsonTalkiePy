@@ -123,10 +123,16 @@ class CommandLine:
                             case MessageCode.SYS:
                                 if len(words) > 2:
                                     message["s"] = SystemCode.from_name(words[2]).value
+                                if len(words) > 3:
+                                    try:    # Try as number first
+                                        message["v"] = int(words[3])
+                                    except ValueError:
+                                        message["v"] = words[3]
                         json_talkie.talk(message)
                         return
                         
         self._print_help()
+
 
     def _print_help(self):
         """Print help"""
@@ -142,6 +148,7 @@ class CommandLine:
         print("\t[exit]               \tExits the command line (Ctrl+D).")
         print("\t[help]               \tShows the present help.")
 
+
     def _print_sys(self):
         """Print system help"""
         print("\t['talker' sys mute]  \tMutes the talker so that becomes silent.")
@@ -149,6 +156,7 @@ class CommandLine:
         print("\t['talker' sys muted] \tPrints '1' if the talker is muted.")
         print("\t['talker' sys board] \tPrints the board description (OS).")
         print("\t['talker' sys ping]  \tReturns the duration of the round-trip in milliseconds.")
+        print("\t['talker' sys ping d]\tSets some overloading data to a more realistic measurement.")
         print("\t['talker' sys drops] \tReturns the number of drops associated to out of time messages.")
         print("\t['talker' sys delay] \tReturns the delay after which the message is dropped in milliseconds.")
         print("\t['talker' sys delay d]\tSets a new delay, where 0 means no delay.")
