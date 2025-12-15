@@ -200,8 +200,16 @@ class CommandLine:
                 case MessageCode.SYS:
                     system_code = SystemCode(message[JsonChar.SYSTEM.value])
                     match system_code:
+                        case SystemCode.MUTE | SystemCode.UNMUTE:
+                            print(f"{padded_prefix}\t{str(EchoCode(message[JsonChar.ROGER.value]))}")
+                            if JsonChar.REPLY.value in message:
+                                print(f"{padded_prefix}\t{str(message[JsonChar.REPLY.value])}")
+                    
                         case SystemCode.BOARD:
                             print(f"{padded_prefix}\t{str(message[JsonChar.DESCRIPTION.value])}")
+
+                        case _:
+                            print(f"{padded_prefix}\t{str(message[JsonChar.VALUE.value])}")
                 case _:
                     if JsonChar.VALUE.value in message:
                         print(f"{padded_prefix}\t{str(message[JsonChar.VALUE.value])}")
