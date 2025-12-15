@@ -211,6 +211,8 @@ class CommandLine:
                         case SystemCode.PING:
                             if "delay_ms" in message:
                                 print(f"{padded_prefix}\t{str(message["delay_ms"])}")
+                            else:
+                                print(f"{padded_prefix}\t{"unknown"}")
 
                         case _:
                             print(f"{padded_prefix}\t{str(message[JsonChar.VALUE.value])}")
