@@ -25,6 +25,18 @@ from enum import Enum
 class MessageCode(Enum):
     TALK, LIST, RUN, SET, GET, SYS, ECHO, ERROR, CHANNEL = range(9)
 
+    def __str__(self) -> str:
+        """String representation is lowercase"""
+        return self.name.lower()
+    
+    @classmethod
+    def from_name(cls, name: str) -> 'MessageCode':
+        """Returns the MessageCode based on a lower case name"""
+        try:
+            return cls[name.lower()]  # Changed to lower()
+        except KeyError:
+            return cls.TALK  # Default
+    
 
 class CommandLine:
     def __init__(self):
@@ -90,7 +102,7 @@ class CommandLine:
                     print(f"\t[port]               \t{actual_port}")
                     return
                 elif len(words) == 1:
-                    if words[0] == "talk":
+                    if words[0] == str(MessageCode.TALK):
                         message = {"m": MessageCode.TALK.value}
                         json_talkie.talk(message)
                         return
