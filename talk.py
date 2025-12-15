@@ -105,6 +105,10 @@ class CommandLine:
                                 except ValueError:
                                     message["n"] = words[2]
                             case MessageCode.SET:
+                                try:    # Try as number first
+                                    message["x"] = int(words[2])
+                                except ValueError:
+                                    message["n"] = words[2]
                                 try:
                                     message["v"] = int(words[3])
                                 except ValueError:
