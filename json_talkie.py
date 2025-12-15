@@ -327,8 +327,8 @@ class JsonTalkie:
 
     @staticmethod
     def message_id() -> int:
-        """Generates a 32-bit wrapped timestamp ID using overflow."""
-        return int(time.time() * 1000) & 0xFFFFFFFF
+        """Generates a 16-bit wrapped timestamp ID using overflow."""
+        return int(time.time() * 1000) & 0xFFFF # Truncated to 16 bits (uint16_t)
     
     @staticmethod
     def encode(message: Dict[str, Any]) -> bytes:

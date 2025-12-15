@@ -171,9 +171,10 @@ class CommandLine:
                     case MessageCode.SYS:
                         parts.append(f" {str(original_message_code)}")
                         parts.append(f" {str(SystemCode(message['s']))}")
-                        
-                        
-            
+                    case _:
+                        parts.append(f" {str(original_message_code)}")
+
+
             parts.append("]")
         
         return "".join(parts)
