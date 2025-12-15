@@ -210,6 +210,8 @@ class JsonTalkie:
                                             delay_ms: int = actual_time - out_time_ms
                                             if delay_ms >= 0:
                                                 message["delay_ms"] = delay_ms
+                                            else: # do overflow as if uint16_t in c++
+                                                message["delay_ms"] = delay_ms + 65536  # 2^16
 
 
                         if self._verbose:
@@ -225,16 +227,19 @@ class JsonTalkie:
                         print(f"\tInvalid message: {e}")
                     pass
 
+
     def receive(self, message: Dict[str, Any]) -> bool:
         """Handles message content only."""
-        message["t"] = message["f"]
-        message["o"] = message["m"]
         match message["m"]:
             case 0:         # talk
+                message["t"] = message["f"]
+                message["o"] = message["m"]
                 message["m"] = 6
                 message["d"] = f"{self._manifesto['talker']['description']}"
                 return self.talk(message)
             case 1:         # list
+                message["t"] = message["f"]
+                message["o"] = message["m"]
                 message["m"] = 6
                 if 'run' in self._manifesto:
                     for name, content in self._manifesto['run'].items():
@@ -253,6 +258,8 @@ class JsonTalkie:
                         self.talk(message)
                 return True
             case 2:         # run
+                message["t"] = message["f"]
+                message["o"] = message["m"]
                 message["m"] = 6
                 if "n" in message and 'run' in self._manifesto:
                     if message["n"] in self._manifesto['run']:
@@ -268,6 +275,8 @@ class JsonTalkie:
                         message["r"] = "UNKNOWN"
                         self.talk(message)
             case 3:         # set
+                message["t"] = message["f"]
+                message["o"] = message["m"]
                 message["m"] = 6
                 if "v" in message and isinstance(message["v"], int) and "n" in message and 'set' in self._manifesto:
                     if message["n"] in self._manifesto['set']:
@@ -283,6 +292,8 @@ class JsonTalkie:
                         message["r"] = "UNKNOWN"
                         self.talk(message)
             case 4:         # get
+                message["t"] = message["f"]
+                message["o"] = message["m"]
                 message["m"] = 6
                 if "n" in message and 'get' in self._manifesto:
                     if message["n"] in self._manifesto['get']:
@@ -295,6 +306,8 @@ class JsonTalkie:
                         message["r"] = "UNKNOWN"
                         self.talk(message)
             case 5:         # sys
+                message["t"] = message["f"]
+                message["o"] = message["m"]
                 message["m"] = 6
                 message["d"] = f"{platform.platform()}"
                 return self.talk(message)
@@ -320,6 +333,8 @@ class JsonTalkie:
                 if "error" in self._manifesto:
                     self._manifesto["error"](message)
             case 8:         # channel
+                message["t"] = message["f"]
+                message["o"] = message["m"]
                 if "b" in message and isinstance(message["b"], int):
                     self._channel = message["b"]
                 message["m"] = 6
