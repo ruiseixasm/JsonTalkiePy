@@ -49,7 +49,23 @@ class MessageCode(Enum):
                     return True
                 case _: return len(words) == 2
         return False
+
+
+class SystemCode(Enum):
+    BOARD, PING, DROPS, DELAY, CHANNEL, PORT = range(6)
+
+    def __str__(self) -> str:
+        """String representation is lowercase"""
+        return self.name.lower()
     
+    @classmethod
+    def from_name(cls, name: str) -> Union['SystemCode', None]:
+        """Returns the SystemCode based on a lower case name"""
+        try:
+            return cls[name.upper()]    # SystemCode is in upper case
+        except KeyError:
+            return None
+
 
 class CommandLine:
     def __init__(self):
