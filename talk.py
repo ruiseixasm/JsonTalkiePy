@@ -19,52 +19,10 @@ from typing import Dict, Any
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.patch_stdout import patch_stdout
-from enum import Enum
-from typing import Union
 
-
-class MessageCode(Enum):
-    TALK, LIST, RUN, SET, GET, SYS, ECHO, ERROR, CHANNEL = range(9)
-
-    def __str__(self) -> str:
-        """String representation is lowercase"""
-        return self.name.lower()
+from json_talkie import JsonTalkie, JsonChar, MessageCode, SystemCode, EchoCode
     
-    @classmethod
-    def from_name(cls, name: str) -> Union['MessageCode', None]:
-        """Returns the MessageCode based on a lower case name"""
-        try:
-            return cls[name.upper()]    # MessageCode is in upper case
-        except KeyError:
-            return None
 
-    @classmethod
-    def validate_to_words(cls, words: list[str]) -> bool:
-        if len(words) > 1 and MessageCode.from_name(words[1]):
-            match MessageCode.from_name(words[1]):  # word[0] is the device name
-                case MessageCode.RUN | MessageCode.GET:
-                    return len(words) == 3
-                case MessageCode.SET: return len(words) == 4
-                case MessageCode.SYS | MessageCode.CHANNEL:
-                    return True
-                case _: return len(words) == 2
-        return False
-
-
-class SystemCode(Enum):
-    BOARD, PING, DROPS, DELAY, CHANNEL, PORT = range(6)
-
-    def __str__(self) -> str:
-        """String representation is lowercase"""
-        return self.name.lower()
-    
-    @classmethod
-    def from_name(cls, name: str) -> Union['SystemCode', None]:
-        """Returns the SystemCode based on a lower case name"""
-        try:
-            return cls[name.upper()]    # SystemCode is in upper case
-        except KeyError:
-            return None
 
 
 class CommandLine:
@@ -198,19 +156,17 @@ class CommandLine:
         if "f" in message:
             parts.append(f"\t[{message['f']}")
             
-            if "w" in message:
-                what = {
-                    0: "talk", 1: "list", 2: "run",
-                    3: "set", 4: "get", 5: "sys", 8: "channel"
-                }.get(message.get("w"), "echo")
-                parts.append(f" {what}")
-                
-                if "N" in message:
-                    parts.append(f" {message['N']}")
-                    if "n" in message:
-                        parts.append(f"|{message['n']}")
-                elif "n" in message:
-                    parts.append(f" {message['n']}")
+            if "o" in message:
+                if MessageCode(message.get("o")) == MessageCode.LIST:
+                    name = str(MessageCode(message.get("n")))
+                    parts.append(f" {name}")
+                    
+                    if "x" in message:
+                        parts.append(f" {message['x']}")
+                        if "n" in message:
+                            parts.append(f"|{message['n']}")
+                    elif "n" in message:
+                        parts.append(f" {message['n']}")
             
             parts.append("]")
         
@@ -222,34 +178,18 @@ class CommandLine:
         try:
             prefix = self.generate_prefix(message)
             padded_prefix = prefix.ljust(self.max_prefix_length)
-            
-            echo_reply: dict = {}
+            original_message_code = MessageCode(message.get("o"))
 
-            if "w" in message:
-                echo_reply[0] = {
-                    0: "talk", 1: "list", 2: "run",
-                    3: "set", 4: "get", 5: "sys", 8: "channel"
-                }.get(message.get("w"), "echo")
-
-            if "g" in message:
-                echo_reply[1] = {
-                    0: "ROGER", 1: "SAY AGAIN", 2: "NEGATIVE"
-                }.get(message["g"], "FAIL")
-            elif "v" in message:
-                echo_reply[2] = str(message["v"])
-            elif "b" in message:
-                echo_reply[1] = str(message["b"])
-            elif "d" in message:
-                echo_reply[1] = str(message["d"])
-            
-            if 1 in echo_reply:
-                print(f"{padded_prefix}\t{echo_reply[1]}")
-            if 2 in echo_reply:
-                print(f"{padded_prefix}\t{echo_reply[2]}")
-
-            # If it carries a reply
-            if "r" in message:	
-                print(f"{padded_prefix}\t{str(message["r"])}")
+            match original_message_code:
+                case MessageCode.TALK | MessageCode.LIST:
+                    print(f"{padded_prefix}\t{str(message["d"])}")
+                case _:
+                    if "v" in message:
+                        print(f"{padded_prefix}\t{str(message["v"])}")
+                    else:
+                        print(f"{padded_prefix}\t{str(EchoCode(message["g"]))}")
+                    if  JsonChar.REPLY  in message:
+                        print(f"{padded_prefix}\t{str(message[ JsonChar.REPLY ])}")
 
             return True
         except Exception as e:
@@ -307,8 +247,6 @@ if __name__ == "__main__":
         from broadcast_socket_udp import BroadcastSocket_UDP
         broadcast_socket = BroadcastSocket_UDP()
 
-    from json_talkie import JsonTalkie
-    
     cli = CommandLine()
     json_talkie = JsonTalkie(broadcast_socket, cli.manifesto, VERBOSE)
 

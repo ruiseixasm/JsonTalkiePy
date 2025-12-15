@@ -17,8 +17,72 @@ import uuid
 from typing import Dict, Tuple, Any, TYPE_CHECKING, Callable
 import time
 import platform
+from enum import Enum
+from typing import Union, cast
 
 from broadcast_socket import BroadcastSocket
+
+
+class JsonChar(Enum):
+    CHECKSUM    = "c"
+    IDENTITY    = "i"
+    MESSAGE     = "m"
+    ORIGINAL    = "o"
+    FROM        = "f"
+    TO          = "t"
+    SYSTEM      = "s"
+    ERROR       = "e"
+    VALUE       = "v"
+    REPLY       = "r"
+    ROGER       = "g"
+    NAME        = "n"
+    INDEX       = "x"
+    DESCRIPTION = "d"
+
+
+class TalkieCode:
+    """Mixin with shared functionality for Talkie codes (enums)"""
+    
+    def __str__(self) -> str:
+        """String representation is lowercase"""
+                # Tell type checker self is an Enum
+        enum_self = cast(Enum, self)
+        return enum_self.name.lower()
+    
+    @classmethod
+    def from_name(cls, name: str) -> Union['Enum', None]:
+        """Returns the TalkieCode based on a lower case name"""
+        try:
+            return cls[name.upper()]    # TalkieCode is in upper case
+        except KeyError:
+            return None
+
+
+class MessageCode(TalkieCode, Enum):
+    TALK, LIST, RUN, SET, GET, SYS, ECHO, ERROR, CHANNEL = range(9)
+
+    @classmethod
+    def validate_to_words(cls, words: list[str]) -> bool:
+        if len(words) > 1 and MessageCode.from_name(words[1]):
+            match MessageCode.from_name(words[1]):  # word[0] is the device name
+                case MessageCode.RUN | MessageCode.GET:
+                    return len(words) == 3
+                case MessageCode.SET: return len(words) == 4
+                case MessageCode.SYS | MessageCode.CHANNEL:
+                    return True
+                case _: return len(words) == 2
+        return False
+
+
+class SystemCode(TalkieCode, Enum):
+    BOARD, PING, DROPS, DELAY, CHANNEL, PORT = range(6)
+
+
+class EchoCode(TalkieCode, Enum):
+    ROGER, SAY_AGAIN, NEGATIVE = range(3)
+
+
+
 
 # Keys:
 #     b: byte
