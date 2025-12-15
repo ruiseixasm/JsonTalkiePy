@@ -19,6 +19,12 @@ from typing import Dict, Any
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.patch_stdout import patch_stdout
+from enum import Enum
+
+
+class MessageCode(Enum):
+    TALK, LIST, RUN, SET, GET, SYS, ECHO, ERROR, CHANNEL = range(9)
+
 
 class CommandLine:
     def __init__(self):
@@ -85,11 +91,11 @@ class CommandLine:
                     return
                 elif len(words) == 1:
                     if words[0] == "talk":
-                        message = {"m": 0}
+                        message = {"m": MessageCode.TALK.value}
                         json_talkie.talk(message)
                         return
                     elif words[0] == "sys":
-                        message = {"m": 5}
+                        message = {"m": MessageCode.SYS.value}
                         json_talkie.talk(message)
                         return
                 else:
@@ -100,20 +106,20 @@ class CommandLine:
                         if words[0] != "*":
                             message["t"] = words[0]
                     command_map = {
-                        "talk": (0, 2),
-                        "list": (1, 2),
-                        "run": (2, 3),
-                        "set": (3, 4),
-                        "get": (4, 3),
-                        "sys": (5, 2),
-                        "channel": (8, 0)
+                        "talk": (MessageCode.TALK.value, 2),
+                        "list": (MessageCode.LIST.value, 2),
+                        "run": (MessageCode.RUN.value, 3),
+                        "set": (MessageCode.SET.value, 4),
+                        "get": (MessageCode.GET.value, 3),
+                        "sys": (MessageCode.SYS.value, 2),
+                        "channel": (MessageCode.CHANNEL.value, 0)
                     }
                     
                     if words[1] in command_map:
                         code, total_args = command_map[words[1]]
                         if len(words) == total_args or total_args == 0:
                             message["m"] = code
-                            if code == 8:   # channel
+                            if code == MessageCode.CHANNEL:
                                 if len(words) == 3:
                                     try:
                                         message["b"] = int(words[2])
