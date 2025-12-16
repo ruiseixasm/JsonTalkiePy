@@ -175,9 +175,8 @@ class CommandLine:
                     case MessageCode.LIST:
                         action_name = str(MessageCode(message[JsonChar.ACTION.value]))
                         parts.append(f" {action_name}")
-                        if JsonChar.INDEX.value in message:
+                        if JsonChar.INDEX.value in message and JsonChar.NAME.value in message:
                             parts.append(f" {message[JsonChar.INDEX.value]}")
-                        if JsonChar.NAME.value in message:
                             parts.append(f"|{message[JsonChar.NAME.value]}")
 
                     case MessageCode.SYS:
