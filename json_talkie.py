@@ -83,45 +83,9 @@ class EchoCode(TalkieCode, Enum):
     ROGER, SAY_AGAIN, NEGATIVE = range(3)
 
 
+class ErrorCode(TalkieCode, Enum):
+    FROM, FIELDS, CHECKSUM, MESSAGE, IDENTITY, DELAY = range(6)
 
-
-# Keys:
-#     b: byte
-#     c: checksum
-#     d: description
-#     e: error code
-#     f: from
-#     g: echo roger code
-#     i: id
-#     m: message
-#     n: name
-#     r: reply
-#     t: to
-#     v: value
-#     w: what
-
-# Messages/Whats:
-#     0 talk
-#     1 list
-#     2 run
-#     3 set
-#     4 get
-#     5 sys
-#     6 echo
-#     7 error
-
-# Echo codes (g):
-#     0 - ROGER
-#     1 - UNKNOWN
-#     2 - NONE
-
-# Error types (e):
-#     0 - Unknown sender
-#     1 - Message missing the checksum
-#     2 - Message corrupted
-#     3 - Wrong message code
-#     4 - Message NOT identified
-#     5 - Set command arrived too late
 
 
 
