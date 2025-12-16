@@ -135,6 +135,9 @@ class CommandLine:
                                         message["v"] = int(words[3])
                                     except ValueError:
                                         message["v"] = words[3]
+                            case _:
+                                self._print_help()
+                                return
                                     
                         json_talkie.talk(message)
                         return
