@@ -122,7 +122,11 @@ class CommandLine:
                                         return
                             case MessageCode.SYS:
                                 if len(words) > 2:
-                                    message["s"] = SystemCode.from_name(words[2]).value
+                                    if (SystemCode.from_name(words[2])):
+                                        message["s"] = SystemCode.from_name(words[2]).value
+                                    else:
+                                        self._print_sys()
+                                        return
                                 else:
                                     self._print_sys()
                                     return
