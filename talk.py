@@ -177,10 +177,8 @@ class CommandLine:
                         parts.append(f" {action_name}")
                         if JsonChar.INDEX.value in message:
                             parts.append(f" {message[JsonChar.INDEX.value]}")
-                            if JsonChar.NAME.value in message:
-                                parts.append(f"|{message[JsonChar.NAME.value]}")
-                        elif JsonChar.NAME.value in message:
-                            parts.append(f" {message[JsonChar.NAME.value]}")
+                        if JsonChar.NAME.value in message:
+                            parts.append(f"|{message[JsonChar.NAME.value]}")
 
                     case MessageCode.SYS:
                         parts.append(f" {str(original_message_code)}")
@@ -188,6 +186,10 @@ class CommandLine:
 
                     case _:
                         parts.append(f" {str(original_message_code)}")
+                        if JsonChar.INDEX.value in message:
+                            parts.append(f" {message[JsonChar.INDEX.value]}")
+                        elif JsonChar.NAME.value in message:
+                            parts.append(f" {message[JsonChar.NAME.value]}")
 
 
             parts.append("]")
