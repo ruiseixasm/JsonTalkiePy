@@ -155,15 +155,15 @@ class CommandLine:
 
     def _print_sys(self):
         """Print system help"""
-        print("\t['talker' sys mute]  \tMutes the talker so that becomes silent.")
-        print("\t['talker' sys unmute]\tUnmutes the talker if it's silent.")
-        print("\t['talker' sys muted] \tPrints '1' if the talker is muted.")
         print("\t['talker' sys board] \tPrints the board description (OS).")
         print("\t['talker' sys ping]  \tReturns the duration of the round-trip in milliseconds.")
         print("\t['talker' sys ping d]\tSets some overloading data to a more realistic measurement.")
         print("\t['talker' sys drops] \tReturns the number of drops associated to out of time messages.")
         print("\t['talker' sys delay] \tReturns the delay after which the message is dropped in milliseconds.")
-        print("\t['talker' sys delay d]\tSets a new delay, where 0 means no delay.")
+        print("\t['talker' sys delay d]\tSets a new delay, where 0 means no delay processed (no drops).")
+        print("\t['talker' sys mute]  \tMutes the talker so that becomes silent.")
+        print("\t['talker' sys unmute]\tUnmutes the talker if it's silent.")
+        print("\t['talker' sys muted] \tPrints '1' if the talker is muted.")
         
 
 

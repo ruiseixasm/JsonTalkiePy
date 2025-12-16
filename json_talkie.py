@@ -60,7 +60,7 @@ class TalkieCode:
 
 
 class MessageCode(TalkieCode, Enum):
-    TALK, LIST, RUN, SET, GET, SYS, ECHO, ERROR, CHANNEL = range(9)
+    RUN, SET, GET, TALK, LIST, CHANNEL, SYS, ECHO, ERROR = range(9)
 
     @classmethod
     def validate_to_words(cls, words: list[str]) -> bool:
@@ -76,11 +76,11 @@ class MessageCode(TalkieCode, Enum):
 
 
 class SystemCode(TalkieCode, Enum):
-    MUTE, UNMUTE, MUTED, BOARD, PING, DROPS, DELAY = range(7)
+    BOARD, PING, DROPS, DELAY, MUTE, UNMUTE, MUTED = range(7)
 
 
 class EchoCode(TalkieCode, Enum):
-    ROGER, SAY_AGAIN, NEGATIVE = range(3)
+    ROGER, SAY_AGAIN, NEGATIVE, NIL = range(4)
 
 
 class ErrorCode(TalkieCode, Enum):
