@@ -96,51 +96,50 @@ class CommandLine:
                             message["t"] = words[0]
 
                     if MessageData.validate_to_words(words):
-                        message["m"] = MessageData.from_name(words[1]).value
-                        match MessageData.from_name(words[1]):
-                            case MessageData.RUN | MessageData.GET:
-                                try:    # Try as number first
-                                    message["x"] = int(words[2])
-                                except ValueError:
-                                    message["n"] = words[2]
-                            case MessageData.SET:
-                                try:    # Try as number first
-                                    message["x"] = int(words[2])
-                                except ValueError:
-                                    message["n"] = words[2]
-                                try:
-                                    message["v"] = int(words[3])
-                                except ValueError:
-                                    print(f"\t'{words[3]}' is not an integer!")
-                                    return
-                            case MessageData.CHANNEL:
-                                if len(words) > 2:
-                                    try:
-                                        message["b"] = int(words[2])
+                        message_data = MessageData.from_name(words[1])
+                        if message_data:
+                            message["m"] = MessageData.from_name(words[1]).value
+                            match message_data:
+                                case MessageData.RUN | MessageData.GET:
+                                    try:    # Try as number first
+                                        message["x"] = int(words[2])
                                     except ValueError:
-                                        print(f"\t'{words[2]}' is not an integer!")
+                                        message["n"] = words[2]
+                                case MessageData.SET:
+                                    try:    # Try as number first
+                                        message["x"] = int(words[2])
+                                    except ValueError:
+                                        message["n"] = words[2]
+                                    try:
+                                        message["v"] = int(words[3])
+                                    except ValueError:
+                                        print(f"\t'{words[3]}' is not an integer!")
                                         return
-                            case MessageData.SYS:
-                                if len(words) > 2:
-                                    if (SystemData.from_name(words[2])):
-                                        message["s"] = SystemData.from_name(words[2]).value
+                                case MessageData.CHANNEL:
+                                    if len(words) > 2:
+                                        try:
+                                            message["b"] = int(words[2])
+                                        except ValueError:
+                                            print(f"\t'{words[2]}' is not an integer!")
+                                            return
+                                case MessageData.SYS:
+                                    if len(words) > 2:
+                                        if (SystemData.from_name(words[2])):
+                                            message["s"] = SystemData.from_name(words[2]).value
+                                        else:
+                                            self._print_sys()
+                                            return
                                     else:
                                         self._print_sys()
                                         return
-                                else:
-                                    self._print_sys()
-                                    return
-                                if len(words) > 3:
-                                    try:    # Try as number first
-                                        message["v"] = int(words[3])
-                                    except ValueError:
-                                        message["v"] = words[3]
-                            case _:
-                                self._print_help()
-                                return
+                                    if len(words) > 3:
+                                        try:    # Try as number first
+                                            message["v"] = int(words[3])
+                                        except ValueError:
+                                            message["v"] = words[3]
                                     
-                        json_talkie.talk(message)
-                        return
+                            json_talkie.talk(message)
+                            return
                         
         self._print_help()
 
