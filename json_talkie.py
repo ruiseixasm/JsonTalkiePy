@@ -97,8 +97,6 @@ class JsonTalkie:
         self._channel: int = 0
         self._verbose: bool = verbose
         # State variables
-        self._sent_messages: dict[int, Dict[str, Any]] = {}
-        self._fifo_pool_100: list[int] = []
         self._devices_address: Dict[str, Tuple[str, int]] = {}
         self._message_time: float = 0.0
         self._running: bool = False
@@ -134,19 +132,7 @@ class JsonTalkie:
             sent_result = self._socket.send( JsonTalkie.encode(message), self._devices_address[message["t"]] )
         else:
             sent_result = self._socket.send( JsonTalkie.encode(message) )
-        # keeps the sent messages for a minute
-        message_id: int = message[JsonChar.IDENTITY.value]
-        self._sent_messages[message_id] = message
-        self._fifo_pool_100.insert(0, message_id)
         return sent_result
-    
-
-    def clean_messages_pool(self):
-        extra_messages: int = len(self._fifo_pool_100) - 100
-        if extra_messages > 0:
-            for _ in range(extra_messages):
-                message_id = self._fifo_pool_100.pop()
-                del(self._sent_messages[message_id])
     
 
     def listen(self):
@@ -177,14 +163,11 @@ class JsonTalkie:
                                             else: # do overflow as if uint16_t in c++
                                                 message["delay_ms"] = delay_ms + 65536  # 2^16
 
-
                         if self._verbose:
                             print(message)
                         if "f" in message:
                             self._devices_address[message["f"]] = ip_port
 
-
-                        self.clean_messages_pool()
                         self.receive(message)
                 except (UnicodeDecodeError, json.JSONDecodeError) as e:
                     if self._verbose:
@@ -268,6 +251,13 @@ class JsonTalkie:
                         message["r"] = "UNKNOWN"
                         self.talk(message)
 
+            case MessageCode.CHANNEL:
+                if "b" in message and isinstance(message["b"], int):
+                    self._channel = message["b"]
+                message["m"] = 6
+                message["b"] = self._channel
+                return self.talk(message)
+            
             case MessageCode.SYS:
                 message["m"] = 6
                 message["d"] = f"{platform.platform()}"
@@ -296,12 +286,6 @@ class JsonTalkie:
                 if "error" in self._manifesto:
                     self._manifesto["error"](message)
 
-            case MessageCode.CHANNEL:
-                if "b" in message and isinstance(message["b"], int):
-                    self._channel = message["b"]
-                message["m"] = 6
-                message["b"] = self._channel
-                return self.talk(message)
             case _:
                 print("\tUnknown message!")
         return False
