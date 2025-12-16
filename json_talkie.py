@@ -21,7 +21,6 @@ import platform
 from broadcast_socket import BroadcastSocket
 
 from talkie_codes import JsonChar, MessageCode, SystemCode, EchoCode
-    
 
 
 
@@ -186,9 +185,10 @@ class JsonTalkie:
                 return True
             
             case MessageCode.CHANNEL:
-                if "b" in message and isinstance(message["b"], int):
-                    self._channel = message["b"]
-                message["b"] = self._channel
+                if JsonChar.VALUE.value in message and isinstance(message[JsonChar.VALUE.value], int):
+                    self._channel = message[JsonChar.VALUE.value]
+                else:
+                    message[JsonChar.VALUE.value] = self._channel
                 return self.talk(message)
             
             case MessageCode.SYS:
