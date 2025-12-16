@@ -93,10 +93,9 @@ class JsonTalkie:
                                             out_time_ms: int = message_id
                                             actual_time: int = self.message_id()
                                             delay_ms: int = actual_time - out_time_ms
-                                            if delay_ms >= 0:
-                                                message["delay_ms"] = delay_ms
-                                            else: # do overflow as if uint16_t in c++
-                                                message["delay_ms"] = delay_ms + 65536  # 2^16
+                                            if delay_ms < 0:    # do overflow as if uint16_t in c++
+                                                delay_ms += 0xFFFF + 1  # 2^16
+                                            message["delay_ms"] = delay_ms
 
                         if self._verbose:
                             print(message)
