@@ -123,11 +123,15 @@ class CommandLine:
                             case MessageCode.SYS:
                                 if len(words) > 2:
                                     message["s"] = SystemCode.from_name(words[2]).value
+                                else:
+                                    self._print_sys()
+                                    return
                                 if len(words) > 3:
                                     try:    # Try as number first
                                         message["v"] = int(words[3])
                                     except ValueError:
                                         message["v"] = words[3]
+                                    
                         json_talkie.talk(message)
                         return
                         
