@@ -51,6 +51,10 @@ class TalkieCode:
             return None
 
 
+class SourceData(TalkieCode, Enum):
+    REMOTE, LOCAL = range(2)
+
+
 class MessageCode(TalkieCode, Enum):
     RUN, SET, GET, TALK, LIST, CHANNEL, SYS, ECHO, ERROR = range(9)
 
@@ -68,7 +72,7 @@ class MessageCode(TalkieCode, Enum):
 
 
 class SystemCode(TalkieCode, Enum):
-    BOARD, PING, DROPS, DELAY, MUTE, UNMUTE, MUTED = range(7)
+    BOARD, PING, DROPS, DELAY, MUTE, UNMUTE, MUTED, SOCKET, TALKER, MANIFESTO = range(10)
 
 
 class EchoCode(TalkieCode, Enum):
@@ -76,6 +80,5 @@ class EchoCode(TalkieCode, Enum):
 
 
 class ErrorCode(TalkieCode, Enum):
-    FROM, FIELDS, CHECKSUM, MESSAGE, IDENTITY, DELAY = range(6)
-
+    FROM, FIELD, CHECKSUM, MESSAGE, IDENTITY, DELAY, KEY, DATA = range(8)
 
