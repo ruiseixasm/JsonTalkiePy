@@ -17,75 +17,11 @@ import uuid
 from typing import Dict, Tuple, Any, TYPE_CHECKING, Callable
 import time
 import platform
-from enum import Enum
-from typing import Union, cast
 
 from broadcast_socket import BroadcastSocket
 
-
-class JsonChar(Enum):
-    CHECKSUM    = "c"
-    IDENTITY    = "i"
-    MESSAGE     = "m"
-    ORIGINAL    = "o"
-    FROM        = "f"
-    TO          = "t"
-    SYSTEM      = "s"
-    ERROR       = "e"
-    VALUE       = "v"
-    REPLY       = "r"
-    ROGER       = "g"
-    ACTION      = "a"
-    NAME        = "n"
-    INDEX       = "x"
-    DESCRIPTION = "d"
-
-
-class TalkieCode:
-    """Mixin with shared functionality for Talkie codes (enums)"""
+from talkie_codes import JsonChar, MessageCode, SystemCode, EchoCode
     
-    def __str__(self) -> str:
-        """String representation is lowercase"""
-                # Tell type checker self is an Enum
-        enum_self = cast(Enum, self)
-        return enum_self.name.lower()
-    
-    @classmethod
-    def from_name(cls, name: str) -> Union['Enum', None]:
-        """Returns the TalkieCode based on a lower case name"""
-        try:
-            return cls[name.upper()]    # TalkieCode is in upper case
-        except KeyError:
-            return None
-
-
-class MessageCode(TalkieCode, Enum):
-    RUN, SET, GET, TALK, LIST, CHANNEL, SYS, ECHO, ERROR = range(9)
-
-    @classmethod
-    def validate_to_words(cls, words: list[str]) -> bool:
-        if len(words) > 1 and MessageCode.from_name(words[1]):
-            match MessageCode.from_name(words[1]):  # word[0] is the device name
-                case MessageCode.RUN | MessageCode.GET:
-                    return len(words) == 3
-                case MessageCode.SET: return len(words) == 4
-                case MessageCode.SYS | MessageCode.CHANNEL:
-                    return True
-                case _: return len(words) == 2
-        return False
-
-
-class SystemCode(TalkieCode, Enum):
-    BOARD, PING, DROPS, DELAY, MUTE, UNMUTE, MUTED = range(7)
-
-
-class EchoCode(TalkieCode, Enum):
-    ROGER, SAY_AGAIN, NEGATIVE, NIL = range(4)
-
-
-class ErrorCode(TalkieCode, Enum):
-    FROM, FIELDS, CHECKSUM, MESSAGE, IDENTITY, DELAY = range(6)
-
 
 
 
@@ -177,90 +113,86 @@ class JsonTalkie:
 
     def receive(self, message: Dict[str, Any]) -> bool:
         """Handles message content only."""
-        if message[JsonChar.MESSAGE.value] != MessageCode.ECHO.value and message[JsonChar.MESSAGE.value] != MessageCode.ERROR.value:
-            message["t"] = message["f"]
-            message["o"] = message["m"]
+
+        if message[JsonChar.MESSAGE.value] < MessageCode.ECHO.value:
+
+            message[JsonChar.TO.value] = message[JsonChar.FROM.value]
+            message[JsonChar.FROM.value] = self._manifesto['talker']['name']
+
+            message[JsonChar.ORIGINAL.value] = message[JsonChar.MESSAGE.value]
+            message[JsonChar.MESSAGE.value] = MessageCode.ECHO.value
+
 
         match MessageCode(message[JsonChar.MESSAGE.value]):
-            case MessageCode.TALK:
-                message["m"] = 6
-                message["d"] = f"{self._manifesto['talker']['description']}"
-                return self.talk(message)
-            
-            case MessageCode.LIST:
-                message["m"] = 6
-                if 'run' in self._manifesto:
-                    for name, content in self._manifesto['run'].items():
-                        message["n"] = name
-                        message["d"] = content['description']
-                        self.talk(message)
-                if 'set' in self._manifesto:
-                    for name, content in self._manifesto['set'].items():
-                        message["n"] = name
-                        message["d"] = content['description']
-                        self.talk(message)
-                if 'get' in self._manifesto:
-                    for name, content in self._manifesto['get'].items():
-                        message["n"] = name
-                        message["d"] = content['description']
-                        self.talk(message)
-                return True
-            
+
             case MessageCode.RUN:
-                message["m"] = 6
-                if "n" in message and 'run' in self._manifesto:
-                    if message["n"] in self._manifesto['run']:
-                        message["r"] = "ROGER"
+                if JsonChar.NAME.value in message and 'run' in self._manifesto:
+                    if message[JsonChar.NAME.value] in self._manifesto['run']:
                         self.talk(message)
-                        roger: bool = self._manifesto['run'][message["n"]]['function'](message)
+                        roger: bool = self._manifesto['run'][message[JsonChar.NAME.value]]['function'](message)
                         if roger:
-                            message["r"] = "ROGER"
+                            message[JsonChar.ROGER.value] = EchoCode.ROGER
                         else:
-                            message["r"] = "FAIL"
+                            message[JsonChar.ROGER.value] = EchoCode.NEGATIVE
                         return self.talk(message)
                     else:
-                        message["r"] = "UNKNOWN"
+                        message[JsonChar.ROGER.value] = EchoCode.SAY_AGAIN
                         self.talk(message)
 
             case MessageCode.SET:
-                message["m"] = 6
-                if "v" in message and isinstance(message["v"], int) and "n" in message and 'set' in self._manifesto:
-                    if message["n"] in self._manifesto['set']:
-                        message["r"] = "ROGER"
+                if JsonChar.VALUE.value in message and isinstance(message[JsonChar.VALUE.value], int) and JsonChar.NAME.value in message and 'set' in self._manifesto:
+                    if message[JsonChar.NAME.value] in self._manifesto['set']:
                         self.talk(message)
-                        roger: bool = self._manifesto['set'][message["n"]]['function'](message, message["v"])
+                        roger: bool = self._manifesto['set'][message[JsonChar.NAME.value]]['function'](message, message[JsonChar.VALUE.value])
                         if roger:
-                            message["r"] = "ROGER"
+                            message[JsonChar.ROGER.value] = EchoCode.ROGER
                         else:
-                            message["r"] = "FAIL"
+                            message[JsonChar.ROGER.value] = EchoCode.NEGATIVE
                         return self.talk(message)
                     else:
-                        message["r"] = "UNKNOWN"
+                        message[JsonChar.ROGER.value] = EchoCode.SAY_AGAIN
                         self.talk(message)
 
             case MessageCode.GET:
-                message["m"] = 6
-                if "n" in message and 'get' in self._manifesto:
-                    if message["n"] in self._manifesto['get']:
-                        message["r"] = "ROGER"
+                if JsonChar.NAME.value in message and 'get' in self._manifesto:
+                    if message[JsonChar.NAME.value] in self._manifesto['get']:
                         self.talk(message)
-                        message["r"] = "ROGER"
-                        message["v"] = self._manifesto['get'][message["n"]]['function'](message)
+                        message[JsonChar.VALUE.value] = self._manifesto['get'][message[JsonChar.NAME.value]]['function'](message)
                         return self.talk(message)
                     else:
-                        message["r"] = "UNKNOWN"
+                        message[JsonChar.ROGER.value] = EchoCode.SAY_AGAIN
                         self.talk(message)
 
+            case MessageCode.TALK:
+                message[JsonChar.DESCRIPTION.value] = f"{self._manifesto['talker']['description']}"
+                return self.talk(message)
+            
+            case MessageCode.LIST:
+                if 'run' in self._manifesto:
+                    for name, content in self._manifesto['run'].items():
+                        message[JsonChar.NAME.value] = name
+                        message[JsonChar.DESCRIPTION.value] = content['description']
+                        self.talk(message)
+                if 'set' in self._manifesto:
+                    for name, content in self._manifesto['set'].items():
+                        message[JsonChar.NAME.value] = name
+                        message[JsonChar.DESCRIPTION.value] = content['description']
+                        self.talk(message)
+                if 'get' in self._manifesto:
+                    for name, content in self._manifesto['get'].items():
+                        message[JsonChar.NAME.value] = name
+                        message[JsonChar.DESCRIPTION.value] = content['description']
+                        self.talk(message)
+                return True
+            
             case MessageCode.CHANNEL:
                 if "b" in message and isinstance(message["b"], int):
                     self._channel = message["b"]
-                message["m"] = 6
                 message["b"] = self._channel
                 return self.talk(message)
             
             case MessageCode.SYS:
-                message["m"] = 6
-                message["d"] = f"{platform.platform()}"
+                message[JsonChar.DESCRIPTION.value] = f"{platform.platform()}"
                 return self.talk(message)
             
             case MessageCode.ECHO:
@@ -298,9 +230,9 @@ class JsonTalkie:
             except (ValueError, TypeError):
                 return False
             if JsonTalkie.valid_checksum(message):
-                if "m" not in message:
+                if JsonChar.MESSAGE.value not in message:
                     return False
-                if not isinstance(message["m"], int):
+                if not isinstance(message[JsonChar.MESSAGE.value], int):
                     return False
                 if not ("f" in message and "i" in message):
                     return False

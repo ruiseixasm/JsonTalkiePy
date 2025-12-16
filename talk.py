@@ -20,8 +20,8 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.patch_stdout import patch_stdout
 
-from json_talkie import JsonTalkie, JsonChar, MessageCode, SystemCode, EchoCode
-    
+from json_talkie import JsonTalkie
+from talkie_codes import JsonChar, MessageCode, SystemCode, EchoCode
 
 
 
