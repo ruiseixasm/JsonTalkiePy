@@ -147,30 +147,33 @@ class CommandLine:
 
     def _print_help(self):
         """Print help"""
-        print("\t[talk]               \tPrints all talkers' 'name' and 'description'.")
-        print("\t['talker' list]      \tList the entire 'talker' manifesto.")
-        print("\t['talker' channel]   \tShows the Device channel.")
-        print("\t['talker' channel n] \tSets the Device channel.")
-        print("\t['talker' run 'name']\tRuns the named function.")
-        print("\t['talker' set 'name']\tSets the named variable.")
-        print("\t['talker' get 'name']\tGets the named variable value.")
-        print("\t[sys]                \tPrints available options for the 'talker' system.")
-        print("\t[* 'action' '...']   \tThe wildcard '*' means all talkers.")
-        print("\t[exit]               \tExits the command line (Ctrl+D).")
-        print("\t[help]               \tShows the present help.")
+        print("\t[talk]                     Prints all talkers' 'name' and 'description'.")
+        print("\t['talker' list]            List the entire 'talker' manifesto.")
+        print("\t['talker' channel]         Returns the Device channel.")
+        print("\t['talker' channel n]       Sets the Device channel.")
+        print("\t['talker' run 'name']      Runs the named function.")
+        print("\t['talker' set 'name']      Sets the named variable.")
+        print("\t['talker' get 'name']      Gets the named variable value.")
+        print("\t[sys]                      Prints available options for the 'talker' system.")
+        print("\t[* 'action' '...']         The wildcard '*' means all talkers.")
+        print("\t[exit]                     Exits the command line (Ctrl+D).")
+        print("\t[help]                     Shows the present help.")
 
 
     def _print_sys(self):
         """Print system help"""
-        print("\t['talker' sys board] \tPrints the board description (OS).")
-        print("\t['talker' sys ping]  \tReturns the duration of the round-trip in milliseconds.")
-        print("\t['talker' sys ping d]\tSets some overloading data to a more realistic measurement.")
-        print("\t['talker' sys drops] \tReturns the number of drops associated to out of time messages.")
-        print("\t['talker' sys delay] \tReturns the delay after which the message is dropped in milliseconds.")
-        print("\t['talker' sys delay d]\tSets a new delay, where 0 means no delay processed (no drops).")
-        print("\t['talker' sys mute]  \tMutes the talker so that becomes silent.")
-        print("\t['talker' sys unmute]\tUnmutes the talker if it's silent.")
-        print("\t['talker' sys muted] \tPrints '1' if the talker is muted.")
+        print("\t['talker' sys board]       Prints the board description (OS).")
+        print("\t['talker' sys ping]        Returns the duration of the round-trip in milliseconds.")
+        print("\t['talker' sys ping d]      Sets some overloading data to a more realistic measurement.")
+        print("\t['talker' sys drops]       Returns the number of drops associated to out of time messages.")
+        print("\t['talker' sys delay]       Returns the maximum delay for dropping the message in milliseconds.")
+        print("\t['talker' sys delay d]     Sets a new delay, where 0 means no delay processed (no drops).")
+        print("\t['talker' sys mute]        Mutes the talker so that becomes silent.")
+        print("\t['talker' sys unmute]      Unmutes the talker if it's silent.")
+        print("\t['talker' sys muted]       Prints '1' if the talker is muted.")
+        print("\t['talker' sys socket]      Prints the socket class name.")
+        print("\t['talker' sys talker]      Prints the talker class name.")
+        print("\t['talker' sys manifesto]   Prints the manifesto class name.")
         
 
 
