@@ -65,8 +65,12 @@ class JsonTalkie:
         sent_result: bool = False
         if "t" in message and message["t"] in self._devices_address:
             sent_result = self._socket.send( JsonTalkie.encode(message), self._devices_address[message["t"]] )
+            if self._verbose:
+                print("--> DIRECT SENDING -->")
         else:
             sent_result = self._socket.send( JsonTalkie.encode(message) )
+            if self._verbose:
+                print("--> BROADCAST SENDING -->")
         return sent_result
     
 
