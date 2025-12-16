@@ -55,30 +55,30 @@ class SourceData(TalkieCode, Enum):
     REMOTE, LOCAL = range(2)
 
 
-class MessageCode(TalkieCode, Enum):
+class MessageData(TalkieCode, Enum):
     RUN, SET, GET, TALK, LIST, CHANNEL, SYS, ECHO, ERROR = range(9)
 
     @classmethod
     def validate_to_words(cls, words: list[str]) -> bool:
-        if len(words) > 1 and MessageCode.from_name(words[1]):
-            match MessageCode.from_name(words[1]):  # word[0] is the device name
-                case MessageCode.RUN | MessageCode.GET:
+        if len(words) > 1 and MessageData.from_name(words[1]):
+            match MessageData.from_name(words[1]):  # word[0] is the device name
+                case MessageData.RUN | MessageData.GET:
                     return len(words) == 3
-                case MessageCode.SET: return len(words) == 4
-                case MessageCode.SYS | MessageCode.CHANNEL:
+                case MessageData.SET: return len(words) == 4
+                case MessageData.SYS | MessageData.CHANNEL:
                     return True
                 case _: return len(words) == 2
         return False
 
 
-class SystemCode(TalkieCode, Enum):
+class SystemData(TalkieCode, Enum):
     BOARD, PING, DROPS, DELAY, MUTE, UNMUTE, MUTED, SOCKET, TALKER, MANIFESTO = range(10)
 
 
-class EchoCode(TalkieCode, Enum):
+class EchoData(TalkieCode, Enum):
     ROGER, SAY_AGAIN, NEGATIVE, NIL = range(4)
 
 
-class ErrorCode(TalkieCode, Enum):
+class ErrorData(TalkieCode, Enum):
     FROM, FIELD, CHECKSUM, MESSAGE, IDENTITY, DELAY, KEY, DATA = range(8)
 

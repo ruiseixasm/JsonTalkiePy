@@ -20,7 +20,7 @@ import platform
 
 from broadcast_socket import BroadcastSocket
 
-from talkie_codes import JsonChar, MessageCode, SystemCode, EchoCode
+from talkie_codes import JsonChar, MessageData, SystemData, EchoData
 
 
 
@@ -83,12 +83,12 @@ class JsonTalkie:
                     if self.validate_message(message):
 
                         # Add info to echo message right away accordingly to the message original type
-                        if message[JsonChar.MESSAGE.value] == MessageCode.ECHO.value:
+                        if message[JsonChar.MESSAGE.value] == MessageData.ECHO.value:
                             if JsonChar.ORIGINAL.value in message:
-                                original_message_code = MessageCode(message[JsonChar.ORIGINAL.value])
+                                original_message_code = MessageData(message[JsonChar.ORIGINAL.value])
                                 match original_message_code:
-                                    case MessageCode.SYS:
-                                        if message[JsonChar.SYSTEM.value] == SystemCode.PING.value:
+                                    case MessageData.SYS:
+                                        if message[JsonChar.SYSTEM.value] == SystemData.PING.value:
                                             message_id = message[JsonChar.IDENTITY.value]
                                             out_time_ms: int = message_id
                                             actual_time: int = self.message_id()
@@ -113,60 +113,60 @@ class JsonTalkie:
     def receive(self, message: Dict[str, Any]) -> bool:
         """Handles message content only."""
 
-        if message[JsonChar.MESSAGE.value] < MessageCode.ECHO.value:
+        if message[JsonChar.MESSAGE.value] < MessageData.ECHO.value:
 
             message[JsonChar.TO.value] = message[JsonChar.FROM.value]
             message[JsonChar.FROM.value] = self._manifesto['talker']['name']
 
             message[JsonChar.ORIGINAL.value] = message[JsonChar.MESSAGE.value]
-            message[JsonChar.MESSAGE.value] = MessageCode.ECHO.value
+            message[JsonChar.MESSAGE.value] = MessageData.ECHO.value
 
 
-        match MessageCode(message[JsonChar.MESSAGE.value]):
+        match MessageData(message[JsonChar.MESSAGE.value]):
 
-            case MessageCode.RUN:
+            case MessageData.RUN:
                 if JsonChar.NAME.value in message and 'run' in self._manifesto:
                     if message[JsonChar.NAME.value] in self._manifesto['run']:
                         self.talk(message)
                         roger: bool = self._manifesto['run'][message[JsonChar.NAME.value]]['function'](message)
                         if roger:
-                            message[JsonChar.ROGER.value] = EchoCode.ROGER
+                            message[JsonChar.ROGER.value] = EchoData.ROGER
                         else:
-                            message[JsonChar.ROGER.value] = EchoCode.NEGATIVE
+                            message[JsonChar.ROGER.value] = EchoData.NEGATIVE
                         return self.talk(message)
                     else:
-                        message[JsonChar.ROGER.value] = EchoCode.SAY_AGAIN
+                        message[JsonChar.ROGER.value] = EchoData.SAY_AGAIN
                         self.talk(message)
 
-            case MessageCode.SET:
+            case MessageData.SET:
                 if JsonChar.VALUE.value in message and isinstance(message[JsonChar.VALUE.value], int) and JsonChar.NAME.value in message and 'set' in self._manifesto:
                     if message[JsonChar.NAME.value] in self._manifesto['set']:
                         self.talk(message)
                         roger: bool = self._manifesto['set'][message[JsonChar.NAME.value]]['function'](message, message[JsonChar.VALUE.value])
                         if roger:
-                            message[JsonChar.ROGER.value] = EchoCode.ROGER
+                            message[JsonChar.ROGER.value] = EchoData.ROGER
                         else:
-                            message[JsonChar.ROGER.value] = EchoCode.NEGATIVE
+                            message[JsonChar.ROGER.value] = EchoData.NEGATIVE
                         return self.talk(message)
                     else:
-                        message[JsonChar.ROGER.value] = EchoCode.SAY_AGAIN
+                        message[JsonChar.ROGER.value] = EchoData.SAY_AGAIN
                         self.talk(message)
 
-            case MessageCode.GET:
+            case MessageData.GET:
                 if JsonChar.NAME.value in message and 'get' in self._manifesto:
                     if message[JsonChar.NAME.value] in self._manifesto['get']:
                         self.talk(message)
                         message[JsonChar.VALUE.value] = self._manifesto['get'][message[JsonChar.NAME.value]]['function'](message)
                         return self.talk(message)
                     else:
-                        message[JsonChar.ROGER.value] = EchoCode.SAY_AGAIN
+                        message[JsonChar.ROGER.value] = EchoData.SAY_AGAIN
                         self.talk(message)
 
-            case MessageCode.TALK:
+            case MessageData.TALK:
                 message[JsonChar.DESCRIPTION.value] = f"{self._manifesto['talker']['description']}"
                 return self.talk(message)
             
-            case MessageCode.LIST:
+            case MessageData.LIST:
                 if 'run' in self._manifesto:
                     for name, content in self._manifesto['run'].items():
                         message[JsonChar.NAME.value] = name
@@ -184,18 +184,18 @@ class JsonTalkie:
                         self.talk(message)
                 return True
             
-            case MessageCode.CHANNEL:
+            case MessageData.CHANNEL:
                 if JsonChar.VALUE.value in message and isinstance(message[JsonChar.VALUE.value], int):
                     self._channel = message[JsonChar.VALUE.value]
                 else:
                     message[JsonChar.VALUE.value] = self._channel
                 return self.talk(message)
             
-            case MessageCode.SYS:
+            case MessageData.SYS:
                 message[JsonChar.DESCRIPTION.value] = f"{platform.platform()}"
                 return self.talk(message)
             
-            case MessageCode.ECHO:
+            case MessageData.ECHO:
 
                 # Echo codes (g):
                 #     0 - ROGER
@@ -205,7 +205,7 @@ class JsonTalkie:
                 if "echo" in self._manifesto:
                     self._manifesto["echo"](message)
 
-            case MessageCode.ERROR:
+            case MessageData.ERROR:
 
                 # Error types:
                 #     0 - Unknown sender

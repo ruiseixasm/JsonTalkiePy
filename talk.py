@@ -21,7 +21,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.patch_stdout import patch_stdout
 
 from json_talkie import JsonTalkie
-from talkie_codes import JsonChar, MessageCode, SystemCode, EchoCode
+from talkie_codes import JsonChar, MessageData, SystemData, EchoData
 
 
 
@@ -80,11 +80,11 @@ class CommandLine:
             words = cmd.split()
             if words:
                 if len(words) == 1:
-                    if words[0] == str(MessageCode.TALK):
-                        message = {"m": MessageCode.TALK.value}
+                    if words[0] == str(MessageData.TALK):
+                        message = {"m": MessageData.TALK.value}
                         json_talkie.talk(message)
                         return
-                    elif words[0] == str(MessageCode.SYS):
+                    elif words[0] == str(MessageData.SYS):
                         self._print_sys()
                         return
                 else:   # WITH TARGET NAME DEFINED
@@ -95,15 +95,15 @@ class CommandLine:
                         if words[0] != "*":
                             message["t"] = words[0]
 
-                    if MessageCode.validate_to_words(words):
-                        message["m"] = MessageCode.from_name(words[1]).value
-                        match MessageCode.from_name(words[1]):
-                            case MessageCode.RUN | MessageCode.GET:
+                    if MessageData.validate_to_words(words):
+                        message["m"] = MessageData.from_name(words[1]).value
+                        match MessageData.from_name(words[1]):
+                            case MessageData.RUN | MessageData.GET:
                                 try:    # Try as number first
                                     message["x"] = int(words[2])
                                 except ValueError:
                                     message["n"] = words[2]
-                            case MessageCode.SET:
+                            case MessageData.SET:
                                 try:    # Try as number first
                                     message["x"] = int(words[2])
                                 except ValueError:
@@ -113,17 +113,17 @@ class CommandLine:
                                 except ValueError:
                                     print(f"\t'{words[3]}' is not an integer!")
                                     return
-                            case MessageCode.CHANNEL:
+                            case MessageData.CHANNEL:
                                 if len(words) > 2:
                                     try:
                                         message["b"] = int(words[2])
                                     except ValueError:
                                         print(f"\t'{words[2]}' is not an integer!")
                                         return
-                            case MessageCode.SYS:
+                            case MessageData.SYS:
                                 if len(words) > 2:
-                                    if (SystemCode.from_name(words[2])):
-                                        message["s"] = SystemCode.from_name(words[2]).value
+                                    if (SystemData.from_name(words[2])):
+                                        message["s"] = SystemData.from_name(words[2]).value
                                     else:
                                         self._print_sys()
                                         return
@@ -181,18 +181,18 @@ class CommandLine:
             parts.append(f"\t[{message[JsonChar.FROM.value]}")  # VERY IMPORTANT, NEVER FORGET .value !!
             
             if JsonChar.ORIGINAL.value in message:
-                original_message_code = MessageCode(message[JsonChar.ORIGINAL.value])
+                original_message_code = MessageData(message[JsonChar.ORIGINAL.value])
                 match original_message_code:
-                    case MessageCode.LIST:
-                        action_name = str(MessageCode(message[JsonChar.ACTION.value]))
+                    case MessageData.LIST:
+                        action_name = str(MessageData(message[JsonChar.ACTION.value]))
                         parts.append(f" {action_name}")
                         if JsonChar.INDEX.value in message and JsonChar.NAME.value in message:
                             parts.append(f" {message[JsonChar.INDEX.value]}")
                             parts.append(f"|{message[JsonChar.NAME.value]}")
 
-                    case MessageCode.SYS:
+                    case MessageData.SYS:
                         parts.append(f" {str(original_message_code)}")
-                        parts.append(f" {str(SystemCode(message[JsonChar.SYSTEM.value]))}")
+                        parts.append(f" {str(SystemData(message[JsonChar.SYSTEM.value]))}")
 
                     case _:
                         parts.append(f" {str(original_message_code)}")
@@ -213,23 +213,23 @@ class CommandLine:
             prefix = self.generate_prefix(message)
             padded_prefix = prefix.ljust(self.max_prefix_length)
             if JsonChar.ORIGINAL.value in message:
-                original_message_code = MessageCode(message[JsonChar.ORIGINAL.value])   # VERY IMPORTANT, NEVER FORGET .value !!
+                original_message_code = MessageData(message[JsonChar.ORIGINAL.value])   # VERY IMPORTANT, NEVER FORGET .value !!
 
                 match original_message_code:
-                    case MessageCode.TALK | MessageCode.LIST:
+                    case MessageData.TALK | MessageData.LIST:
                         print(f"{padded_prefix}\t{str(message[JsonChar.DESCRIPTION.value])}")
-                    case MessageCode.SYS:
-                        system_code = SystemCode(message[JsonChar.SYSTEM.value])
+                    case MessageData.SYS:
+                        system_code = SystemData(message[JsonChar.SYSTEM.value])
                         match system_code:
-                            case SystemCode.MUTE | SystemCode.UNMUTE:
-                                print(f"{padded_prefix}\t{str(EchoCode(message[JsonChar.ROGER.value]))}")
+                            case SystemData.MUTE | SystemData.UNMUTE:
+                                print(f"{padded_prefix}\t{str(EchoData(message[JsonChar.ROGER.value]))}")
                                 if JsonChar.REPLY.value in message:
                                     print(f"{padded_prefix}\t{str(message[JsonChar.REPLY.value])}")
                         
-                            case SystemCode.BOARD:
+                            case SystemData.BOARD:
                                 print(f"{padded_prefix}\t{str(message[JsonChar.DESCRIPTION.value])}")
 
-                            case SystemCode.PING:
+                            case SystemData.PING:
                                 if "delay_ms" in message:
                                     print(f"{padded_prefix}\t{str(message["delay_ms"])}")
                                 else:
@@ -241,7 +241,7 @@ class CommandLine:
                         if JsonChar.VALUE.value in message:
                             print(f"{padded_prefix}\t{str(message[JsonChar.VALUE.value])}")
                         elif JsonChar.ROGER.value in message:
-                            print(f"{padded_prefix}\t{str(EchoCode(message[JsonChar.ROGER.value]))}")
+                            print(f"{padded_prefix}\t{str(EchoData(message[JsonChar.ROGER.value]))}")
                         else:
                             print(f"{padded_prefix}\t{message[JsonChar.DESCRIPTION.value]}")
                         if JsonChar.REPLY.value in message:
