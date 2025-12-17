@@ -111,19 +111,19 @@ class Talker:
                                 roger = "UNKNOWN"
                             case 2:
                                 roger = "NONE"
-                        if "n" in message:
+                        if JsonKey.NAME.value in message:
                             print(f" {what} {message[ JsonKey.NAME.value ]}]\t{roger}")
                         else:
                             print(f" {what}]\t{roger}")
-                    elif "v" in message and "n" in message:
+                    elif JsonKey.VALUE.value in message and JsonKey.NAME.value in message:
                         print(f" {what} {message[ JsonKey.NAME.value ]}]\t{message[ JsonKey.VALUE.value ]}")
-                    elif "n" in message and "d" in message:
+                    elif JsonKey.NAME.value in message and JsonKey.DESCRIPTION.value in message:
                         print(f" {what} {message[ JsonKey.NAME.value ]}]\t{message[ JsonKey.DESCRIPTION.value ]}")
-                    elif "n" in message and "r" in message:
+                    elif JsonKey.NAME.value in message and JsonKey.REPLY.value in message:
                         print(f" {what} {message[ JsonKey.NAME.value ]}]\t{message[ JsonKey.REPLY.value ]}")
-                    elif "r" in message:
+                    elif JsonKey.REPLY.value in message:
                         print(f" {what}]\t{message[ JsonKey.REPLY.value ]}")
-            elif "d" in message:
+            elif JsonKey.DESCRIPTION.value in message:
                 print(f"]\t{message[ JsonKey.DESCRIPTION.value ]}")
         return True
 
@@ -180,9 +180,9 @@ if __name__ == "__main__":
     try:
         messages: tuple[Dict[str, Any]] = (
             {JsonKey.MESSAGE.value: 1, JsonKey.TO.value: '*'},
-            {JsonKey.MESSAGE.value: 2, "n": 'buzz', JsonKey.TO.value: 'Buzzer'},
-            {JsonKey.MESSAGE.value: 2, "n": 'on', JsonKey.TO.value: 'Buzzer'},
-            {JsonKey.MESSAGE.value: 2, "n": 'off', JsonKey.TO.value: 'Buzzer'}
+            {JsonKey.MESSAGE.value: 2, JsonKey.NAME.value: 'buzz', JsonKey.TO.value: 'Buzzer'},
+            {JsonKey.MESSAGE.value: 2, JsonKey.NAME.value: 'on', JsonKey.TO.value: 'Buzzer'},
+            {JsonKey.MESSAGE.value: 2, JsonKey.NAME.value: 'off', JsonKey.TO.value: 'Buzzer'}
         )
 
         # Main loop
