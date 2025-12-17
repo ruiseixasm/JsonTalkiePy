@@ -189,7 +189,7 @@ if __name__ == "__main__":
         message_time = time.time()
         while True:
             if time.time() - message_time > 30:
-                json_talkie.talk(messages[random.randint(0, len(messages) - 1)])
+                json_talkie.remoteSend(messages[random.randint(0, len(messages) - 1)])
                 message_time = time.time()
     except KeyboardInterrupt:
         print("\tShutting down...")

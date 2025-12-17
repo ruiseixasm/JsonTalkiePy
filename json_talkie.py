@@ -53,7 +53,7 @@ class JsonTalkie:
             self._thread.join()
         self._socket.close()
 
-    def talk(self, message: Dict[str, Any]) -> bool:
+    def remoteSend(self, message: Dict[str, Any]) -> bool:
         """Sends messages without network awareness."""
         message[ JsonKey.FROM.value ] = self._manifesto['talker']['name']
         if JsonKey.IDENTITY.value not in message:
@@ -105,14 +105,14 @@ class JsonTalkie:
                         if JsonKey.FROM.value in message:
                             self._devices_address[message[ JsonKey.FROM.value ]] = ip_port
 
-                        self.receive(message)
+                        self.processMessage(message)
                 except (UnicodeDecodeError, json.JSONDecodeError) as e:
                     if self._verbose:
                         print(f"\tInvalid message: {e}")
                     pass
 
 
-    def receive(self, message: Dict[str, Any]) -> bool:
+    def processMessage(self, message: Dict[str, Any]) -> bool:
         """Handles message content only."""
 
         message_data = MessageData(message[JsonKey.MESSAGE.value])
@@ -131,61 +131,61 @@ class JsonTalkie:
             case MessageData.RUN:
                 if JsonKey.NAME.value in message and 'run' in self._manifesto:
                     if message[JsonKey.NAME.value] in self._manifesto['run']:
-                        self.talk(message)
+                        self.remoteSend(message)
                         roger: bool = self._manifesto['run'][message[JsonKey.NAME.value]]['function'](message)
                         if roger:
                             message[JsonKey.ROGER.value] = EchoData.ROGER
                         else:
                             message[JsonKey.ROGER.value] = EchoData.NEGATIVE
-                        return self.talk(message)
+                        return self.remoteSend(message)
                     else:
                         message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
-                        self.talk(message)
+                        self.remoteSend(message)
 
             case MessageData.SET:
                 if JsonKey.VALUE.value in message and isinstance(message[JsonKey.VALUE.value], int) and JsonKey.NAME.value in message and 'set' in self._manifesto:
                     if message[JsonKey.NAME.value] in self._manifesto['set']:
-                        self.talk(message)
+                        self.remoteSend(message)
                         roger: bool = self._manifesto['set'][message[JsonKey.NAME.value]]['function'](message, message[JsonKey.VALUE.value])
                         if roger:
                             message[JsonKey.ROGER.value] = EchoData.ROGER
                         else:
                             message[JsonKey.ROGER.value] = EchoData.NEGATIVE
-                        return self.talk(message)
+                        return self.remoteSend(message)
                     else:
                         message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
-                        self.talk(message)
+                        self.remoteSend(message)
 
             case MessageData.GET:
                 if JsonKey.NAME.value in message and 'get' in self._manifesto:
                     if message[JsonKey.NAME.value] in self._manifesto['get']:
-                        self.talk(message)
+                        self.remoteSend(message)
                         message[JsonKey.VALUE.value] = self._manifesto['get'][message[JsonKey.NAME.value]]['function'](message)
-                        return self.talk(message)
+                        return self.remoteSend(message)
                     else:
                         message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
-                        self.talk(message)
+                        self.remoteSend(message)
 
             case MessageData.TALK:
                 message[JsonKey.DESCRIPTION.value] = f"{self._manifesto['talker']['description']}"
-                return self.talk(message)
+                return self.remoteSend(message)
             
             case MessageData.LIST:
                 if 'run' in self._manifesto:
                     for name, content in self._manifesto['run'].items():
                         message[JsonKey.NAME.value] = name
                         message[JsonKey.DESCRIPTION.value] = content['description']
-                        self.talk(message)
+                        self.remoteSend(message)
                 if 'set' in self._manifesto:
                     for name, content in self._manifesto['set'].items():
                         message[JsonKey.NAME.value] = name
                         message[JsonKey.DESCRIPTION.value] = content['description']
-                        self.talk(message)
+                        self.remoteSend(message)
                 if 'get' in self._manifesto:
                     for name, content in self._manifesto['get'].items():
                         message[JsonKey.NAME.value] = name
                         message[JsonKey.DESCRIPTION.value] = content['description']
-                        self.talk(message)
+                        self.remoteSend(message)
                 return True
             
             case MessageData.CHANNEL:
@@ -193,11 +193,11 @@ class JsonTalkie:
                     self._channel = message[JsonKey.VALUE.value]
                 else:
                     message[JsonKey.VALUE.value] = self._channel
-                return self.talk(message)
+                return self.remoteSend(message)
             
             case MessageData.SYS:
                 message[JsonKey.DESCRIPTION.value] = f"{platform.platform()}"
-                return self.talk(message)
+                return self.remoteSend(message)
             
             case MessageData.ECHO:
 

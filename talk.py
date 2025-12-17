@@ -84,7 +84,7 @@ class CommandLine:
                 if len(words) == 1:
                     if words[0] == str(MessageData.TALK):
                         message = {JsonKey.MESSAGE.value: MessageData.TALK.value}
-                        json_talkie.talk(message)
+                        json_talkie.remoteSend(message)
                         return
                     elif words[0] == str(MessageData.SYS):
                         self._print_sys()
@@ -145,9 +145,9 @@ class CommandLine:
                                             message[ JsonKey.VALUE.value ] = words[3]
                                 
                             if (SourceData.from_name(words[0]) == SourceData.HERE):
-                                json_talkie.receive(message)    # Sends directly to myself
+                                json_talkie.processMessage(message)    # Sends directly to myself
                             else:
-                                json_talkie.talk(message)
+                                json_talkie.remoteSend(message)
                             return
                         
         self._print_help()
@@ -328,7 +328,7 @@ if __name__ == "__main__":
     
     print(f"\tWARNINGS TO AVOID UNREACHABLE COMMANDS:")
     print(f"\t\tALWAYS GIVE DIFFERENT MAC ADDRESSES TO YOUR DEVICES DUE TO IP CONFLICTS")
-    print(f"\t\tAVOID BROADCASTED (UNNAMED DEVICES) COMMANDS ON WIFI CONNECTED DEVICES DUE TO WIFI RESTRICTIONS")
+    print(f"\t\tAVOID BROADCASTED COMMANDS ON WIFI CONNECTED DEVICES DUE TO WIFI RESTRICTIONS")
     print(f"\t[{cli.manifesto['talker']['name']}] running. Type 'exit' to exit or 'talk' to make them talk.")
     
     try:
