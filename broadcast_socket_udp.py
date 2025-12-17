@@ -63,7 +63,24 @@ class BroadcastSocket_UDP(BroadcastSocket):
         super().__init__()
         self._port = port
         self._socket = None  # Not initialized until open()
+
+        # ===== [SELF IP] cache local IP =====
+        self._local_ip = self._get_local_ip()
     
+
+    # ===== [SELF IP] =====
+    def _get_local_ip(self) -> str:
+        try:
+            hostname = socket.gethostname()
+            ips = socket.gethostbyname_ex(hostname)[2]
+            for ip in ips:
+                if not ip.startswith('127.'):
+                    return ip
+        except Exception:
+            pass
+        return '127.0.0.1'
+
+
     def open(self) -> bool:
         """Initialize and bind the socket."""
         try:
@@ -154,9 +171,21 @@ class BroadcastSocket_UDP(BroadcastSocket):
             return None
         try:
             data_ip_port: Optional[Tuple[bytes, Tuple[str, int]]] = self._socket.recvfrom(4096)
-            if data_ip_port is not None and data_ip_port[1][1] == self._port:
+            if data_ip_port is None:
+                return None
+
+            data, (src_ip, src_port) = data_ip_port
+
+            # ===== [SELF IP] DROP self-sent packets =====
+            if src_ip == self._local_ip:
+                if DEBUG:
+                    print(f"Dropped self packet from {src_ip}")
+                return None
+
+            if src_port == self._port:
                 return data_ip_port
             return None
+
         except BlockingIOError:
             return None
         except Exception as e:
