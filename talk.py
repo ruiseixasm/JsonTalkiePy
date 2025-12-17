@@ -101,8 +101,7 @@ class CommandLine:
                         try:    # Try as channel first
                             message[ JsonKey.TO.value ] = int(words[0])
                         except ValueError:
-                            if words[0] != "*":
-                                message[ JsonKey.TO.value ] = words[0]
+                            message[ JsonKey.TO.value ] = words[0]
 
                     if MessageData.validate_to_words(words):
                         message_data = MessageData.from_name(words[1])
@@ -163,7 +162,6 @@ class CommandLine:
         print("\t['talker' set 'name']      Sets the named variable.")
         print("\t['talker' get 'name']      Gets the named variable value.")
         print("\t[sys]                      Prints available options for the 'talker' system.")
-        print("\t[* 'action' '...']         The wildcard '*' means all talkers (but self).")
         print("\t[here 'action' '...']      The keyword 'here' applies to self talker alone.")
         print("\t[exit]                     Exits the command line (Ctrl+D).")
         print("\t[help]                     Shows the present help.")
