@@ -20,7 +20,7 @@ import platform
 
 from broadcast_socket import BroadcastSocket
 
-from talkie_codes import JsonChar, MessageData, SystemData, EchoData
+from talkie_codes import JsonKey, MessageData, SystemData, EchoData
 
 
 
@@ -87,13 +87,13 @@ class JsonTalkie:
                     if self.validate_message(message):
 
                         # Add info to echo message right away accordingly to the message original type
-                        if message[JsonChar.MESSAGE.value] == MessageData.ECHO.value:
-                            if JsonChar.ORIGINAL.value in message:
-                                original_message_code = MessageData(message[JsonChar.ORIGINAL.value])
+                        if message[JsonKey.MESSAGE.value] == MessageData.ECHO.value:
+                            if JsonKey.ORIGINAL.value in message:
+                                original_message_code = MessageData(message[JsonKey.ORIGINAL.value])
                                 match original_message_code:
                                     case MessageData.SYS:
-                                        if message[JsonChar.SYSTEM.value] == SystemData.PING.value:
-                                            message_id = message[JsonChar.IDENTITY.value]
+                                        if message[JsonKey.SYSTEM.value] == SystemData.PING.value:
+                                            message_id = message[JsonKey.IDENTITY.value]
                                             out_time_ms: int = message_id
                                             actual_time: int = self.message_id()
                                             delay_ms: int = actual_time - out_time_ms
@@ -116,86 +116,86 @@ class JsonTalkie:
     def receive(self, message: Dict[str, Any]) -> bool:
         """Handles message content only."""
 
-        if message[JsonChar.MESSAGE.value] < MessageData.ECHO.value:
+        if message[JsonKey.MESSAGE.value] < MessageData.ECHO.value:
 
-            message[JsonChar.TO.value] = message[JsonChar.FROM.value]
-            message[JsonChar.FROM.value] = self._manifesto['talker']['name']
+            message[JsonKey.TO.value] = message[JsonKey.FROM.value]
+            message[JsonKey.FROM.value] = self._manifesto['talker']['name']
 
-            message[JsonChar.ORIGINAL.value] = message[JsonChar.MESSAGE.value]
-            message[JsonChar.MESSAGE.value] = MessageData.ECHO.value
+            message[JsonKey.ORIGINAL.value] = message[JsonKey.MESSAGE.value]
+            message[JsonKey.MESSAGE.value] = MessageData.ECHO.value
 
 
-        match MessageData(message[JsonChar.MESSAGE.value]):
+        match MessageData(message[JsonKey.MESSAGE.value]):
 
             case MessageData.RUN:
-                if JsonChar.NAME.value in message and 'run' in self._manifesto:
-                    if message[JsonChar.NAME.value] in self._manifesto['run']:
+                if JsonKey.NAME.value in message and 'run' in self._manifesto:
+                    if message[JsonKey.NAME.value] in self._manifesto['run']:
                         self.talk(message)
-                        roger: bool = self._manifesto['run'][message[JsonChar.NAME.value]]['function'](message)
+                        roger: bool = self._manifesto['run'][message[JsonKey.NAME.value]]['function'](message)
                         if roger:
-                            message[JsonChar.ROGER.value] = EchoData.ROGER
+                            message[JsonKey.ROGER.value] = EchoData.ROGER
                         else:
-                            message[JsonChar.ROGER.value] = EchoData.NEGATIVE
+                            message[JsonKey.ROGER.value] = EchoData.NEGATIVE
                         return self.talk(message)
                     else:
-                        message[JsonChar.ROGER.value] = EchoData.SAY_AGAIN
+                        message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
                         self.talk(message)
 
             case MessageData.SET:
-                if JsonChar.VALUE.value in message and isinstance(message[JsonChar.VALUE.value], int) and JsonChar.NAME.value in message and 'set' in self._manifesto:
-                    if message[JsonChar.NAME.value] in self._manifesto['set']:
+                if JsonKey.VALUE.value in message and isinstance(message[JsonKey.VALUE.value], int) and JsonKey.NAME.value in message and 'set' in self._manifesto:
+                    if message[JsonKey.NAME.value] in self._manifesto['set']:
                         self.talk(message)
-                        roger: bool = self._manifesto['set'][message[JsonChar.NAME.value]]['function'](message, message[JsonChar.VALUE.value])
+                        roger: bool = self._manifesto['set'][message[JsonKey.NAME.value]]['function'](message, message[JsonKey.VALUE.value])
                         if roger:
-                            message[JsonChar.ROGER.value] = EchoData.ROGER
+                            message[JsonKey.ROGER.value] = EchoData.ROGER
                         else:
-                            message[JsonChar.ROGER.value] = EchoData.NEGATIVE
+                            message[JsonKey.ROGER.value] = EchoData.NEGATIVE
                         return self.talk(message)
                     else:
-                        message[JsonChar.ROGER.value] = EchoData.SAY_AGAIN
+                        message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
                         self.talk(message)
 
             case MessageData.GET:
-                if JsonChar.NAME.value in message and 'get' in self._manifesto:
-                    if message[JsonChar.NAME.value] in self._manifesto['get']:
+                if JsonKey.NAME.value in message and 'get' in self._manifesto:
+                    if message[JsonKey.NAME.value] in self._manifesto['get']:
                         self.talk(message)
-                        message[JsonChar.VALUE.value] = self._manifesto['get'][message[JsonChar.NAME.value]]['function'](message)
+                        message[JsonKey.VALUE.value] = self._manifesto['get'][message[JsonKey.NAME.value]]['function'](message)
                         return self.talk(message)
                     else:
-                        message[JsonChar.ROGER.value] = EchoData.SAY_AGAIN
+                        message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
                         self.talk(message)
 
             case MessageData.TALK:
-                message[JsonChar.DESCRIPTION.value] = f"{self._manifesto['talker']['description']}"
+                message[JsonKey.DESCRIPTION.value] = f"{self._manifesto['talker']['description']}"
                 return self.talk(message)
             
             case MessageData.LIST:
                 if 'run' in self._manifesto:
                     for name, content in self._manifesto['run'].items():
-                        message[JsonChar.NAME.value] = name
-                        message[JsonChar.DESCRIPTION.value] = content['description']
+                        message[JsonKey.NAME.value] = name
+                        message[JsonKey.DESCRIPTION.value] = content['description']
                         self.talk(message)
                 if 'set' in self._manifesto:
                     for name, content in self._manifesto['set'].items():
-                        message[JsonChar.NAME.value] = name
-                        message[JsonChar.DESCRIPTION.value] = content['description']
+                        message[JsonKey.NAME.value] = name
+                        message[JsonKey.DESCRIPTION.value] = content['description']
                         self.talk(message)
                 if 'get' in self._manifesto:
                     for name, content in self._manifesto['get'].items():
-                        message[JsonChar.NAME.value] = name
-                        message[JsonChar.DESCRIPTION.value] = content['description']
+                        message[JsonKey.NAME.value] = name
+                        message[JsonKey.DESCRIPTION.value] = content['description']
                         self.talk(message)
                 return True
             
             case MessageData.CHANNEL:
-                if JsonChar.VALUE.value in message and isinstance(message[JsonChar.VALUE.value], int):
-                    self._channel = message[JsonChar.VALUE.value]
+                if JsonKey.VALUE.value in message and isinstance(message[JsonKey.VALUE.value], int):
+                    self._channel = message[JsonKey.VALUE.value]
                 else:
-                    message[JsonChar.VALUE.value] = self._channel
+                    message[JsonKey.VALUE.value] = self._channel
                 return self.talk(message)
             
             case MessageData.SYS:
-                message[JsonChar.DESCRIPTION.value] = f"{platform.platform()}"
+                message[JsonKey.DESCRIPTION.value] = f"{platform.platform()}"
                 return self.talk(message)
             
             case MessageData.ECHO:
@@ -233,9 +233,9 @@ class JsonTalkie:
             except (ValueError, TypeError):
                 return False
             if JsonTalkie.valid_checksum(message):
-                if JsonChar.MESSAGE.value not in message:
+                if JsonKey.MESSAGE.value not in message:
                     return False
-                if not isinstance(message[JsonChar.MESSAGE.value], int):
+                if not isinstance(message[JsonKey.MESSAGE.value], int):
                     return False
                 if not ("f" in message and "i" in message):
                     return False

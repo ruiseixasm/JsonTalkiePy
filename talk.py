@@ -21,7 +21,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.patch_stdout import patch_stdout
 
 from json_talkie import JsonTalkie
-from talkie_codes import JsonChar, MessageData, SystemData, EchoData
+from talkie_codes import JsonKey, MessageData, SystemData, EchoData
 
 
 
@@ -179,29 +179,29 @@ class CommandLine:
     def generate_prefix(self, message: Dict[str, Any]) -> str:
         """Generate aligned prefix for messages"""
         parts = []
-        if JsonChar.FROM.value in message:
-            parts.append(f"\t[{message[JsonChar.FROM.value]}")  # VERY IMPORTANT, NEVER FORGET .value !!
+        if JsonKey.FROM.value in message:
+            parts.append(f"\t[{message[JsonKey.FROM.value]}")  # VERY IMPORTANT, NEVER FORGET .value !!
             
-            if JsonChar.ORIGINAL.value in message:
-                original_message_code = MessageData(message[JsonChar.ORIGINAL.value])
+            if JsonKey.ORIGINAL.value in message:
+                original_message_code = MessageData(message[JsonKey.ORIGINAL.value])
                 match original_message_code:
                     case MessageData.LIST:
-                        action_name = str(MessageData(message[JsonChar.ACTION.value]))
+                        action_name = str(MessageData(message[JsonKey.ACTION.value]))
                         parts.append(f" {action_name}")
-                        if JsonChar.INDEX.value in message and JsonChar.NAME.value in message:
-                            parts.append(f" {message[JsonChar.INDEX.value]}")
-                            parts.append(f"|{message[JsonChar.NAME.value]}")
+                        if JsonKey.INDEX.value in message and JsonKey.NAME.value in message:
+                            parts.append(f" {message[JsonKey.INDEX.value]}")
+                            parts.append(f"|{message[JsonKey.NAME.value]}")
 
                     case MessageData.SYS:
                         parts.append(f" {str(original_message_code)}")
-                        parts.append(f" {str(SystemData(message[JsonChar.SYSTEM.value]))}")
+                        parts.append(f" {str(SystemData(message[JsonKey.SYSTEM.value]))}")
 
                     case _:
                         parts.append(f" {str(original_message_code)}")
-                        if JsonChar.INDEX.value in message:
-                            parts.append(f" {message[JsonChar.INDEX.value]}")
-                        elif JsonChar.NAME.value in message:
-                            parts.append(f" {message[JsonChar.NAME.value]}")
+                        if JsonKey.INDEX.value in message:
+                            parts.append(f" {message[JsonKey.INDEX.value]}")
+                        elif JsonKey.NAME.value in message:
+                            parts.append(f" {message[JsonKey.NAME.value]}")
 
 
             parts.append("]")
@@ -214,22 +214,22 @@ class CommandLine:
         try:
             prefix = self.generate_prefix(message)
             padded_prefix = prefix.ljust(self.max_prefix_length)
-            if JsonChar.ORIGINAL.value in message:
-                original_message_code = MessageData(message[JsonChar.ORIGINAL.value])   # VERY IMPORTANT, NEVER FORGET .value !!
+            if JsonKey.ORIGINAL.value in message:
+                original_message_code = MessageData(message[JsonKey.ORIGINAL.value])   # VERY IMPORTANT, NEVER FORGET .value !!
 
                 match original_message_code:
                     case MessageData.TALK | MessageData.LIST:
-                        print(f"{padded_prefix}\t   {str(message[JsonChar.DESCRIPTION.value])}")
+                        print(f"{padded_prefix}\t   {str(message[JsonKey.DESCRIPTION.value])}")
                     case MessageData.SYS:
-                        system_code = SystemData(message[JsonChar.SYSTEM.value])
+                        system_code = SystemData(message[JsonKey.SYSTEM.value])
                         match system_code:
                             case SystemData.MUTE | SystemData.UNMUTE:
-                                print(f"{padded_prefix}\t   {str(EchoData(message[JsonChar.ROGER.value]))}")
-                                if JsonChar.REPLY.value in message:
-                                    print(f"{padded_prefix}\t   {str(message[JsonChar.REPLY.value])}")
+                                print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
+                                if JsonKey.REPLY.value in message:
+                                    print(f"{padded_prefix}\t   {str(message[JsonKey.REPLY.value])}")
                         
                             case SystemData.BOARD:
-                                print(f"{padded_prefix}\t   {str(message[JsonChar.DESCRIPTION.value])}")
+                                print(f"{padded_prefix}\t   {str(message[JsonKey.DESCRIPTION.value])}")
 
                             case SystemData.PING:
                                 if "delay_ms" in message:
@@ -238,16 +238,16 @@ class CommandLine:
                                     print(f"{padded_prefix}\t   {"unknown"}")
 
                             case _:
-                                print(f"{padded_prefix}\t   {str(message[JsonChar.VALUE.value])}")
+                                print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
                     case _:
-                        if JsonChar.VALUE.value in message:
-                            print(f"{padded_prefix}\t   {str(message[JsonChar.VALUE.value])}")
-                        elif JsonChar.ROGER.value in message:
-                            print(f"{padded_prefix}\t   {str(EchoData(message[JsonChar.ROGER.value]))}")
+                        if JsonKey.VALUE.value in message:
+                            print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
+                        elif JsonKey.ROGER.value in message:
+                            print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
                         else:
-                            print(f"{padded_prefix}\t   {message[JsonChar.DESCRIPTION.value]}")
-                        if JsonChar.REPLY.value in message:
-                            print(f"{padded_prefix}\t   {str(message[JsonChar.REPLY.value])}")
+                            print(f"{padded_prefix}\t   {message[JsonKey.DESCRIPTION.value]}")
+                        if JsonKey.REPLY.value in message:
+                            print(f"{padded_prefix}\t   {str(message[JsonKey.REPLY.value])}")
 
             # Remove the exceeding messages from the pool
 

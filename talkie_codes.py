@@ -15,8 +15,10 @@ from enum import Enum
 from typing import Union, cast
 
 
-class JsonChar(Enum):
+class JsonKey(Enum):
+    SOURCE      = "c"
     CHECKSUM    = "c"
+    TIMESTAMP   = "i"
     IDENTITY    = "i"
     MESSAGE     = "m"
     ORIGINAL    = "o"
