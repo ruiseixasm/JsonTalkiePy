@@ -219,35 +219,35 @@ class CommandLine:
 
                 match original_message_code:
                     case MessageData.TALK | MessageData.LIST:
-                        print(f"{padded_prefix}\t{str(message[JsonChar.DESCRIPTION.value])}")
+                        print(f"{padded_prefix}\t   {str(message[JsonChar.DESCRIPTION.value])}")
                     case MessageData.SYS:
                         system_code = SystemData(message[JsonChar.SYSTEM.value])
                         match system_code:
                             case SystemData.MUTE | SystemData.UNMUTE:
-                                print(f"{padded_prefix}\t{str(EchoData(message[JsonChar.ROGER.value]))}")
+                                print(f"{padded_prefix}\t   {str(EchoData(message[JsonChar.ROGER.value]))}")
                                 if JsonChar.REPLY.value in message:
-                                    print(f"{padded_prefix}\t{str(message[JsonChar.REPLY.value])}")
+                                    print(f"{padded_prefix}\t   {str(message[JsonChar.REPLY.value])}")
                         
                             case SystemData.BOARD:
-                                print(f"{padded_prefix}\t{str(message[JsonChar.DESCRIPTION.value])}")
+                                print(f"{padded_prefix}\t   {str(message[JsonChar.DESCRIPTION.value])}")
 
                             case SystemData.PING:
                                 if "delay_ms" in message:
-                                    print(f"{padded_prefix}\t{str(message["delay_ms"])}")
+                                    print(f"{padded_prefix}\t   {str(message["delay_ms"])}")
                                 else:
-                                    print(f"{padded_prefix}\t{"unknown"}")
+                                    print(f"{padded_prefix}\t   {"unknown"}")
 
                             case _:
-                                print(f"{padded_prefix}\t{str(message[JsonChar.VALUE.value])}")
+                                print(f"{padded_prefix}\t   {str(message[JsonChar.VALUE.value])}")
                     case _:
                         if JsonChar.VALUE.value in message:
-                            print(f"{padded_prefix}\t{str(message[JsonChar.VALUE.value])}")
+                            print(f"{padded_prefix}\t   {str(message[JsonChar.VALUE.value])}")
                         elif JsonChar.ROGER.value in message:
-                            print(f"{padded_prefix}\t{str(EchoData(message[JsonChar.ROGER.value]))}")
+                            print(f"{padded_prefix}\t   {str(EchoData(message[JsonChar.ROGER.value]))}")
                         else:
-                            print(f"{padded_prefix}\t{message[JsonChar.DESCRIPTION.value]}")
+                            print(f"{padded_prefix}\t   {message[JsonChar.DESCRIPTION.value]}")
                         if JsonChar.REPLY.value in message:
-                            print(f"{padded_prefix}\t{str(message[JsonChar.REPLY.value])}")
+                            print(f"{padded_prefix}\t   {str(message[JsonChar.REPLY.value])}")
 
             # Remove the exceeding messages from the pool
 
