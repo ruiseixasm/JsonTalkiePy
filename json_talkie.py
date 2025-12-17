@@ -115,6 +115,8 @@ class JsonTalkie:
     def receive(self, message: Dict[str, Any]) -> bool:
         """Handles message content only."""
 
+        message_data = MessageData(message[JsonKey.MESSAGE.value])
+
         if message[JsonKey.MESSAGE.value] < MessageData.ECHO.value:
 
             message[JsonKey.TO.value] = message[JsonKey.FROM.value]
@@ -124,7 +126,7 @@ class JsonTalkie:
             message[JsonKey.MESSAGE.value] = MessageData.ECHO.value
 
 
-        match MessageData(message[JsonKey.MESSAGE.value]):
+        match message_data:
 
             case MessageData.RUN:
                 if JsonKey.NAME.value in message and 'run' in self._manifesto:

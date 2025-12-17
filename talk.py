@@ -91,11 +91,15 @@ class CommandLine:
                         return
                 else:   # WITH TARGET NAME DEFINED
                     message: dict = {}
-                    try:    # Try as channel first
-                        message[ JsonKey.TO.value ] = int(words[0])
-                    except ValueError:
-                        if words[0] != "*":
-                            message[ JsonKey.TO.value ] = words[0]
+                    if (SourceData.from_name(words[0]) == SourceData.HERE):
+                        message[ JsonKey.FROM.value ] = json_talkie._manifesto['talker']['name']
+                        message[ JsonKey.SOURCE.value ] = SourceData.HERE.value
+                    else:
+                        try:    # Try as channel first
+                            message[ JsonKey.TO.value ] = int(words[0])
+                        except ValueError:
+                            if words[0] != "*":
+                                message[ JsonKey.TO.value ] = words[0]
 
                     if MessageData.validate_to_words(words):
                         message_data = MessageData.from_name(words[1])
@@ -141,9 +145,6 @@ class CommandLine:
                                             message[ JsonKey.VALUE.value ] = words[3]
                                 
                             if (SourceData.from_name(words[0]) == SourceData.HERE):
-                                del(message[ JsonKey.TO.value ])
-                                message[ JsonKey.FROM.value ] = json_talkie._manifesto['talker']['name']
-                                message[ JsonKey.SOURCE.value ] = SourceData.HERE.value
                                 json_talkie.receive(message)    # Sends directly to myself
                             else:
                                 json_talkie.talk(message)
