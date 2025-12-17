@@ -146,7 +146,7 @@ class CommandLine:
 
     def _print_help(self):
         """Print help"""
-        print("\t[talk]                     Prints all talkers' 'name' and 'description'.")
+        print("\t[talk]                     Prints all talkers' 'name' and 'description' (but self).")
         print("\t['talker' list]            List the entire 'talker' manifesto.")
         print("\t['talker' channel]         Returns the Device channel.")
         print("\t['talker' channel n]       Sets the Device channel.")
@@ -154,7 +154,7 @@ class CommandLine:
         print("\t['talker' set 'name']      Sets the named variable.")
         print("\t['talker' get 'name']      Gets the named variable value.")
         print("\t[sys]                      Prints available options for the 'talker' system.")
-        print("\t[* 'action' '...']         The wildcard '*' means all talkers.")
+        print("\t[* 'action' '...']         The wildcard '*' means all talkers (but self).")
         print("\t[here 'action' '...']      The keyword 'here' applies to self talker alone.")
         print("\t[exit]                     Exits the command line (Ctrl+D).")
         print("\t[help]                     Shows the present help.")
