@@ -118,7 +118,7 @@ class CommandLine:
                                 case MessageData.CHANNEL:
                                     if len(words) > 2:
                                         try:
-                                            message["b"] = int(words[2])
+                                            message[ JsonKey.VALUE.value ] = int(words[2])
                                         except ValueError:
                                             print(f"\t'{words[2]}' is not an integer!")
                                             return
