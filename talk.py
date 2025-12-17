@@ -261,7 +261,7 @@ class CommandLine:
 
     def error(self, message: Dict[str, Any]) -> bool:
         """Handle error messages"""
-        if "f" in message:
+        if JsonKey.FROM.value in message:
             print(f"\t[{message['f']}", end='')
             if "e" in message and isinstance(message[ JsonKey.ERROR.value ], int):
                 error_messages = {

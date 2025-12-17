@@ -103,7 +103,7 @@ class JsonTalkie:
 
                         if self._verbose:
                             print(message)
-                        if "f" in message:
+                        if JsonKey.FROM.value in message:
                             self._devices_address[message[ JsonKey.FROM.value ]] = ip_port
 
                         self.receive(message)
@@ -237,7 +237,7 @@ class JsonTalkie:
                     return False
                 if not isinstance(message[JsonKey.MESSAGE.value], int):
                     return False
-                if not ("f" in message and "i" in message):
+                if not (JsonKey.FROM.value in message and "i" in message):
                     return False
                 if "t" in message:
                     if isinstance(message[ JsonKey.TO.value ], int):

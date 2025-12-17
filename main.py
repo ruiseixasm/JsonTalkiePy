@@ -84,7 +84,7 @@ class Talker:
     #     2 - NONE
 
     def echo(self, message: Dict[str, Any]) -> bool:
-        if "f" in message:
+        if JsonKey.FROM.value in message:
             print(f"\t[{message[ JsonKey.FROM.value ]}", end='')
             if "w" in message:
                 what: str = "echo"
@@ -137,7 +137,7 @@ class Talker:
     #     5 - Set command arrived too late
 
     def error(self, message: Dict[str, Any]) -> bool:
-        if "f" in message:
+        if JsonKey.FROM.value in message:
             print(f"\t[{message[ JsonKey.FROM.value ]}", end='')
             if "e" in message:
                 if isinstance(message[ JsonKey.ERROR.value ], int):
