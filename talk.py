@@ -21,7 +21,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.patch_stdout import patch_stdout
 
 from json_talkie import JsonTalkie
-from talkie_codes import JsonKey, MessageData, SystemData, EchoData
+from talkie_codes import JsonKey, SourceData, MessageData, SystemData, EchoData
 
 
 
@@ -47,6 +47,7 @@ class CommandLine:
 
         self.max_prefix_length = 22  # Fixed alignment width
 
+
     async def run(self):
         """Async version of the main loop"""
         while True:
@@ -66,6 +67,7 @@ class CommandLine:
                 continue
             except Exception as e:
                 print(f"\tError: {e}")
+
 
     async def _execute(self, cmd: str):
         """Async command execution handler"""
@@ -137,8 +139,11 @@ class CommandLine:
                                             message[ JsonKey.VALUE.value ] = int(words[3])
                                         except ValueError:
                                             message[ JsonKey.VALUE.value ] = words[3]
-                                    
-                            json_talkie.talk(message)
+                                
+                            if (words[0] == SourceData.HERE.value):
+                                json_talkie.receive(message)    # Sends directly to myself
+                            else:
+                                json_talkie.talk(message)
                             return
                         
         self._print_help()
