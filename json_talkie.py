@@ -56,7 +56,7 @@ class JsonTalkie:
     def talk(self, message: Dict[str, Any]) -> bool:
         """Sends messages without network awareness."""
         message[ JsonKey.FROM.value ] = self._manifesto['talker']['name']
-        if "i" not in message:
+        if JsonKey.IDENTITY.value not in message:
             message[ JsonKey.IDENTITY.value ] = JsonTalkie.message_id()
         JsonTalkie.valid_checksum(message)
         if self._verbose:
@@ -237,7 +237,7 @@ class JsonTalkie:
                     return False
                 if not isinstance(message[JsonKey.MESSAGE.value], int):
                     return False
-                if not (JsonKey.FROM.value in message and "i" in message):
+                if not (JsonKey.FROM.value in message and JsonKey.IDENTITY.value in message):
                     return False
                 if "t" in message:
                     if isinstance(message[ JsonKey.TO.value ], int):
