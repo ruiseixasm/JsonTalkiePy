@@ -179,10 +179,10 @@ if __name__ == "__main__":
     
     try:
         messages: tuple[Dict[str, Any]] = (
-            {JsonKey.MESSAGE.value: 1, "t": '*'},
-            {JsonKey.MESSAGE.value: 2, "n": 'buzz', "t": 'Buzzer'},
-            {JsonKey.MESSAGE.value: 2, "n": 'on', "t": 'Buzzer'},
-            {JsonKey.MESSAGE.value: 2, "n": 'off', "t": 'Buzzer'}
+            {JsonKey.MESSAGE.value: 1, JsonKey.TO.value: '*'},
+            {JsonKey.MESSAGE.value: 2, "n": 'buzz', JsonKey.TO.value: 'Buzzer'},
+            {JsonKey.MESSAGE.value: 2, "n": 'on', JsonKey.TO.value: 'Buzzer'},
+            {JsonKey.MESSAGE.value: 2, "n": 'off', JsonKey.TO.value: 'Buzzer'}
         )
 
         # Main loop

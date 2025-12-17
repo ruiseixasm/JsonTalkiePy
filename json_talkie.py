@@ -63,7 +63,7 @@ class JsonTalkie:
             print(message)
         # Avoids broadcasting flooding
         sent_result: bool = False
-        if "t" in message and message[ JsonKey.TO.value ] in self._devices_address:
+        if JsonKey.TO.value in message and message[ JsonKey.TO.value ] in self._devices_address:
             sent_result = self._socket.send( JsonTalkie.encode(message), self._devices_address[message[ JsonKey.TO.value ]] )
             if self._verbose:
                 print("--> DIRECT SENDING -->")
@@ -239,7 +239,7 @@ class JsonTalkie:
                     return False
                 if not (JsonKey.FROM.value in message and JsonKey.IDENTITY.value in message):
                     return False
-                if "t" in message:
+                if JsonKey.TO.value in message:
                     if isinstance(message[ JsonKey.TO.value ], int):
                         if message[ JsonKey.TO.value ] != self._channel:
                             return False
