@@ -98,7 +98,6 @@ class CommandLine:
                         message[ JsonKey.SOURCE.value ] = SourceData.HERE.value
                         message[ JsonKey.FROM.value ] = json_talkie._manifesto['talker']['name']
                     else:
-                        message[ JsonKey.SOURCE.value ] = SourceData.REMOTE.value
                         try:    # Try as channel first
                             message[ JsonKey.TO.value ] = int(words[0])
                         except ValueError:

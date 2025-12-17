@@ -94,6 +94,7 @@ class JsonTalkie:
 
     def remoteSend(self, message: Dict[str, Any]) -> bool:
         """Sends messages without network awareness."""
+        message[ JsonKey.SOURCE.value ] = SourceData.REMOTE.value
         message[ JsonKey.FROM.value ] = self._manifesto['talker']['name']
         if JsonKey.IDENTITY.value not in message:
             message[ JsonKey.IDENTITY.value ] = JsonTalkie.message_id()
@@ -118,17 +119,13 @@ class JsonTalkie:
     
 
     def transmitMessage(self, message: Dict[str, Any]) -> bool:
-
-        source_data = SourceData(message[ JsonKey.SOURCE.value ])
-        match source_data:
-            
-            case SourceData.REMOTE:
-                return self.remoteSend(message)
-            
-            case SourceData.HERE:
-                return self.hereSend(message)
-
-        return False
+        if message.get( JsonKey.SOURCE.value ):
+            source_data = SourceData(message.get( JsonKey.SOURCE.value ))   # get is safer than []
+            match source_data:
+                case SourceData.HERE:
+                    return self.hereSend(message)
+        # Default is remote
+        return self.remoteSend(message)
 
 
     def processMessage(self, message: Dict[str, Any]) -> bool:

@@ -12,7 +12,7 @@ Lesser General Public License for more details.
 https://github.com/ruiseixasm/JsonTalkie
 '''
 from enum import Enum
-from typing import Union, cast
+from typing import Union, cast, Optional
 
 
 class JsonKey(Enum):
@@ -37,7 +37,7 @@ class JsonKey(Enum):
 
 class TalkieCode:
     """Mixin with shared functionality for Talkie codes (enums)"""
-    
+
     def __str__(self) -> str:
         """String representation is lowercase"""
                 # Tell type checker self is an Enum
