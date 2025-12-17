@@ -90,28 +90,28 @@ class CommandLine:
                 else:   # WITH TARGET NAME DEFINED
                     message: dict = {}
                     try:    # Try as channel first
-                        message["t"] = int(words[0])
+                        message[ JsonKey.TO.value ] = int(words[0])
                     except ValueError:
                         if words[0] != "*":
-                            message["t"] = words[0]
+                            message[ JsonKey.TO.value ] = words[0]
 
                     if MessageData.validate_to_words(words):
                         message_data = MessageData.from_name(words[1])
                         if message_data:
-                            message["m"] = MessageData.from_name(words[1]).value
+                            message[ JsonKey.MESSAGE.value ] = MessageData.from_name(words[1]).value
                             match message_data:
                                 case MessageData.RUN | MessageData.GET:
                                     try:    # Try as number first
-                                        message["x"] = int(words[2])
+                                        message[ JsonKey.INDEX.value ] = int(words[2])
                                     except ValueError:
-                                        message["n"] = words[2]
+                                        message[ JsonKey.NAME.value ] = words[2]
                                 case MessageData.SET:
                                     try:    # Try as number first
-                                        message["x"] = int(words[2])
+                                        message[ JsonKey.INDEX.value ] = int(words[2])
                                     except ValueError:
-                                        message["n"] = words[2]
+                                        message[ JsonKey.NAME.value ] = words[2]
                                     try:
-                                        message["v"] = int(words[3])
+                                        message[ JsonKey.VALUE.value ] = int(words[3])
                                     except ValueError:
                                         print(f"\t'{words[3]}' is not an integer!")
                                         return
@@ -125,7 +125,7 @@ class CommandLine:
                                 case MessageData.SYS:
                                     if len(words) > 2:
                                         if (SystemData.from_name(words[2])):
-                                            message["s"] = SystemData.from_name(words[2]).value
+                                            message[ JsonKey.SYSTEM.value ] = SystemData.from_name(words[2]).value
                                         else:
                                             self._print_sys()
                                             return
@@ -134,9 +134,9 @@ class CommandLine:
                                         return
                                     if len(words) > 3:
                                         try:    # Try as number first
-                                            message["v"] = int(words[3])
+                                            message[ JsonKey.VALUE.value ] = int(words[3])
                                         except ValueError:
-                                            message["v"] = words[3]
+                                            message[ JsonKey.VALUE.value ] = words[3]
                                     
                             json_talkie.talk(message)
                             return
@@ -263,7 +263,7 @@ class CommandLine:
         """Handle error messages"""
         if "f" in message:
             print(f"\t[{message['f']}", end='')
-            if "e" in message and isinstance(message["e"], int):
+            if "e" in message and isinstance(message[ JsonKey.ERROR.value ], int):
                 error_messages = {
                     0: "Message NOT for me",
                     1: "Unknown sender",

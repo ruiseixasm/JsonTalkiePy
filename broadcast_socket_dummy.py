@@ -87,7 +87,7 @@ class BroadcastSocket_Dummy(BroadcastSocket):
                 if random.randint(0, 1000) < 10:
                     divide: float = 1/random_number
                     message = self.messages[random_number % len(self.messages)]
-                    message["i"] = BroadcastSocket_Dummy.message_id()
+                    message[ JsonKey.IDENTITY.value ] = BroadcastSocket_Dummy.message_id()
                     BroadcastSocket_Dummy.valid_checksum(message)
                     data = BroadcastSocket_Dummy.encode(message)
                     print(f"DUMMY RECEIVED: {data}")
@@ -128,8 +128,8 @@ class BroadcastSocket_Dummy(BroadcastSocket):
         #     you should specify (',', ':') to eliminate whitespace.
         message_checksum: int = 0
         if "c" in message:
-            message_checksum = message["c"]
-        message["c"] = 0
+            message_checksum = message[ JsonKey.CHECKSUM.value ]
+        message[ JsonKey.CHECKSUM.value ] = 0
         data = json.dumps(message, separators=(',', ':')).encode('utf-8')
         # 16-bit word and XORing
         checksum = 0
@@ -140,5 +140,5 @@ class BroadcastSocket_Dummy(BroadcastSocket):
                 chunk |= data[i+1]
             checksum ^= chunk
         checksum &= 0xFFFF
-        message["c"] = checksum
+        message[ JsonKey.CHECKSUM.value ] = checksum
         return message_checksum == checksum

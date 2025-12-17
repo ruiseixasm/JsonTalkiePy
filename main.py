@@ -85,7 +85,7 @@ class Talker:
 
     def echo(self, message: Dict[str, Any]) -> bool:
         if "f" in message:
-            print(f"\t[{message["f"]}", end='')
+            print(f"\t[{message[ JsonKey.FROM.value ]}", end='')
             if "w" in message:
                 what: str = "echo"
                 if isinstance(message["w"], int) and message["w"] >= 0 and message["w"] <= 6:
@@ -104,7 +104,7 @@ class Talker:
                             what = "sys"
                     if "g" in message:
                         roger: str = "FAIL"
-                        match message["g"]:
+                        match message[ JsonKey.ROGER.value ]:
                             case 0:
                                 roger = "ROGER"
                             case 1:
@@ -112,19 +112,19 @@ class Talker:
                             case 2:
                                 roger = "NONE"
                         if "n" in message:
-                            print(f" {what} {message["n"]}]\t{roger}")
+                            print(f" {what} {message[ JsonKey.NAME.value ]}]\t{roger}")
                         else:
                             print(f" {what}]\t{roger}")
                     elif "v" in message and "n" in message:
-                        print(f" {what} {message["n"]}]\t{message["v"]}")
+                        print(f" {what} {message[ JsonKey.NAME.value ]}]\t{message[ JsonKey.VALUE.value ]}")
                     elif "n" in message and "d" in message:
-                        print(f" {what} {message["n"]}]\t{message["d"]}")
+                        print(f" {what} {message[ JsonKey.NAME.value ]}]\t{message[ JsonKey.DESCRIPTION.value ]}")
                     elif "n" in message and "r" in message:
-                        print(f" {what} {message["n"]}]\t{message["r"]}")
+                        print(f" {what} {message[ JsonKey.NAME.value ]}]\t{message[ JsonKey.REPLY.value ]}")
                     elif "r" in message:
-                        print(f" {what}]\t{message["r"]}")
+                        print(f" {what}]\t{message[ JsonKey.REPLY.value ]}")
             elif "d" in message:
-                print(f"]\t{message["d"]}")
+                print(f"]\t{message[ JsonKey.DESCRIPTION.value ]}")
         return True
 
 
@@ -138,11 +138,11 @@ class Talker:
 
     def error(self, message: Dict[str, Any]) -> bool:
         if "f" in message:
-            print(f"\t[{message["f"]}", end='')
+            print(f"\t[{message[ JsonKey.FROM.value ]}", end='')
             if "e" in message:
-                if isinstance(message["e"], int):
+                if isinstance(message[ JsonKey.ERROR.value ], int):
                     print(f"]\tERROR", end='')
-                    match message["e"]:
+                    match message[ JsonKey.ERROR.value ]:
                         case 0:
                             print(f"\tUnknown sender")
                         case 1:

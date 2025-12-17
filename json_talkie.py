@@ -55,16 +55,16 @@ class JsonTalkie:
 
     def talk(self, message: Dict[str, Any]) -> bool:
         """Sends messages without network awareness."""
-        message["f"] = self._manifesto['talker']['name']
+        message[ JsonKey.FROM.value ] = self._manifesto['talker']['name']
         if "i" not in message:
-            message["i"] = JsonTalkie.message_id()
+            message[ JsonKey.IDENTITY.value ] = JsonTalkie.message_id()
         JsonTalkie.valid_checksum(message)
         if self._verbose:
             print(message)
         # Avoids broadcasting flooding
         sent_result: bool = False
-        if "t" in message and message["t"] in self._devices_address:
-            sent_result = self._socket.send( JsonTalkie.encode(message), self._devices_address[message["t"]] )
+        if "t" in message and message[ JsonKey.TO.value ] in self._devices_address:
+            sent_result = self._socket.send( JsonTalkie.encode(message), self._devices_address[message[ JsonKey.TO.value ]] )
             if self._verbose:
                 print("--> DIRECT SENDING -->")
         else:
@@ -104,7 +104,7 @@ class JsonTalkie:
                         if self._verbose:
                             print(message)
                         if "f" in message:
-                            self._devices_address[message["f"]] = ip_port
+                            self._devices_address[message[ JsonKey.FROM.value ]] = ip_port
 
                         self.receive(message)
                 except (UnicodeDecodeError, json.JSONDecodeError) as e:
@@ -240,10 +240,10 @@ class JsonTalkie:
                 if not ("f" in message and "i" in message):
                     return False
                 if "t" in message:
-                    if isinstance(message["t"], int):
-                        if message["t"] != self._channel:
+                    if isinstance(message[ JsonKey.TO.value ], int):
+                        if message[ JsonKey.TO.value ] != self._channel:
                             return False
-                    elif message["t"] != self._manifesto['talker']['name']:
+                    elif message[ JsonKey.TO.value ] != self._manifesto['talker']['name']:
                         return False
             else:
                 return False
@@ -282,8 +282,8 @@ class JsonTalkie:
         #     you should specify (',', ':') to eliminate whitespace.
         message_checksum: int = 0
         if "c" in message:
-            message_checksum = message["c"]
-        message["c"] = 0
+            message_checksum = message[ JsonKey.CHECKSUM.value ]
+        message[ JsonKey.CHECKSUM.value ] = 0
         data = json.dumps(message, separators=(',', ':')).encode('utf-8')
         # 16-bit word and XORing
         checksum = 0
@@ -294,6 +294,6 @@ class JsonTalkie:
                 chunk |= data[i+1]
             checksum ^= chunk
         checksum &= 0xFFFF
-        message["c"] = checksum
+        message[ JsonKey.CHECKSUM.value ] = checksum
         return message_checksum == checksum
 
