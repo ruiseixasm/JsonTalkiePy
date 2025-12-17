@@ -81,7 +81,7 @@ class CommandLine:
             if words:
                 if len(words) == 1:
                     if words[0] == str(MessageData.TALK):
-                        message = {"m": MessageData.TALK.value}
+                        message = {JsonKey.MESSAGE.value: MessageData.TALK.value}
                         json_talkie.talk(message)
                         return
                     elif words[0] == str(MessageData.SYS):
