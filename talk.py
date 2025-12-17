@@ -140,7 +140,7 @@ class CommandLine:
                                         except ValueError:
                                             message[ JsonKey.VALUE.value ] = words[3]
                                 
-                            if (words[0] == SourceData.HERE.value):
+                            if (SourceData.from_name(words[0]) == SourceData.HERE.value):
                                 message[ JsonKey.SOURCE.value ] = SourceData.HERE.value
                                 json_talkie.receive(message)    # Sends directly to myself
                             else:
