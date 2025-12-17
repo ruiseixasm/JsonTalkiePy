@@ -227,9 +227,9 @@ class JsonTalkie:
 
 
     def validate_message(self, message: Dict[str, Any]) -> bool:
-        if isinstance(message, dict) and "c" in message:
+        if isinstance(message, dict) and JsonKey.CHECKSUM.value in message:
             try:
-                message_checksum: int = int(message.get("c", None))
+                message_checksum: int = int(message.get(JsonKey.CHECKSUM.value, None))
             except (ValueError, TypeError):
                 return False
             if JsonTalkie.valid_checksum(message):
@@ -281,7 +281,7 @@ class JsonTalkie:
         #     (',', ': ') otherwise. To get the most compact JSON representation,
         #     you should specify (',', ':') to eliminate whitespace.
         message_checksum: int = 0
-        if "c" in message:
+        if JsonKey.CHECKSUM.value in message:
             message_checksum = message[ JsonKey.CHECKSUM.value ]
         message[ JsonKey.CHECKSUM.value ] = 0
         data = json.dumps(message, separators=(',', ':')).encode('utf-8')
