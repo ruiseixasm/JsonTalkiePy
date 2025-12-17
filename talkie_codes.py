@@ -54,7 +54,7 @@ class TalkieCode:
 
 
 class SourceData(TalkieCode, Enum):
-    REMOTE, LOCAL = range(2)
+    REMOTE, LOCAL, HERE = range(3)
 
 
 class MessageData(TalkieCode, Enum):
