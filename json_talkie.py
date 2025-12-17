@@ -93,8 +93,7 @@ class JsonTalkie:
                                 match original_message_code:
                                     case MessageData.SYS:
                                         if message[JsonKey.SYSTEM.value] == SystemData.PING.value:
-                                            message_id = message[JsonKey.IDENTITY.value]
-                                            out_time_ms: int = message_id
+                                            out_time_ms: int = message[JsonKey.TIMESTAMP.value]
                                             actual_time: int = self.message_id()
                                             delay_ms: int = actual_time - out_time_ms
                                             if delay_ms < 0:    # do overflow as if uint16_t in c++
