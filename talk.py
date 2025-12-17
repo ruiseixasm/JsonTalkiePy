@@ -83,7 +83,10 @@ class CommandLine:
             if words:
                 if len(words) == 1:
                     if words[0] == str(MessageData.TALK):
-                        message = {JsonKey.MESSAGE.value: MessageData.TALK.value}
+                        message = {
+                            JsonKey.MESSAGE.value: MessageData.TALK.value,
+                            JsonKey.SOURCE.value: SourceData.REMOTE.value
+                        }
                         json_talkie.remoteSend(message)
                         return
                     elif words[0] == str(MessageData.SYS):
@@ -92,9 +95,10 @@ class CommandLine:
                 else:   # WITH TARGET NAME DEFINED
                     message: dict = {}
                     if (SourceData.from_name(words[0]) == SourceData.HERE):
-                        message[ JsonKey.FROM.value ] = json_talkie._manifesto['talker']['name']
                         message[ JsonKey.SOURCE.value ] = SourceData.HERE.value
+                        message[ JsonKey.FROM.value ] = json_talkie._manifesto['talker']['name']
                     else:
+                        message[ JsonKey.SOURCE.value ] = SourceData.REMOTE.value
                         try:    # Try as channel first
                             message[ JsonKey.TO.value ] = int(words[0])
                         except ValueError:
