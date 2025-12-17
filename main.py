@@ -139,7 +139,7 @@ class Talker:
     def error(self, message: Dict[str, Any]) -> bool:
         if JsonKey.FROM.value in message:
             print(f"\t[{message[ JsonKey.FROM.value ]}", end='')
-            if "e" in message:
+            if JsonKey.ERROR.value in message:
                 if isinstance(message[ JsonKey.ERROR.value ], int):
                     print(f"]\tERROR", end='')
                     match message[ JsonKey.ERROR.value ]:

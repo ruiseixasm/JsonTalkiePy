@@ -263,7 +263,7 @@ class CommandLine:
         """Handle error messages"""
         if JsonKey.FROM.value in message:
             print(f"\t[{message['f']}", end='')
-            if "e" in message and isinstance(message[ JsonKey.ERROR.value ], int):
+            if JsonKey.ERROR.value in message and isinstance(message[ JsonKey.ERROR.value ], int):
                 error_messages = {
                     0: "Message NOT for me",
                     1: "Unknown sender",
