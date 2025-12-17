@@ -119,13 +119,12 @@ class JsonTalkie:
     
 
     def transmitMessage(self, message: Dict[str, Any]) -> bool:
-        if message.get( JsonKey.SOURCE.value ):
-            source_data = SourceData(message.get( JsonKey.SOURCE.value ))   # get is safer than []
-            match source_data:
-                case SourceData.HERE:
-                    return self.hereSend(message)
-        # Default is remote
-        return self.remoteSend(message)
+        source_data = SourceData( message.get(JsonKey.SOURCE.value, SourceData.REMOTE) )   # get is safer than []
+        match source_data:
+            case SourceData.HERE:
+                return self.hereSend(message)
+            case _: # Default is remote
+                return self.remoteSend(message)
 
 
     def processMessage(self, message: Dict[str, Any]) -> bool:
@@ -245,10 +244,6 @@ class JsonTalkie:
 
     def validate_message(self, message: Dict[str, Any]) -> bool:
         if isinstance(message, dict) and JsonKey.CHECKSUM.value in message:
-            try:
-                message_checksum: int = int(message.get(JsonKey.CHECKSUM.value, None))
-            except (ValueError, TypeError):
-                return False
             if JsonTalkie.valid_checksum(message):
                 if JsonKey.MESSAGE.value not in message:
                     return False
@@ -266,6 +261,7 @@ class JsonTalkie:
                 return False
         else:
             return False
+        message[JsonKey.CHECKSUM.value] = SourceData.REMOTE.value
         return True
 
 
