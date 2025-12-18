@@ -53,7 +53,7 @@ class SourceData(TalkieCode):
 
 
 class MessageData(TalkieCode):
-    CALL, LIST, SYS, TALK, CHANNEL, PING, ECHO, ERROR = range(8)
+    TALK, CHANNEL, PING, CALL, LIST, SYS, ECHO, ERROR = range(8)
 
     @classmethod
     def validate_to_words(cls, words: list[str]) -> bool:
