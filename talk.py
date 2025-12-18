@@ -179,14 +179,16 @@ class CommandLine:
         """Generate aligned prefix for messages"""
         parts = []
         if JsonKey.ORIGINAL.value in message and JsonKey.FROM.value in message:
-            original_message_code = MessageData(message[JsonKey.ORIGINAL.value])
-            parts.append(f"\t[{str(original_message_code)}")  # VERY IMPORTANT, NEVER FORGET .value !!
+            original_message_code = MessageData(message[JsonKey.ORIGINAL.value])    # VERY IMPORTANT, NEVER FORGET .value !!
+            if original_message_code == MessageData.LIST:
+                action_name = str(MessageData(message[JsonKey.ACTION.value]))
+                parts.append(f"\t[{action_name}")
+            else:
+                parts.append(f"\t[{str(original_message_code)}")
             parts.append(f" {message[JsonKey.FROM.value]}")
             
             match original_message_code:
                 case MessageData.LIST:
-                    action_name = str(MessageData(message[JsonKey.ACTION.value]))
-                    parts.append(f" {action_name}")
                     if JsonKey.INDEX.value in message and JsonKey.NAME.value in message:
                         parts.append(f" {message[JsonKey.INDEX.value]}")
                         parts.append(f"|{message[JsonKey.NAME.value]}")
