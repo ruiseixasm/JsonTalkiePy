@@ -212,7 +212,9 @@ class JsonTalkie:
                     #     2 - NONE
 
                     if "echo" in self._manifesto:
-                        self._manifesto["echo"](message)
+                        message_id = message[JsonKey.IDENTITY.value]
+                        if message_id == self._original_message_id:
+                            self._manifesto["echo"](message)
 
                 case MessageData.ERROR:
 
