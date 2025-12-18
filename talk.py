@@ -252,7 +252,7 @@ class CommandLine:
                     case _:
                         if JsonKey.VALUE.value in message:
                             if JsonKey.REPLY.value in message:
-                                print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.VALUE.value]))}", end="")
+                                print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}", end="")
                                 print(f"\t   {str(message[JsonKey.REPLY.value])}")
                             else:
                                 print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")

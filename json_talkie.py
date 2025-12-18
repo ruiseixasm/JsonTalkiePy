@@ -77,7 +77,8 @@ class JsonTalkie:
                                         delay_ms: int = actual_time - out_time_ms
                                         if delay_ms < 0:    # do overflow as if uint16_t in c++
                                             delay_ms += 0xFFFF + 1  # 2^16
-                                        message[JsonKey.VALUE.value] = delay_ms
+                                        if JsonKey.VALUE.value not in message:  # Don't change value already set
+                                            message[JsonKey.VALUE.value] = delay_ms
 
                         if self._verbose:
                             print(message)
