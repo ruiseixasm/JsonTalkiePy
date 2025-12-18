@@ -91,13 +91,19 @@ class CommandLine:
                         if (SourceData.from_name(words[1]) == SourceData.HERE):
                             message[ JsonKey.SOURCE.value ] = SourceData.HERE.value
                         else:
-                            message[ JsonKey.TO.value ] = words[1]
+                            try:
+                                message[ JsonKey.TO.value ] = int(words[1]) # Check if it's a Channel first
+                            except ValueError:
+                                message[ JsonKey.TO.value ] = words[1]
 
                     match message_data:
 
                         case MessageData.RUN | MessageData.GET:
                             if num_of_keys > 2:
-                                message[ JsonKey.NAME.value ] = words[2]
+                                try:
+                                    message[ JsonKey.INDEX.value ] = int(words[2])
+                                except ValueError:
+                                    message[ JsonKey.NAME.value ] = words[2]
                             else:
                                 print(f"\t'{words[0]}' misses arguments!")
                                 return
@@ -109,7 +115,10 @@ class CommandLine:
                                 except ValueError:
                                     print(f"\t'{words[2]}' is not an integer!")
                                     return
-                                message[ JsonKey.NAME.value ] = words[2]
+                                try:
+                                    message[ JsonKey.INDEX.value ] = int(words[2])
+                                except ValueError:
+                                    message[ JsonKey.NAME.value ] = words[2]
                             else:
                                 print(f"\t'{words[0]}' misses arguments!")
                                 return
