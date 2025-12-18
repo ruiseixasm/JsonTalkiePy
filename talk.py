@@ -122,8 +122,11 @@ class CommandLine:
                         case MessageData.SYS:
                             if num_of_keys > 2:
                                 message[ JsonKey.VALUE.value ] = words[2]
-                            else:
+                            elif num_of_keys == 2:
                                 print(f"\t'{words[0]}' misses arguments!")
+                                return
+                            else:
+                                self._print_sys()
                                 return
 
                         case MessageData.TALK:
@@ -139,7 +142,11 @@ class CommandLine:
 
                         case _:
                             self._print_help()
-                            return      
+                            return
+
+                elif words[0] == "help":
+                    self._print_help()
+                    return
  
         json_talkie.transmitMessage(message)
 
