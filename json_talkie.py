@@ -184,10 +184,6 @@ class JsonTalkie:
                             message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
                             self.transmitMessage(message)
 
-                case MessageData.TALK:
-                    message[JsonKey.DESCRIPTION.value] = f"{self._manifesto['talker']['description']}"
-                    return self.transmitMessage(message)
-                
                 case MessageData.LIST:
                     if 'run' in self._manifesto:
                         for name, content in self._manifesto['run'].items():
@@ -206,11 +202,19 @@ class JsonTalkie:
                             self.transmitMessage(message)
                     return True
                 
+                case MessageData.TALK:
+                    message[JsonKey.DESCRIPTION.value] = f"{self._manifesto['talker']['description']}"
+                    return self.transmitMessage(message)
+                
                 case MessageData.CHANNEL:
                     if JsonKey.VALUE.value in message and isinstance(message[JsonKey.VALUE.value], int):
                         self._channel = message[JsonKey.VALUE.value]
                     else:
                         message[JsonKey.VALUE.value] = self._channel
+                    return self.transmitMessage(message)
+                
+                case MessageData.PING:
+                    # Does nothing, sends it right away
                     return self.transmitMessage(message)
                 
                 case MessageData.SYS:

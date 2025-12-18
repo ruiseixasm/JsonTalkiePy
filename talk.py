@@ -141,13 +141,13 @@ class CommandLine:
                         case MessageData.TALK:
                             pass
 
-                        case MessageData.PING:
-                            if num_of_keys > 2:
-                                message[ JsonKey.DESCRIPTION.value ] = words[2]
-
                         case MessageData.CHANNEL:
                             if num_of_keys > 2:
                                 message[ JsonKey.VALUE.value ] = words[2]
+
+                        case MessageData.PING:
+                            if num_of_keys > 2:
+                                message[ JsonKey.DESCRIPTION.value ] = words[2]
 
                         case _:
                             self._print_help()
