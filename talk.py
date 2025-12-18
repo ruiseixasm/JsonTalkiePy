@@ -98,7 +98,7 @@ class CommandLine:
 
                     match message_data:
 
-                        case MessageData.RUN | MessageData.GET:
+                        case MessageData.CALL:
                             if num_of_keys > 2:
                                 try:
                                     message[ JsonKey.INDEX.value ] = int(words[2])
@@ -114,21 +114,6 @@ class CommandLine:
                                             message[ JsonKey.DESCRIPTION.value ] = int(words[3])
                                         except ValueError:
                                             message[ JsonKey.DESCRIPTION.value ] = words[3]
-                            else:
-                                print(f"\t'{words[0]}' misses arguments!")
-                                return
-
-                        case MessageData.SET:
-                            if num_of_keys > 3:
-                                try:
-                                    message[ JsonKey.VALUE.value ] = int(words[3])
-                                except ValueError:
-                                    print(f"\t'{words[2]}' is not an integer!")
-                                    return
-                                try:
-                                    message[ JsonKey.INDEX.value ] = int(words[2])
-                                except ValueError:
-                                    message[ JsonKey.NAME.value ] = words[2]
                             else:
                                 print(f"\t'{words[0]}' misses arguments!")
                                 return

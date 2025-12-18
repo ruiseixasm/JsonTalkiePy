@@ -56,15 +56,14 @@ class SourceData(TalkieCode):
 
 
 class MessageData(TalkieCode):
-    RUN, SET, GET, LIST, SYS, TALK, CHANNEL, PING, ECHO, ERROR = range(10)
+    CALL, LIST, SYS, TALK, CHANNEL, PING, ECHO, ERROR = range(8)
 
     @classmethod
     def validate_to_words(cls, words: list[str]) -> bool:
         if len(words) > 1 and MessageData.from_name(words[1]) is not None:
             match MessageData.from_name(words[1]):  # word[0] is the device name
-                case MessageData.RUN | MessageData.GET:
+                case MessageData.CALL:
                     return len(words) == 3
-                case MessageData.SET: return len(words) == 4
                 case MessageData.SYS | MessageData.CHANNEL:
                     return True
                 case _: return len(words) == 2

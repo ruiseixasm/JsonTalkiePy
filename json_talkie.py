@@ -147,7 +147,7 @@ class JsonTalkie:
 
             match message_data:
 
-                case MessageData.RUN:
+                case MessageData.CALL:
                     if JsonKey.NAME.value in message and 'run' in self._manifesto:
                         if message[JsonKey.NAME.value] in self._manifesto['run']:
                             self.transmitMessage(message)
@@ -156,30 +156,6 @@ class JsonTalkie:
                                 message[JsonKey.ROGER.value] = EchoData.ROGER
                             else:
                                 message[JsonKey.ROGER.value] = EchoData.NEGATIVE
-                            return self.transmitMessage(message)
-                        else:
-                            message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
-                            self.transmitMessage(message)
-
-                case MessageData.SET:
-                    if JsonKey.VALUE.value in message and isinstance(message[JsonKey.VALUE.value], int) and JsonKey.NAME.value in message and 'set' in self._manifesto:
-                        if message[JsonKey.NAME.value] in self._manifesto['set']:
-                            self.transmitMessage(message)
-                            roger: bool = self._manifesto['set'][message[JsonKey.NAME.value]]['function'](message, message[JsonKey.VALUE.value])
-                            if roger:
-                                message[JsonKey.ROGER.value] = EchoData.ROGER
-                            else:
-                                message[JsonKey.ROGER.value] = EchoData.NEGATIVE
-                            return self.transmitMessage(message)
-                        else:
-                            message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
-                            self.transmitMessage(message)
-
-                case MessageData.GET:
-                    if JsonKey.NAME.value in message and 'get' in self._manifesto:
-                        if message[JsonKey.NAME.value] in self._manifesto['get']:
-                            self.transmitMessage(message)
-                            message[JsonKey.VALUE.value] = self._manifesto['get'][message[JsonKey.NAME.value]]['function'](message)
                             return self.transmitMessage(message)
                         else:
                             message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
