@@ -253,22 +253,17 @@ class CommandLine:
                         case _:
                             print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
                 case _:
-                    if JsonKey.VALUE.value in message:
-                        if str(0) in message:
-                            print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}", end="")
-                            print(f"\t   {str(message[ str(0) ])}")
-                        else:
-                            print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
-                    elif JsonKey.ROGER.value in message:
-                        if str(0) in message:
-                            print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}", end="")
-                            print(f"\t   {str(message[ str(0) ])}")
-                        else:
-                            print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
+                    print(f"{padded_prefix}", end="")
+                    if JsonKey.ROGER.value in message:
+                        print(f"\t   {str(EchoData(message[JsonKey.ROGER.value]))}", end="")
                     elif JsonKey.DESCRIPTION.value in message:
-                        print(f"{padded_prefix}\t   {message[JsonKey.DESCRIPTION.value]}")
-                    elif str(0) in message:
-                        print(f"{padded_prefix}\t   {str(message[ str(0) ])}")
+                        print(f"\t   {message[JsonKey.DESCRIPTION.value]}", end="")
+                    for value_i in range(10):
+                        if str(value_i) in message:
+                            print(f"\t   {str(message[ str(value_i) ])}", end="")
+                        else:
+                            break
+                    print() # Just to add a new line
 
             return True
         except Exception as e:
