@@ -83,8 +83,8 @@ class CommandLine:
             if words:
                 if len(words) == 1:
                     message_data = MessageData.from_name(words[0])
-                    if message_data:
-                        if message_data >= MessageData.TALK or message_data <= MessageData.PING:    # Includes CHANNEL
+                    if message_data is not None:
+                        if not (message_data < MessageData.TALK or message_data > MessageData.PING):   # Includes CHANNEL
                             message = {
                                 JsonKey.MESSAGE.value: message_data.value
                             }
@@ -136,7 +136,7 @@ class CommandLine:
                                             return
                                 case MessageData.SYS:
                                     if len(words) > 2:
-                                        if (SystemData.from_name(words[2])):
+                                        if (SystemData.from_name(words[2]) is not None):
                                             message[ JsonKey.SYSTEM.value ] = SystemData.from_name(words[2]).value
                                         else:
                                             self._print_sys()
