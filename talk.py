@@ -204,8 +204,7 @@ class CommandLine:
 
             original_message_code = MessageData(message[JsonKey.ORIGINAL.value])    # VERY IMPORTANT, NEVER FORGET .value !!
             if original_message_code == MessageData.LIST:
-                action_name = str(MessageData(message[JsonKey.ACTION.value]))
-                parts.append(f"\t[{action_name}")
+                parts.append(f"\t[{str(MessageData.CALL)}")
             else:
                 parts.append(f"\t[{str(original_message_code)}")
             parts.append(f" {from_talker}")
@@ -245,9 +244,9 @@ class CommandLine:
                         system_code = SystemData(message[JsonKey.SYSTEM.value])
                         match system_code:
                             case SystemData.MUTE | SystemData.UNMUTE:
-                                if JsonKey.REPLY.value in message:
+                                if str(0) in message:
                                     print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}", end="")
-                                    print(f"\t   {str(message[JsonKey.REPLY.value])}")
+                                    print(f"\t   {str(message[ str(0) ])}")
                                 else:
                                     print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
                         
@@ -258,21 +257,21 @@ class CommandLine:
                                 print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
                     case _:
                         if JsonKey.VALUE.value in message:
-                            if JsonKey.REPLY.value in message:
+                            if str(0) in message:
                                 print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}", end="")
-                                print(f"\t   {str(message[JsonKey.REPLY.value])}")
+                                print(f"\t   {str(message[ str(0) ])}")
                             else:
                                 print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
                         elif JsonKey.ROGER.value in message:
-                            if JsonKey.REPLY.value in message:
+                            if str(0) in message:
                                 print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}", end="")
-                                print(f"\t   {str(message[JsonKey.REPLY.value])}")
+                                print(f"\t   {str(message[ str(0) ])}")
                             else:
                                 print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
                         elif JsonKey.DESCRIPTION.value in message:
                             print(f"{padded_prefix}\t   {message[JsonKey.DESCRIPTION.value]}")
-                        elif JsonKey.REPLY.value in message:
-                            print(f"{padded_prefix}\t   {str(message[JsonKey.REPLY.value])}")
+                        elif str(0) in message:
+                            print(f"{padded_prefix}\t   {str(message[ str(0) ])}")
 
             return True
         except Exception as e:

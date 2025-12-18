@@ -119,10 +119,10 @@ class Talker:
                         print(f" {what} {message[ JsonKey.NAME.value ]}]\t{message[ JsonKey.VALUE.value ]}")
                     elif JsonKey.NAME.value in message and JsonKey.DESCRIPTION.value in message:
                         print(f" {what} {message[ JsonKey.NAME.value ]}]\t{message[ JsonKey.DESCRIPTION.value ]}")
-                    elif JsonKey.NAME.value in message and JsonKey.REPLY.value in message:
-                        print(f" {what} {message[ JsonKey.NAME.value ]}]\t{message[ JsonKey.REPLY.value ]}")
-                    elif JsonKey.REPLY.value in message:
-                        print(f" {what}]\t{message[ JsonKey.REPLY.value ]}")
+                    elif JsonKey.NAME.value in message and str(0) in message:
+                        print(f" {what} {message[ JsonKey.NAME.value ]}]\t{message[  str(0)  ]}")
+                    elif str(0) in message:
+                        print(f" {what}]\t{message[  str(0)  ]}")
             elif JsonKey.DESCRIPTION.value in message:
                 print(f"]\t{message[ JsonKey.DESCRIPTION.value ]}")
         return True
