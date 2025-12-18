@@ -198,14 +198,22 @@ class CommandLine:
     def generate_prefix(self, message: Dict[str, Any]) -> str:
         """Generate aligned prefix for messages"""
         parts = []
-        if JsonKey.ORIGINAL.value in message and JsonKey.FROM.value in message:
+        if JsonKey.ORIGINAL.value in message:
+
+            if JsonKey.FROM.value in message:
+                from_talker = message[JsonKey.FROM.value]
+            elif JsonKey.SOURCE.value in message and message[JsonKey.SOURCE.value] == SourceData.HERE.value:
+                from_talker = json_talkie._manifesto['talker']['name']
+            else:
+                return ""
+
             original_message_code = MessageData(message[JsonKey.ORIGINAL.value])    # VERY IMPORTANT, NEVER FORGET .value !!
             if original_message_code == MessageData.LIST:
                 action_name = str(MessageData(message[JsonKey.ACTION.value]))
                 parts.append(f"\t[{action_name}")
             else:
                 parts.append(f"\t[{str(original_message_code)}")
-            parts.append(f" {message[JsonKey.FROM.value]}")
+            parts.append(f" {from_talker}")
             
             match original_message_code:
                 case MessageData.LIST:
