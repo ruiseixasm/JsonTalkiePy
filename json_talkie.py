@@ -71,14 +71,13 @@ class JsonTalkie:
                             if JsonKey.ORIGINAL.value in message:
                                 original_message_code = MessageData(message[JsonKey.ORIGINAL.value])
                                 match original_message_code:
-                                    case MessageData.SYS:
-                                        if message[JsonKey.SYSTEM.value] == SystemData.PING.value:
-                                            out_time_ms: int = message[JsonKey.TIMESTAMP.value]
-                                            actual_time: int = self.message_id()
-                                            delay_ms: int = actual_time - out_time_ms
-                                            if delay_ms < 0:    # do overflow as if uint16_t in c++
-                                                delay_ms += 0xFFFF + 1  # 2^16
-                                            message["delay_ms"] = delay_ms
+                                    case MessageData.PING:
+                                        out_time_ms: int = message[JsonKey.TIMESTAMP.value]
+                                        actual_time: int = self.message_id()
+                                        delay_ms: int = actual_time - out_time_ms
+                                        if delay_ms < 0:    # do overflow as if uint16_t in c++
+                                            delay_ms += 0xFFFF + 1  # 2^16
+                                        message[JsonKey.VALUE.value] = delay_ms
 
                         if self._verbose:
                             print(message)
