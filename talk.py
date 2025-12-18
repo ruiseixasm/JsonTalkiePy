@@ -104,6 +104,16 @@ class CommandLine:
                                     message[ JsonKey.INDEX.value ] = int(words[2])
                                 except ValueError:
                                     message[ JsonKey.NAME.value ] = words[2]
+                                if num_of_keys > 3:
+                                    try:
+                                        message[ JsonKey.VALUE.value ] = int(words[3])
+                                    except ValueError:
+                                        message[ JsonKey.VALUE.value ] = words[3]
+                                    if num_of_keys > 4:
+                                        try:
+                                            message[ JsonKey.DESCRIPTION.value ] = int(words[3])
+                                        except ValueError:
+                                            message[ JsonKey.DESCRIPTION.value ] = words[3]
                             else:
                                 print(f"\t'{words[0]}' misses arguments!")
                                 return
