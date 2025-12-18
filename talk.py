@@ -193,38 +193,37 @@ class CommandLine:
     def generate_prefix(self, message: Dict[str, Any]) -> str:
         """Generate aligned prefix for messages"""
         parts = []
-        if JsonKey.ORIGINAL.value in message:
 
-            if JsonKey.FROM.value in message:
-                from_talker = message[JsonKey.FROM.value]
-            elif JsonKey.SOURCE.value in message and message[JsonKey.SOURCE.value] == SourceData.HERE.value:
-                from_talker = json_talkie._manifesto['talker']['name']
-            else:
-                return ""
+        if JsonKey.FROM.value in message:
+            from_talker = message[JsonKey.FROM.value]
+        elif JsonKey.SOURCE.value in message and message[JsonKey.SOURCE.value] == SourceData.HERE.value:
+            from_talker = json_talkie._manifesto['talker']['name']
+        else:
+            return ""
 
-            original_message_code = MessageData(message[JsonKey.ORIGINAL.value])    # VERY IMPORTANT, NEVER FORGET .value !!
-            if original_message_code == MessageData.LIST:
-                parts.append(f"\t[{str(MessageData.CALL)}")
-            else:
-                parts.append(f"\t[{str(original_message_code)}")
-            parts.append(f" {from_talker}")
-            
-            match original_message_code:
-                case MessageData.LIST:
-                    if JsonKey.INDEX.value in message and JsonKey.NAME.value in message:
-                        parts.append(f" {message[JsonKey.INDEX.value]}")
-                        parts.append(f"|{message[JsonKey.NAME.value]}")
+        original_message_code = json_talkie._original_message_data
+        if original_message_code == MessageData.LIST:
+            parts.append(f"\t[{str(MessageData.CALL)}")
+        else:
+            parts.append(f"\t[{str(original_message_code)}")
+        parts.append(f" {from_talker}")
+        
+        match original_message_code:
+            case MessageData.LIST:
+                if JsonKey.INDEX.value in message and JsonKey.NAME.value in message:
+                    parts.append(f" {message[JsonKey.INDEX.value]}")
+                    parts.append(f"|{message[JsonKey.NAME.value]}")
 
-                case MessageData.SYS:
-                    parts.append(f" {str(SystemData(message[JsonKey.SYSTEM.value]))}")
+            case MessageData.SYS:
+                parts.append(f" {str(SystemData(message[JsonKey.SYSTEM.value]))}")
 
-                case _:
-                    if JsonKey.INDEX.value in message:
-                        parts.append(f" {message[JsonKey.INDEX.value]}")
-                    elif JsonKey.NAME.value in message:
-                        parts.append(f" {message[JsonKey.NAME.value]}")
+            case _:
+                if JsonKey.INDEX.value in message:
+                    parts.append(f" {message[JsonKey.INDEX.value]}")
+                elif JsonKey.NAME.value in message:
+                    parts.append(f" {message[JsonKey.NAME.value]}")
 
-            parts.append("]")
+        parts.append("]")
         
         return "".join(parts)
 
@@ -234,44 +233,44 @@ class CommandLine:
         try:
             prefix = self.generate_prefix(message)
             padded_prefix = prefix.ljust(self.max_prefix_length)
-            if JsonKey.ORIGINAL.value in message:
-                original_message_code = MessageData(message[JsonKey.ORIGINAL.value])   # VERY IMPORTANT, NEVER FORGET .value !!
 
-                match original_message_code:
-                    case MessageData.TALK | MessageData.LIST:
-                        print(f"{padded_prefix}\t   {str(message[JsonKey.DESCRIPTION.value])}")
-                    case MessageData.SYS:
-                        system_code = SystemData(message[JsonKey.SYSTEM.value])
-                        match system_code:
-                            case SystemData.MUTE | SystemData.UNMUTE:
-                                if str(0) in message:
-                                    print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}", end="")
-                                    print(f"\t   {str(message[ str(0) ])}")
-                                else:
-                                    print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
-                        
-                            case SystemData.BOARD:
-                                print(f"{padded_prefix}\t   {str(message[JsonKey.DESCRIPTION.value])}")
+            original_message_code = json_talkie._original_message_data
 
-                            case _:
-                                print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
-                    case _:
-                        if JsonKey.VALUE.value in message:
-                            if str(0) in message:
-                                print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}", end="")
-                                print(f"\t   {str(message[ str(0) ])}")
-                            else:
-                                print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
-                        elif JsonKey.ROGER.value in message:
+            match original_message_code:
+                case MessageData.TALK | MessageData.LIST:
+                    print(f"{padded_prefix}\t   {str(message[JsonKey.DESCRIPTION.value])}")
+                case MessageData.SYS:
+                    system_code = SystemData(message[JsonKey.SYSTEM.value])
+                    match system_code:
+                        case SystemData.MUTE | SystemData.UNMUTE:
                             if str(0) in message:
                                 print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}", end="")
                                 print(f"\t   {str(message[ str(0) ])}")
                             else:
                                 print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
-                        elif JsonKey.DESCRIPTION.value in message:
-                            print(f"{padded_prefix}\t   {message[JsonKey.DESCRIPTION.value]}")
-                        elif str(0) in message:
-                            print(f"{padded_prefix}\t   {str(message[ str(0) ])}")
+                    
+                        case SystemData.BOARD:
+                            print(f"{padded_prefix}\t   {str(message[JsonKey.DESCRIPTION.value])}")
+
+                        case _:
+                            print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
+                case _:
+                    if JsonKey.VALUE.value in message:
+                        if str(0) in message:
+                            print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}", end="")
+                            print(f"\t   {str(message[ str(0) ])}")
+                        else:
+                            print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
+                    elif JsonKey.ROGER.value in message:
+                        if str(0) in message:
+                            print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}", end="")
+                            print(f"\t   {str(message[ str(0) ])}")
+                        else:
+                            print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
+                    elif JsonKey.DESCRIPTION.value in message:
+                        print(f"{padded_prefix}\t   {message[JsonKey.DESCRIPTION.value]}")
+                    elif str(0) in message:
+                        print(f"{padded_prefix}\t   {str(message[ str(0) ])}")
 
             return True
         except Exception as e:

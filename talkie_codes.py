@@ -21,7 +21,6 @@ class JsonKey(Enum):
     TIMESTAMP   = "i"
     IDENTITY    = "i"
     MESSAGE     = "m"
-    ORIGINAL    = "o"
     FROM        = "f"
     TO          = "t"
     SYSTEM      = "s"

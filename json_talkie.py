@@ -30,6 +30,8 @@ class JsonTalkie:
         self._socket: BroadcastSocket = socket  # Composition over inheritance
         self._manifesto: Dict[str, Dict[str, Any]] = manifesto
         self._channel: int = 0
+        self._original_message_id: int = 0
+        self._original_message_data: MessageData = MessageData.TALK
         self._verbose: bool = verbose
         # State variables
         self._devices_address: Dict[str, Tuple[str, int]] = {}
@@ -68,8 +70,8 @@ class JsonTalkie:
 
                         # Add info to echo message right away accordingly to the message original type
                         if message[JsonKey.MESSAGE.value] == MessageData.ECHO.value:
-                            if JsonKey.ORIGINAL.value in message:
-                                original_message_code = MessageData(message[JsonKey.ORIGINAL.value])
+                            if self._original_message_data.value in message:
+                                original_message_code = MessageData(message[self._original_message_data.value])
                                 match original_message_code:
                                     case MessageData.PING:
                                         out_time_ms: int = message[JsonKey.TIMESTAMP.value]
@@ -103,7 +105,8 @@ class JsonTalkie:
             message[ JsonKey.FROM.value ] = self._manifesto['talker']['name']
 
         if JsonKey.IDENTITY.value not in message:
-            message[ JsonKey.IDENTITY.value ] = JsonTalkie.message_id()
+            self._original_message_id = JsonTalkie.message_id()
+            message[ JsonKey.IDENTITY.value ] = self._original_message_id
         JsonTalkie.valid_checksum(message)
         if self._verbose:
             print(message)
@@ -142,7 +145,7 @@ class JsonTalkie:
         if message_data is not None:
 
             if message[JsonKey.MESSAGE.value] < MessageData.ECHO.value:
-                message[JsonKey.ORIGINAL.value] = message_data.value
+                self._original_message_data = message_data
                 message[JsonKey.MESSAGE.value] = MessageData.ECHO.value
 
             match message_data:
