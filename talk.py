@@ -84,7 +84,7 @@ class CommandLine:
                 if len(words) == 1:
                     message_data = MessageData.from_name(words[0])
                     if message_data:
-                        if message_data >= MessageData.TALK or message_data <= MessageData.PING:
+                        if message_data >= MessageData.TALK or message_data <= MessageData.PING:    # Includes CHANNEL
                             message = {
                                 JsonKey.MESSAGE.value: message_data.value
                             }
@@ -109,7 +109,7 @@ class CommandLine:
 
                     if MessageData.validate_to_words(words):
                         message_data = MessageData.from_name(words[1])
-                        if message_data:
+                        if message_data is not None:
                             message[ JsonKey.MESSAGE.value ] = MessageData.from_name(words[1]).value
                             match message_data:
                                 case MessageData.RUN | MessageData.GET:

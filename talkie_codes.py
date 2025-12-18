@@ -60,7 +60,7 @@ class MessageData(TalkieCode):
 
     @classmethod
     def validate_to_words(cls, words: list[str]) -> bool:
-        if len(words) > 1 and MessageData.from_name(words[1]):
+        if len(words) > 1 and MessageData.from_name(words[1]) is not None:
             match MessageData.from_name(words[1]):  # word[0] is the device name
                 case MessageData.RUN | MessageData.GET:
                     return len(words) == 3
