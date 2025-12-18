@@ -68,20 +68,17 @@ class JsonTalkie:
                         print(data)
                     message: Dict[str, Any] = JsonTalkie.decode(data)
                     if self.validate_message(message):
-
                         # Add info to echo message right away accordingly to the message original type
                         if message[JsonKey.MESSAGE.value] == MessageData.ECHO.value:
-                            if self._original_message_data.value in message:
-                                original_message_code = MessageData(message[self._original_message_data.value])
-                                match original_message_code:
-                                    case MessageData.PING:
-                                        out_time_ms: int = message[JsonKey.TIMESTAMP.value]
-                                        actual_time: int = self.message_id()
-                                        delay_ms: int = actual_time - out_time_ms
-                                        if delay_ms < 0:    # do overflow as if uint16_t in c++
-                                            delay_ms += 0xFFFF + 1  # 2^16
-                                        if JsonKey.VALUE.value not in message:  # Don't change value already set
-                                            message[JsonKey.VALUE.value] = delay_ms
+                            match self._original_message_data:
+                                case MessageData.PING:
+                                    actual_time: int = self.message_id()
+                                    out_time_ms: int = message[JsonKey.TIMESTAMP.value]
+                                    delay_ms: int = actual_time - out_time_ms
+                                    if delay_ms < 0:    # do overflow as if uint16_t in c++
+                                        delay_ms += 0xFFFF + 1  # 2^16
+                                    if str(0) not in message:  # Don't change value already set
+                                        message[ str(0) ] = delay_ms
 
                         if self._verbose:
                             print(message)
