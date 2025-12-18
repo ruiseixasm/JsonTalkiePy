@@ -130,7 +130,11 @@ class CommandLine:
                             
                         case MessageData.SYS:
                             if num_of_keys > 2:
-                                message[ JsonKey.VALUE.value ] = words[2]
+                                try:
+                                    message[ JsonKey.SYSTEM.value ] = SystemData.from_name(words[2]).value
+                                except ValueError:
+                                    print(f"\t'{words[2]}' isn't a valid SystemData code!")
+                                    return
                             elif num_of_keys == 2:
                                 print(f"\t'{words[0]}' misses arguments!")
                                 return
