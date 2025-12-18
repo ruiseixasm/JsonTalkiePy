@@ -31,7 +31,8 @@ class JsonTalkie:
         self._manifesto: Dict[str, Dict[str, Any]] = manifesto
         self._channel: int = 0
         self._original_message_id: int = 0
-        self._original_message_data: MessageData = MessageData.TALK
+        self._original_message_data: MessageData = MessageData.NOISE
+        self._received_message_data: MessageData = MessageData.NOISE
         self._verbose: bool = verbose
         # State variables
         self._devices_address: Dict[str, Tuple[str, int]] = {}
@@ -147,6 +148,7 @@ class JsonTalkie:
         if message_data is not None:
 
             if message[JsonKey.MESSAGE.value] < MessageData.ECHO.value:
+                self._received_message_data = MessageData(message[JsonKey.MESSAGE.value])
                 message[JsonKey.MESSAGE.value] = MessageData.ECHO.value
 
             match message_data:
