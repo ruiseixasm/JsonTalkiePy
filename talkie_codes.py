@@ -58,7 +58,7 @@ class SourceData(TalkieCode, Enum):
 
 
 class MessageData(TalkieCode, Enum):
-    RUN, SET, GET, TALK, LIST, CHANNEL, SYS, ECHO, ERROR = range(9)
+    RUN, SET, GET, LIST, SYS, TALK, CHANNEL, PING, ECHO, ERROR = range(10)
 
     @classmethod
     def validate_to_words(cls, words: list[str]) -> bool:
@@ -74,7 +74,7 @@ class MessageData(TalkieCode, Enum):
 
 
 class SystemData(TalkieCode, Enum):
-    BOARD, PING, DROPS, DELAY, MUTE, UNMUTE, MUTED, SOCKET, TALKER, MANIFESTO = range(10)
+    BOARD, DROPS, DELAY, MUTE, UNMUTE, MUTED, SOCKET, TALKER, MANIFESTO = range(9)
 
 
 class EchoData(TalkieCode, Enum):
