@@ -156,14 +156,14 @@ class CommandLine:
         """Print help"""
         print("\t[[talker] talk]            Prints all talkers' 'name' and 'description' (but here).")
         print("\t[[talker] ping [data]]     Returns the duration of the round-trip in milliseconds.")
-        print("\t[[talker] channel]         Returns the Device channel.")
-        print("\t[<talker> channel [n]]     Sets the Device channel.")
-        print("\t[<talker> list]            List the entire 'talker' manifesto.")
+        print("\t[[talker] channel]         Returns the Talker channel.")
+        print("\t[<talker> channel [n]]     Sets the Talker channel.")
+        print("\t[<talker> list]            List the entire Talker manifesto.")
         print("\t[<talker> run <name>]      Runs the named function.")
         print("\t[<talker> set <name>]      Sets the named variable.")
         print("\t[<talker> get <name>]      Gets the named variable value.")
         print("\t[here <message> '...']     The keyword 'here' applies to self talker alone.")
-        print("\t[sys]                      Prints available options for the 'talker' system.")
+        print("\t[sys]                      Prints available options for the Talker system.")
         print("\t[exit]                     Exits the command line (Ctrl+D).")
         print("\t[help]                     Shows the present help.")
 
