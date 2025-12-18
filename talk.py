@@ -82,15 +82,19 @@ class CommandLine:
             words = cmd.split()
             if words:
                 if len(words) == 1:
-                    if words[0] == str(MessageData.TALK):
-                        message = {
-                            JsonKey.MESSAGE.value: MessageData.TALK.value,
-                            JsonKey.SOURCE.value: SourceData.REMOTE.value
-                        }
-                        json_talkie.remoteSend(message)
-                        return
-                    elif words[0] == str(MessageData.SYS):
-                        self._print_sys()
+                    message_data = MessageData.from_name(words[0])
+                    if message_data:
+                        if message_data >= MessageData.TALK or message_data <= MessageData.PING:
+                            message = {
+                                JsonKey.MESSAGE.value: message_data.value
+                            }
+                            json_talkie.remoteSend(message)
+                            return
+                        elif message_data == MessageData.SYS:
+                            self._print_sys()
+                            return
+                    else:
+                        self._print_help()
                         return
                 else:   # WITH TARGET NAME DEFINED
                     message: dict = {}

@@ -11,7 +11,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 https://github.com/ruiseixasm/JsonTalkie
 '''
-from enum import Enum
+from enum import Enum, IntEnum
 from typing import Union, cast, Optional
 
 
@@ -35,14 +35,12 @@ class JsonKey(Enum):
     DESCRIPTION = "d"
 
 
-class TalkieCode:
+class TalkieCode(IntEnum):
     """Mixin with shared functionality for Talkie codes (enums)"""
 
     def __str__(self) -> str:
         """String representation is lowercase"""
-                # Tell type checker self is an Enum
-        enum_self = cast(Enum, self)
-        return enum_self.name.lower()
+        return self.name.lower()
     
     @classmethod
     def from_name(cls, name: str) -> Union['Enum', None]:
@@ -53,11 +51,11 @@ class TalkieCode:
             return None
 
 
-class SourceData(TalkieCode, Enum):
+class SourceData(TalkieCode):
     REMOTE, LOCAL, HERE = range(3)
 
 
-class MessageData(TalkieCode, Enum):
+class MessageData(TalkieCode):
     RUN, SET, GET, LIST, SYS, TALK, CHANNEL, PING, ECHO, ERROR = range(10)
 
     @classmethod
@@ -73,14 +71,14 @@ class MessageData(TalkieCode, Enum):
         return False
 
 
-class SystemData(TalkieCode, Enum):
+class SystemData(TalkieCode):
     BOARD, DROPS, DELAY, MUTE, UNMUTE, MUTED, SOCKET, TALKER, MANIFESTO = range(9)
 
 
-class EchoData(TalkieCode, Enum):
+class EchoData(TalkieCode):
     ROGER, SAY_AGAIN, NEGATIVE, NIL = range(4)
 
 
-class ErrorData(TalkieCode, Enum):
+class ErrorData(TalkieCode):
     FROM, FIELD, CHECKSUM, MESSAGE, IDENTITY, DELAY, KEY, DATA = range(8)
 
