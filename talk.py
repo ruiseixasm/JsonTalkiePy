@@ -153,7 +153,7 @@ class CommandLine:
                             self._print_help()
                             return
 
-                elif words[0] == "help":
+                else:
                     self._print_help()
                     return
  
