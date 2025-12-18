@@ -140,8 +140,8 @@ class JsonTalkie:
 
         if message_data is not None:
 
-            message[JsonKey.ORIGINAL.value] = message_data.value
             if message[JsonKey.MESSAGE.value] < MessageData.ECHO.value:
+                message[JsonKey.ORIGINAL.value] = message_data.value
                 message[JsonKey.MESSAGE.value] = MessageData.ECHO.value
 
             match message_data:

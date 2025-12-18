@@ -87,10 +87,11 @@ class CommandLine:
                     message = {
                         JsonKey.MESSAGE.value: message_data.value
                     }
-                    if (SourceData.from_name(words[0]) == SourceData.HERE):
-                        message[ JsonKey.SOURCE.value ] = SourceData.HERE.value
-                    elif num_of_keys > 1:
-                        message[ JsonKey.TO.value ] = words[1]
+                    if num_of_keys > 1:
+                        if (SourceData.from_name(words[1]) == SourceData.HERE):
+                            message[ JsonKey.SOURCE.value ] = SourceData.HERE.value
+                        else:
+                            message[ JsonKey.TO.value ] = words[1]
 
                     match message_data:
 
@@ -145,15 +146,15 @@ class CommandLine:
 
     def _print_help(self):
         """Print help"""
-        print("\t[[talker] talk]            Prints all Talkers' 'name' and 'description' (but here).")
-        print("\t[[talker] ping [data]]     Returns the duration of the round-trip in milliseconds.")
-        print("\t[[talker] channel]         Returns the Talker channel.")
-        print("\t[<talker> channel [n]]     Sets the Talker channel.")
-        print("\t[<talker> list]            List the entire Talker manifesto.")
-        print("\t[<talker> run <name>]      Runs the named function.")
-        print("\t[<talker> set <name>]      Sets the named variable.")
-        print("\t[<talker> get <name>]      Gets the named variable value.")
-        print("\t[here <message> '...']     The keyword 'here' applies to self Talker alone.")
+        print("\t[talk [talker]]            Prints all Talkers' 'name' and 'description' (but here).")
+        print("\t[ping [talker] [data]]     Returns the duration of the round-trip in milliseconds.")
+        print("\t[channel [talker]]         Returns the Talker channel.")
+        print("\t[channel <talker> <n>]     Sets the Talker channel.")
+        print("\t[list <talker>]            List the entire Talker manifesto.")
+        print("\t[run <talker> <name>]      Runs the named function.")
+        print("\t[set <talker> <name>]      Sets the named variable.")
+        print("\t[get <talker> <name>]      Gets the named variable value.")
+        print("\t[message here  ...]        The keyword 'here' applies to self Talker alone.")
         print("\t[sys]                      Prints available options for the Talker system.")
         print("\t[exit]                     Exits the command line (Ctrl+D).")
         print("\t[help]                     Shows the present help.")
@@ -161,46 +162,43 @@ class CommandLine:
 
     def _print_sys(self):
         """Print system help"""
-        print("\t[<talker> sys board]       Prints the board description (OS).")
-        print("\t[<talker> sys drops]       Returns the number of drops associated to out of time messages.")
-        print("\t[<talker> sys delay]       Returns the maximum delay for dropping the message in milliseconds.")
-        print("\t[<talker> sys delay d]     Sets a new delay, where 0 means no delay processed (no drops).")
-        print("\t[<talker> sys mute]        Mutes the Talker so that becomes silent.")
-        print("\t[<talker> sys unmute]      Unmutes the Talker if it's silent.")
-        print("\t[<talker> sys muted]       Prints '1' if the Talker is muted.")
-        print("\t[<talker> sys socket]      Prints the socket class name.")
-        print("\t[<talker> sys talker]      Prints the Talker class name.")
-        print("\t[<talker> sys manifesto]   Prints the manifesto class name.")
+        print("\t[sys <talker> board]       Prints the board description (OS).")
+        print("\t[sys <talker> drops]       Returns the number of drops associated to out of time messages.")
+        print("\t[sys <talker> delay]       Returns the maximum delay for dropping the message in milliseconds.")
+        print("\t[sys <talker> delay d]     Sets a new delay, where 0 means no delay processed (no drops).")
+        print("\t[sys <talker> mute]        Mutes the Talker so that becomes silent.")
+        print("\t[sys <talker> unmute]      Unmutes the Talker if it's silent.")
+        print("\t[sys <talker> muted]       Prints '1' if the Talker is muted.")
+        print("\t[sys <talker> socket]      Prints the socket class name.")
+        print("\t[sys <talker> talker]      Prints the Talker class name.")
+        print("\t[sys <talker> manifesto]   Prints the manifesto class name.")
         
 
 
     def generate_prefix(self, message: Dict[str, Any]) -> str:
         """Generate aligned prefix for messages"""
         parts = []
-        if JsonKey.FROM.value in message:
-            parts.append(f"\t[{message[JsonKey.FROM.value]}")  # VERY IMPORTANT, NEVER FORGET .value !!
+        if JsonKey.ORIGINAL.value in message and JsonKey.FROM.value in message:
+            original_message_code = MessageData(message[JsonKey.ORIGINAL.value])
+            parts.append(f"\t[{str(original_message_code)}")  # VERY IMPORTANT, NEVER FORGET .value !!
+            parts.append(f" {message[JsonKey.FROM.value]}")
             
-            if JsonKey.ORIGINAL.value in message:
-                original_message_code = MessageData(message[JsonKey.ORIGINAL.value])
-                match original_message_code:
-                    case MessageData.LIST:
-                        action_name = str(MessageData(message[JsonKey.ACTION.value]))
-                        parts.append(f" {action_name}")
-                        if JsonKey.INDEX.value in message and JsonKey.NAME.value in message:
-                            parts.append(f" {message[JsonKey.INDEX.value]}")
-                            parts.append(f"|{message[JsonKey.NAME.value]}")
+            match original_message_code:
+                case MessageData.LIST:
+                    action_name = str(MessageData(message[JsonKey.ACTION.value]))
+                    parts.append(f" {action_name}")
+                    if JsonKey.INDEX.value in message and JsonKey.NAME.value in message:
+                        parts.append(f" {message[JsonKey.INDEX.value]}")
+                        parts.append(f"|{message[JsonKey.NAME.value]}")
 
-                    case MessageData.SYS:
-                        parts.append(f" {str(original_message_code)}")
-                        parts.append(f" {str(SystemData(message[JsonKey.SYSTEM.value]))}")
+                case MessageData.SYS:
+                    parts.append(f" {str(SystemData(message[JsonKey.SYSTEM.value]))}")
 
-                    case _:
-                        parts.append(f" {str(original_message_code)}")
-                        if JsonKey.INDEX.value in message:
-                            parts.append(f" {message[JsonKey.INDEX.value]}")
-                        elif JsonKey.NAME.value in message:
-                            parts.append(f" {message[JsonKey.NAME.value]}")
-
+                case _:
+                    if JsonKey.INDEX.value in message:
+                        parts.append(f" {message[JsonKey.INDEX.value]}")
+                    elif JsonKey.NAME.value in message:
+                        parts.append(f" {message[JsonKey.NAME.value]}")
 
             parts.append("]")
         
