@@ -27,7 +27,6 @@ class JsonKey(Enum):
     SYSTEM      = "s"
     ERROR       = "e"
     VALUE       = "v"
-    REPLY       = "r"
     ROGER       = "r"
     NAME        = "n"
     INDEX       = "x"
