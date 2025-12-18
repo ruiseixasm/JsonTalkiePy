@@ -199,7 +199,8 @@ class CommandLine:
         else:
             return ""
 
-        original_message_data = json_talkie._original_message.get( JsonKey.MESSAGE.value )
+        original_message = json_talkie._original_message
+        original_message_data = original_message.get( JsonKey.MESSAGE.value )
         if original_message_data == MessageData.LIST:
             parts.append(f"\t[{str(MessageData.CALL)}")
         else:
@@ -216,10 +217,10 @@ class CommandLine:
                 parts.append(f" {str(SystemData(message[JsonKey.SYSTEM.value]))}")
 
             case _:
-                if JsonKey.INDEX.value in json_talkie._original_message:
-                    parts.append(f" {json_talkie._original_message[JsonKey.INDEX.value]}")
-                elif JsonKey.NAME.value in json_talkie._original_message:
-                    parts.append(f" {json_talkie._original_message[JsonKey.NAME.value]}")
+                if JsonKey.INDEX.value in original_message:
+                    parts.append(f" {original_message[JsonKey.INDEX.value]}")
+                elif JsonKey.NAME.value in original_message:
+                    parts.append(f" {original_message[JsonKey.NAME.value]}")
 
         parts.append("]")
         
