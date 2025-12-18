@@ -94,7 +94,13 @@ class JsonTalkie:
     def remoteSend(self, message: Dict[str, Any]) -> bool:
         """Sends messages without network awareness."""
         message[ JsonKey.SOURCE.value ] = SourceData.REMOTE.value
-        message[ JsonKey.FROM.value ] = self._manifesto['talker']['name']
+        if message.get( JsonKey.FROM.value ) is not None:
+            if message[JsonKey.FROM.value] != self._manifesto['talker']['name']:
+                message[JsonKey.TO.value] = message[JsonKey.FROM.value]
+                message[ JsonKey.FROM.value ] = self._manifesto['talker']['name']
+        else:
+            message[ JsonKey.FROM.value ] = self._manifesto['talker']['name']
+
         if JsonKey.IDENTITY.value not in message:
             message[ JsonKey.IDENTITY.value ] = JsonTalkie.message_id()
         JsonTalkie.valid_checksum(message)
@@ -131,113 +137,110 @@ class JsonTalkie:
 
         message_data = MessageData(message[JsonKey.MESSAGE.value])
 
-        if message[JsonKey.MESSAGE.value] < MessageData.ECHO.value:
+        if message_data is not None:
 
-            message[JsonKey.TO.value] = message[JsonKey.FROM.value]
-            message[JsonKey.FROM.value] = self._manifesto['talker']['name']
+            message[JsonKey.ORIGINAL.value] = message_data.value
+            if message[JsonKey.MESSAGE.value] < MessageData.ECHO.value:
+                message[JsonKey.MESSAGE.value] = MessageData.ECHO.value
 
-            message[JsonKey.ORIGINAL.value] = message[JsonKey.MESSAGE.value]
-            message[JsonKey.MESSAGE.value] = MessageData.ECHO.value
+            match message_data:
 
-
-        match message_data:
-
-            case MessageData.RUN:
-                if JsonKey.NAME.value in message and 'run' in self._manifesto:
-                    if message[JsonKey.NAME.value] in self._manifesto['run']:
-                        self.transmitMessage(message)
-                        roger: bool = self._manifesto['run'][message[JsonKey.NAME.value]]['function'](message)
-                        if roger:
-                            message[JsonKey.ROGER.value] = EchoData.ROGER
+                case MessageData.RUN:
+                    if JsonKey.NAME.value in message and 'run' in self._manifesto:
+                        if message[JsonKey.NAME.value] in self._manifesto['run']:
+                            self.transmitMessage(message)
+                            roger: bool = self._manifesto['run'][message[JsonKey.NAME.value]]['function'](message)
+                            if roger:
+                                message[JsonKey.ROGER.value] = EchoData.ROGER
+                            else:
+                                message[JsonKey.ROGER.value] = EchoData.NEGATIVE
+                            return self.transmitMessage(message)
                         else:
-                            message[JsonKey.ROGER.value] = EchoData.NEGATIVE
-                        return self.transmitMessage(message)
-                    else:
-                        message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
-                        self.transmitMessage(message)
+                            message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
+                            self.transmitMessage(message)
 
-            case MessageData.SET:
-                if JsonKey.VALUE.value in message and isinstance(message[JsonKey.VALUE.value], int) and JsonKey.NAME.value in message and 'set' in self._manifesto:
-                    if message[JsonKey.NAME.value] in self._manifesto['set']:
-                        self.transmitMessage(message)
-                        roger: bool = self._manifesto['set'][message[JsonKey.NAME.value]]['function'](message, message[JsonKey.VALUE.value])
-                        if roger:
-                            message[JsonKey.ROGER.value] = EchoData.ROGER
+                case MessageData.SET:
+                    if JsonKey.VALUE.value in message and isinstance(message[JsonKey.VALUE.value], int) and JsonKey.NAME.value in message and 'set' in self._manifesto:
+                        if message[JsonKey.NAME.value] in self._manifesto['set']:
+                            self.transmitMessage(message)
+                            roger: bool = self._manifesto['set'][message[JsonKey.NAME.value]]['function'](message, message[JsonKey.VALUE.value])
+                            if roger:
+                                message[JsonKey.ROGER.value] = EchoData.ROGER
+                            else:
+                                message[JsonKey.ROGER.value] = EchoData.NEGATIVE
+                            return self.transmitMessage(message)
                         else:
-                            message[JsonKey.ROGER.value] = EchoData.NEGATIVE
-                        return self.transmitMessage(message)
+                            message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
+                            self.transmitMessage(message)
+
+                case MessageData.GET:
+                    if JsonKey.NAME.value in message and 'get' in self._manifesto:
+                        if message[JsonKey.NAME.value] in self._manifesto['get']:
+                            self.transmitMessage(message)
+                            message[JsonKey.VALUE.value] = self._manifesto['get'][message[JsonKey.NAME.value]]['function'](message)
+                            return self.transmitMessage(message)
+                        else:
+                            message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
+                            self.transmitMessage(message)
+
+                case MessageData.TALK:
+                    message[JsonKey.DESCRIPTION.value] = f"{self._manifesto['talker']['description']}"
+                    return self.transmitMessage(message)
+                
+                case MessageData.LIST:
+                    if 'run' in self._manifesto:
+                        for name, content in self._manifesto['run'].items():
+                            message[JsonKey.NAME.value] = name
+                            message[JsonKey.DESCRIPTION.value] = content['description']
+                            self.transmitMessage(message)
+                    if 'set' in self._manifesto:
+                        for name, content in self._manifesto['set'].items():
+                            message[JsonKey.NAME.value] = name
+                            message[JsonKey.DESCRIPTION.value] = content['description']
+                            self.transmitMessage(message)
+                    if 'get' in self._manifesto:
+                        for name, content in self._manifesto['get'].items():
+                            message[JsonKey.NAME.value] = name
+                            message[JsonKey.DESCRIPTION.value] = content['description']
+                            self.transmitMessage(message)
+                    return True
+                
+                case MessageData.CHANNEL:
+                    if JsonKey.VALUE.value in message and isinstance(message[JsonKey.VALUE.value], int):
+                        self._channel = message[JsonKey.VALUE.value]
                     else:
-                        message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
-                        self.transmitMessage(message)
+                        message[JsonKey.VALUE.value] = self._channel
+                    return self.transmitMessage(message)
+                
+                case MessageData.SYS:
+                    message[JsonKey.DESCRIPTION.value] = f"{platform.platform()}"
+                    return self.transmitMessage(message)
+                
+                case MessageData.ECHO:
 
-            case MessageData.GET:
-                if JsonKey.NAME.value in message and 'get' in self._manifesto:
-                    if message[JsonKey.NAME.value] in self._manifesto['get']:
-                        self.transmitMessage(message)
-                        message[JsonKey.VALUE.value] = self._manifesto['get'][message[JsonKey.NAME.value]]['function'](message)
-                        return self.transmitMessage(message)
-                    else:
-                        message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
-                        self.transmitMessage(message)
+                    # Echo codes (g):
+                    #     0 - ROGER
+                    #     1 - UNKNOWN
+                    #     2 - NONE
 
-            case MessageData.TALK:
-                message[JsonKey.DESCRIPTION.value] = f"{self._manifesto['talker']['description']}"
-                return self.transmitMessage(message)
-            
-            case MessageData.LIST:
-                if 'run' in self._manifesto:
-                    for name, content in self._manifesto['run'].items():
-                        message[JsonKey.NAME.value] = name
-                        message[JsonKey.DESCRIPTION.value] = content['description']
-                        self.transmitMessage(message)
-                if 'set' in self._manifesto:
-                    for name, content in self._manifesto['set'].items():
-                        message[JsonKey.NAME.value] = name
-                        message[JsonKey.DESCRIPTION.value] = content['description']
-                        self.transmitMessage(message)
-                if 'get' in self._manifesto:
-                    for name, content in self._manifesto['get'].items():
-                        message[JsonKey.NAME.value] = name
-                        message[JsonKey.DESCRIPTION.value] = content['description']
-                        self.transmitMessage(message)
-                return True
-            
-            case MessageData.CHANNEL:
-                if JsonKey.VALUE.value in message and isinstance(message[JsonKey.VALUE.value], int):
-                    self._channel = message[JsonKey.VALUE.value]
-                else:
-                    message[JsonKey.VALUE.value] = self._channel
-                return self.transmitMessage(message)
-            
-            case MessageData.SYS:
-                message[JsonKey.DESCRIPTION.value] = f"{platform.platform()}"
-                return self.transmitMessage(message)
-            
-            case MessageData.ECHO:
+                    if "echo" in self._manifesto:
+                        self._manifesto["echo"](message)
 
-                # Echo codes (g):
-                #     0 - ROGER
-                #     1 - UNKNOWN
-                #     2 - NONE
+                case MessageData.ERROR:
 
-                if "echo" in self._manifesto:
-                    self._manifesto["echo"](message)
+                    # Error types:
+                    #     0 - Unknown sender
+                    #     1 - Message missing the checksum
+                    #     2 - Message corrupted
+                    #     3 - Wrong message code
+                    #     4 - Message NOT identified
+                    #     5 - Set command arrived too late
 
-            case MessageData.ERROR:
+                    if "error" in self._manifesto:
+                        self._manifesto["error"](message)
 
-                # Error types:
-                #     0 - Unknown sender
-                #     1 - Message missing the checksum
-                #     2 - Message corrupted
-                #     3 - Wrong message code
-                #     4 - Message NOT identified
-                #     5 - Set command arrived too late
-
-                if "error" in self._manifesto:
-                    self._manifesto["error"](message)
-
-            case _:
-                print("\tUnknown message!")
+                case _:
+                    print("\tUnknown message!")
         return False
 
 

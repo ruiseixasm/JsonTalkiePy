@@ -242,12 +242,6 @@ class CommandLine:
                             case SystemData.BOARD:
                                 print(f"{padded_prefix}\t   {str(message[JsonKey.DESCRIPTION.value])}")
 
-                            case SystemData.PING:
-                                if "delay_ms" in message:
-                                    print(f"{padded_prefix}\t   {str(message["delay_ms"])}")
-                                else:
-                                    print(f"{padded_prefix}\t   {"unknown"}")
-
                             case _:
                                 print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
                     case _:
