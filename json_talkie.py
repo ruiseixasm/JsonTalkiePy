@@ -105,8 +105,10 @@ class JsonTalkie:
             message[ JsonKey.FROM.value ] = self._manifesto['talker']['name']
 
         if JsonKey.IDENTITY.value not in message:
-            self._original_message_id = JsonTalkie.message_id()
-            message[ JsonKey.IDENTITY.value ] = self._original_message_id
+            message[ JsonKey.IDENTITY.value ] = JsonTalkie.message_id()
+            if message[JsonKey.MESSAGE.value] < MessageData.ECHO.value:
+                self._original_message_id = message[ JsonKey.IDENTITY.value ]
+                self._original_message_data = MessageData( message[JsonKey.MESSAGE.value] )
         JsonTalkie.valid_checksum(message)
         if self._verbose:
             print(message)
@@ -145,7 +147,6 @@ class JsonTalkie:
         if message_data is not None:
 
             if message[JsonKey.MESSAGE.value] < MessageData.ECHO.value:
-                self._original_message_data = message_data
                 message[JsonKey.MESSAGE.value] = MessageData.ECHO.value
 
             match message_data:
