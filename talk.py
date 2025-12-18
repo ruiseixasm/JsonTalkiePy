@@ -199,14 +199,14 @@ class CommandLine:
         else:
             return ""
 
-        original_message_code = json_talkie._original_message_data
-        if original_message_code == MessageData.LIST:
+        original_message_data = json_talkie._original_message.get( JsonKey.MESSAGE.value )
+        if original_message_data == MessageData.LIST:
             parts.append(f"\t[{str(MessageData.CALL)}")
         else:
-            parts.append(f"\t[{str(original_message_code)}")
+            parts.append(f"\t[{str(MessageData( original_message_data ))}")
         parts.append(f" {from_talker}")
         
-        match original_message_code:
+        match original_message_data:
             case MessageData.LIST:
                 if JsonKey.INDEX.value in message and JsonKey.NAME.value in message:
                     parts.append(f" {message[JsonKey.INDEX.value]}")
@@ -216,10 +216,10 @@ class CommandLine:
                 parts.append(f" {str(SystemData(message[JsonKey.SYSTEM.value]))}")
 
             case _:
-                if JsonKey.INDEX.value in message:
-                    parts.append(f" {message[JsonKey.INDEX.value]}")
-                elif JsonKey.NAME.value in message:
-                    parts.append(f" {message[JsonKey.NAME.value]}")
+                if JsonKey.INDEX.value in json_talkie._original_message:
+                    parts.append(f" {json_talkie._original_message[JsonKey.INDEX.value]}")
+                elif JsonKey.NAME.value in json_talkie._original_message:
+                    parts.append(f" {json_talkie._original_message[JsonKey.NAME.value]}")
 
         parts.append("]")
         
@@ -232,9 +232,8 @@ class CommandLine:
             prefix = self.generate_prefix(message)
             padded_prefix = prefix.ljust(self.max_prefix_length)
 
-            original_message_code = json_talkie._original_message_data
-
-            match original_message_code:
+            original_message_data = json_talkie._original_message.get( JsonKey.MESSAGE.value )
+            match original_message_data:
                 case MessageData.TALK | MessageData.LIST:
                     print(f"{padded_prefix}\t   {str(message[JsonKey.DESCRIPTION.value])}")
                 case MessageData.SYS:

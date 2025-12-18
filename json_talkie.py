@@ -30,8 +30,7 @@ class JsonTalkie:
         self._socket: BroadcastSocket = socket  # Composition over inheritance
         self._manifesto: Dict[str, Dict[str, Any]] = manifesto
         self._channel: int = 0
-        self._original_message_id: int = 0
-        self._original_message_data: MessageData = MessageData.NOISE
+        self._original_message: Dict[str, Any] = {}
         self._received_message_data: MessageData = MessageData.NOISE
         self._verbose: bool = verbose
         # State variables
@@ -70,7 +69,7 @@ class JsonTalkie:
                     if self.validate_message(message):
                         # Add info to echo message right away accordingly to the message original type
                         if message[JsonKey.MESSAGE.value] == MessageData.ECHO.value:
-                            match self._original_message_data:
+                            match self._original_message:
                                 case MessageData.PING:
                                     actual_time: int = self.message_id()
                                     out_time_ms: int = message[JsonKey.TIMESTAMP.value]
@@ -105,8 +104,7 @@ class JsonTalkie:
         if JsonKey.IDENTITY.value not in message:
             message[ JsonKey.IDENTITY.value ] = JsonTalkie.message_id()
             if message[JsonKey.MESSAGE.value] < MessageData.ECHO.value:
-                self._original_message_id = message[ JsonKey.IDENTITY.value ]
-                self._original_message_data = MessageData( message[JsonKey.MESSAGE.value] )
+                self._original_message = message
         JsonTalkie.valid_checksum(message)
         if self._verbose:
             print(message)
@@ -210,7 +208,7 @@ class JsonTalkie:
 
                     if "echo" in self._manifesto:
                         message_id = message[JsonKey.IDENTITY.value]
-                        if message_id == self._original_message_id:
+                        if message_id == self._original_message.get(JsonKey.IDENTITY.value):
                             self._manifesto["echo"](message)
 
                 case MessageData.ERROR:
