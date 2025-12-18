@@ -238,9 +238,11 @@ class CommandLine:
                         system_code = SystemData(message[JsonKey.SYSTEM.value])
                         match system_code:
                             case SystemData.MUTE | SystemData.UNMUTE:
-                                print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
                                 if JsonKey.REPLY.value in message:
-                                    print(f"{padded_prefix}\t   {str(message[JsonKey.REPLY.value])}")
+                                    print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}", end="")
+                                    print(f"\t   {str(message[JsonKey.REPLY.value])}")
+                                else:
+                                    print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
                         
                             case SystemData.BOARD:
                                 print(f"{padded_prefix}\t   {str(message[JsonKey.DESCRIPTION.value])}")
@@ -249,16 +251,21 @@ class CommandLine:
                                 print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
                     case _:
                         if JsonKey.VALUE.value in message:
-                            print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
+                            if JsonKey.REPLY.value in message:
+                                print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.VALUE.value]))}", end="")
+                                print(f"\t   {str(message[JsonKey.REPLY.value])}")
+                            else:
+                                print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
                         elif JsonKey.ROGER.value in message:
-                            print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
-                        else:
+                            if JsonKey.REPLY.value in message:
+                                print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}", end="")
+                                print(f"\t   {str(message[JsonKey.REPLY.value])}")
+                            else:
+                                print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
+                        elif JsonKey.DESCRIPTION.value in message:
                             print(f"{padded_prefix}\t   {message[JsonKey.DESCRIPTION.value]}")
-                        if JsonKey.REPLY.value in message:
+                        elif JsonKey.REPLY.value in message:
                             print(f"{padded_prefix}\t   {str(message[JsonKey.REPLY.value])}")
-
-            # Remove the exceeding messages from the pool
-
 
             return True
         except Exception as e:
