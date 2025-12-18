@@ -81,79 +81,66 @@ class CommandLine:
         else:
             words = cmd.split()
             if words:
-                if len(words) == 1:
-                    message_data = MessageData.from_name(words[0])
-                    if message_data is not None:
-                        if not (message_data < MessageData.TALK or message_data > MessageData.PING):   # Includes CHANNEL
-                            message = {
-                                JsonKey.MESSAGE.value: message_data.value
-                            }
-                            json_talkie.remoteSend(message)
-                            return
-                        elif message_data == MessageData.SYS:
-                            self._print_sys()
-                            return
-                    else:
-                        self._print_help()
-                        return
-                else:   # WITH TARGET NAME DEFINED
-                    message: dict = {}
+                message_data = MessageData.from_name(words[0])
+                if message_data is not None:
+                    num_of_keys: int = len(words)
+                    message = {
+                        JsonKey.MESSAGE.value: message_data.value
+                    }
                     if (SourceData.from_name(words[0]) == SourceData.HERE):
                         message[ JsonKey.SOURCE.value ] = SourceData.HERE.value
-                        message[ JsonKey.FROM.value ] = json_talkie._manifesto['talker']['name']
-                    else:
-                        try:    # Try as channel first
-                            message[ JsonKey.TO.value ] = int(words[0])
-                        except ValueError:
-                            message[ JsonKey.TO.value ] = words[0]
+                    elif num_of_keys > 1:
+                        message[ JsonKey.TO.value ] = words[1]
 
-                    if MessageData.validate_to_words(words):
-                        message_data = MessageData.from_name(words[1])
-                        if message_data is not None:
-                            message[ JsonKey.MESSAGE.value ] = MessageData.from_name(words[1]).value
-                            match message_data:
-                                case MessageData.RUN | MessageData.GET:
-                                    try:    # Try as number first
-                                        message[ JsonKey.INDEX.value ] = int(words[2])
-                                    except ValueError:
-                                        message[ JsonKey.NAME.value ] = words[2]
-                                case MessageData.SET:
-                                    try:    # Try as number first
-                                        message[ JsonKey.INDEX.value ] = int(words[2])
-                                    except ValueError:
-                                        message[ JsonKey.NAME.value ] = words[2]
-                                    try:
-                                        message[ JsonKey.VALUE.value ] = int(words[3])
-                                    except ValueError:
-                                        print(f"\t'{words[3]}' is not an integer!")
-                                        return
-                                case MessageData.CHANNEL:
-                                    if len(words) > 2:
-                                        try:
-                                            message[ JsonKey.VALUE.value ] = int(words[2])
-                                        except ValueError:
-                                            print(f"\t'{words[2]}' is not an integer!")
-                                            return
-                                case MessageData.SYS:
-                                    if len(words) > 2:
-                                        if (SystemData.from_name(words[2]) is not None):
-                                            message[ JsonKey.SYSTEM.value ] = SystemData.from_name(words[2]).value
-                                        else:
-                                            self._print_sys()
-                                            return
-                                    else:
-                                        self._print_sys()
-                                        return
-                                    if len(words) > 3:
-                                        try:    # Try as number first
-                                            message[ JsonKey.VALUE.value ] = int(words[3])
-                                        except ValueError:
-                                            message[ JsonKey.VALUE.value ] = words[3]
-                                
-                            json_talkie.transmitMessage(message)
-                            return
-                        
-        self._print_help()
+                    match message_data:
+
+                        case MessageData.RUN | MessageData.GET:
+                            if num_of_keys > 2:
+                                message[ JsonKey.NAME.value ] = words[2]
+                            else:
+                                print(f"\t'{words[0]}' misses arguments!")
+                                return
+
+                        case MessageData.SET:
+                            if num_of_keys > 3:
+                                try:
+                                    message[ JsonKey.VALUE.value ] = int(words[3])
+                                except ValueError:
+                                    print(f"\t'{words[2]}' is not an integer!")
+                                    return
+                                message[ JsonKey.NAME.value ] = words[2]
+                            else:
+                                print(f"\t'{words[0]}' misses arguments!")
+                                return
+
+                        case MessageData.LIST:
+                            if num_of_keys < 2:
+                                print(f"\t'{words[0]}' misses arguments!")
+                                return
+                            
+                        case MessageData.SYS:
+                            if num_of_keys > 2:
+                                message[ JsonKey.VALUE.value ] = words[2]
+                            else:
+                                print(f"\t'{words[0]}' misses arguments!")
+                                return
+
+                        case MessageData.TALK:
+                            pass
+
+                        case MessageData.PING:
+                            if num_of_keys > 2:
+                                message[ JsonKey.DESCRIPTION.value ] = words[2]
+
+                        case MessageData.CHANNEL:
+                            if num_of_keys > 2:
+                                message[ JsonKey.VALUE.value ] = words[2]
+
+                        case _:
+                            self._print_help()
+                            return      
+ 
+        json_talkie.transmitMessage(message)
 
 
     def _print_help(self):

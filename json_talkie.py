@@ -120,6 +120,7 @@ class JsonTalkie:
     
 
     def hereSend(self, message: Dict[str, Any]) -> bool:
+        message[ JsonKey.SOURCE.value ] = SourceData.HERE.value
         return self.processMessage(message)
     
 
