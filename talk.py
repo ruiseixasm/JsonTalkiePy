@@ -100,20 +100,20 @@ class CommandLine:
 
                         case MessageData.CALL:
                             if num_of_keys > 2:
+                                # Action index or name
                                 try:
                                     message[ JsonKey.INDEX.value ] = int(words[2])
                                 except ValueError:
                                     message[ JsonKey.NAME.value ] = words[2]
-                                if num_of_keys > 3:
-                                    try:
-                                        message[ JsonKey.VALUE.value ] = int(words[3])
-                                    except ValueError:
-                                        message[ JsonKey.VALUE.value ] = words[3]
-                                    if num_of_keys > 4:
+                                message_keys: int = 3
+                                if num_of_keys > message_keys:
+                                    # Extra values
+                                    for value_i in range(num_of_keys - message_keys):
+                                        value_word: str = words[message_keys + value_i]
                                         try:
-                                            message[ JsonKey.DESCRIPTION.value ] = int(words[3])
+                                            message[ str(value_i) ] = int(value_word)
                                         except ValueError:
-                                            message[ JsonKey.DESCRIPTION.value ] = words[3]
+                                            message[ str(value_i) ] = value_word
                             else:
                                 print(f"\t'{words[0]}' misses arguments!")
                                 return
@@ -141,8 +141,15 @@ class CommandLine:
                             pass
 
                         case MessageData.CHANNEL:
-                            if num_of_keys > 2:
-                                message[ JsonKey.VALUE.value ] = words[2]
+                            message_keys: int = 2
+                            if num_of_keys > message_keys:
+                                # Extra values
+                                for value_i in range(num_of_keys - message_keys):
+                                    value_word: str = words[message_keys + value_i]
+                                    try:
+                                        message[ str(value_i) ] = int(value_word)
+                                    except ValueError:
+                                        message[ str(value_i) ] = value_word
 
                         case MessageData.PING:
                             if num_of_keys > 2:
