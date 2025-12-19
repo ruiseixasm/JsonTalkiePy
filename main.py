@@ -111,20 +111,20 @@ class Talker:
                                 roger = "UNKNOWN"
                             case 2:
                                 roger = "NONE"
-                        if TalkieKey.NAME.value in message:
-                            print(f" {what} {message[ TalkieKey.NAME.value ]}]\t{roger}")
+                        if TalkieKey.ACTION.value in message:
+                            print(f" {what} {message[ TalkieKey.ACTION.value ]}]\t{roger}")
                         else:
                             print(f" {what}]\t{roger}")
-                    elif TalkieKey.VALUE.value in message and TalkieKey.NAME.value in message:
-                        print(f" {what} {message[ TalkieKey.NAME.value ]}]\t{message[ TalkieKey.VALUE.value ]}")
-                    elif TalkieKey.NAME.value in message and TalkieKey.DESCRIPTION.value in message:
-                        print(f" {what} {message[ TalkieKey.NAME.value ]}]\t{message[ TalkieKey.DESCRIPTION.value ]}")
-                    elif TalkieKey.NAME.value in message and str(0) in message:
-                        print(f" {what} {message[ TalkieKey.NAME.value ]}]\t{message[  str(0)  ]}")
+                    elif TalkieKey.VALUE.value in message and TalkieKey.ACTION.value in message:
+                        print(f" {what} {message[ TalkieKey.ACTION.value ]}]\t{message[ TalkieKey.VALUE.value ]}")
+                    elif TalkieKey.ACTION.value in message and str(0) in message:
+                        print(f" {what} {message[ TalkieKey.ACTION.value ]}]\t{message[ str(0) ]}")
+                    elif TalkieKey.ACTION.value in message and str(0) in message:
+                        print(f" {what} {message[ TalkieKey.ACTION.value ]}]\t{message[  str(0)  ]}")
                     elif str(0) in message:
                         print(f" {what}]\t{message[  str(0)  ]}")
-            elif TalkieKey.DESCRIPTION.value in message:
-                print(f"]\t{message[ TalkieKey.DESCRIPTION.value ]}")
+            elif str(0) in message:
+                print(f"]\t{message[ str(0) ]}")
         return True
 
 
@@ -180,9 +180,9 @@ if __name__ == "__main__":
     try:
         messages: tuple[Dict[str, Any]] = (
             {TalkieKey.MESSAGE.value: 1, TalkieKey.TO.value: '*'},
-            {TalkieKey.MESSAGE.value: 2, TalkieKey.NAME.value: 'buzz', TalkieKey.TO.value: 'Buzzer'},
-            {TalkieKey.MESSAGE.value: 2, TalkieKey.NAME.value: 'on', TalkieKey.TO.value: 'Buzzer'},
-            {TalkieKey.MESSAGE.value: 2, TalkieKey.NAME.value: 'off', TalkieKey.TO.value: 'Buzzer'}
+            {TalkieKey.MESSAGE.value: 2, TalkieKey.ACTION.value: 'buzz', TalkieKey.TO.value: 'Buzzer'},
+            {TalkieKey.MESSAGE.value: 2, TalkieKey.ACTION.value: 'on', TalkieKey.TO.value: 'Buzzer'},
+            {TalkieKey.MESSAGE.value: 2, TalkieKey.ACTION.value: 'off', TalkieKey.TO.value: 'Buzzer'}
         )
 
         # Main loop

@@ -156,10 +156,10 @@ class JsonTalkie:
             match message_data:
 
                 case MessageValue.CALL:
-                    if TalkieKey.NAME.value in message and 'run' in self._manifesto:
-                        if message[TalkieKey.NAME.value] in self._manifesto['run']:
+                    if TalkieKey.ACTION.value in message and 'run' in self._manifesto:
+                        if message[TalkieKey.ACTION.value] in self._manifesto['run']:
                             self.transmitMessage(message)
-                            roger: bool = self._manifesto['run'][message[TalkieKey.NAME.value]]['function'](message)
+                            roger: bool = self._manifesto['run'][message[TalkieKey.ACTION.value]]['function'](message)
                             if roger:
                                 message[TalkieKey.ROGER.value] = RogerValue.ROGER
                             else:
@@ -172,23 +172,23 @@ class JsonTalkie:
                 case MessageValue.LIST:
                     if 'run' in self._manifesto:
                         for name, content in self._manifesto['run'].items():
-                            message[TalkieKey.NAME.value] = name
-                            message[TalkieKey.DESCRIPTION.value] = content['description']
+                            message[TalkieKey.ACTION.value] = name
+                            message[ str(0) ] = content['description']
                             self.transmitMessage(message)
                     if 'set' in self._manifesto:
                         for name, content in self._manifesto['set'].items():
-                            message[TalkieKey.NAME.value] = name
-                            message[TalkieKey.DESCRIPTION.value] = content['description']
+                            message[TalkieKey.ACTION.value] = name
+                            message[ str(0) ] = content['description']
                             self.transmitMessage(message)
                     if 'get' in self._manifesto:
                         for name, content in self._manifesto['get'].items():
-                            message[TalkieKey.NAME.value] = name
-                            message[TalkieKey.DESCRIPTION.value] = content['description']
+                            message[TalkieKey.ACTION.value] = name
+                            message[ str(0) ] = content['description']
                             self.transmitMessage(message)
                     return True
                 
                 case MessageValue.TALK:
-                    message[TalkieKey.DESCRIPTION.value] = f"{self._manifesto['talker']['description']}"
+                    message[ str(0) ] = f"{self._manifesto['talker']['description']}"
                     return self.transmitMessage(message)
                 
                 case MessageValue.CHANNEL:
@@ -203,7 +203,7 @@ class JsonTalkie:
                     return self.transmitMessage(message)
                 
                 case MessageValue.SYS:
-                    message[TalkieKey.DESCRIPTION.value] = f"{platform.platform()}"
+                    message[ str(0) ] = f"{platform.platform()}"
                     return self.transmitMessage(message)
                 
                 case MessageValue.ECHO:

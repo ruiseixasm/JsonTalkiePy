@@ -102,9 +102,9 @@ class CommandLine:
                             if num_of_keys > 2:
                                 # Action index or name
                                 try:
-                                    message[ TalkieKey.INDEX.value ] = int(words[2])
+                                    message[ TalkieKey.ACTION.value ] = int(words[2])
                                 except ValueError:
-                                    message[ TalkieKey.NAME.value ] = words[2]
+                                    message[ TalkieKey.ACTION.value ] = words[2]
                                 message_keys: int = 3
                                 if num_of_keys > message_keys:  # Extra values
                                     for value_i in range(num_of_keys - message_keys):
@@ -228,18 +228,18 @@ class CommandLine:
         
         match original_message_data:
             case MessageValue.LIST:
-                if TalkieKey.INDEX.value in message and TalkieKey.NAME.value in message:
-                    parts.append(f" {message[TalkieKey.INDEX.value]}")
-                    parts.append(f"|{message[TalkieKey.NAME.value]}")
+                if TalkieKey.ACTION.value in message and TalkieKey.ACTION.value in message:
+                    parts.append(f" {message[TalkieKey.ACTION.value]}")
+                    parts.append(f"|{message[TalkieKey.ACTION.value]}")
 
             case MessageValue.SYS:
                 parts.append(f" {str(SystemValue(message[TalkieKey.SYSTEM.value]))}")
 
             case _:
-                if TalkieKey.INDEX.value in original_message:
-                    parts.append(f" {original_message[TalkieKey.INDEX.value]}")
-                elif TalkieKey.NAME.value in original_message:
-                    parts.append(f" {original_message[TalkieKey.NAME.value]}")
+                if TalkieKey.ACTION.value in original_message:
+                    parts.append(f" {original_message[TalkieKey.ACTION.value]}")
+                elif TalkieKey.ACTION.value in original_message:
+                    parts.append(f" {original_message[TalkieKey.ACTION.value]}")
 
         parts.append("]")
         
@@ -270,8 +270,8 @@ class CommandLine:
                     print(f"{padded_prefix}", end="")
                     if TalkieKey.ROGER.value in message:
                         print(f"\t   {str(RogerValue(message[TalkieKey.ROGER.value]))}", end="")
-                    elif TalkieKey.DESCRIPTION.value in message:
-                        print(f"\t   {message[TalkieKey.DESCRIPTION.value]}", end="")
+                    elif str(0) in message:
+                        print(f"\t   {message[ str(0) ]}", end="")
                     for value_i in range(10):
                         if str(value_i) in message:
                             print(f"\t   {str(message[ str(value_i) ])}", end="")
