@@ -257,20 +257,11 @@ class CommandLine:
                 case MessageData.TALK | MessageData.LIST:
                     print(f"{padded_prefix}\t   {str(message[JsonKey.DESCRIPTION.value])}")
                 case MessageData.SYS:
-                    system_code = SystemData(message[JsonKey.SYSTEM.value])
-                    match system_code:
-                        case SystemData.MUTE | SystemData.UNMUTE:
-                            if str(0) in message:
-                                print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}", end="")
-                                print(f"\t   {str(message[ str(0) ])}")
-                            else:
-                                print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
-                    
-                        case SystemData.BOARD:
-                            print(f"{padded_prefix}\t   {str(message[JsonKey.DESCRIPTION.value])}")
-
-                        case _:
-                            print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
+                    if str(0) in message:
+                        print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}", end="")
+                        print(f"\t   {str(message[ str(0) ])}")
+                    else:
+                        print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
                 case _:
                     if original_message_data == MessageData.CALL:
                         roger = message.get(JsonKey.ROGER.value)
