@@ -15,7 +15,7 @@ from enum import Enum, IntEnum
 from typing import Union, cast, Optional
 
 
-class JsonKey(Enum):
+class TalkieKey(Enum):
     SOURCE      = "c"
     CHECKSUM    = "c"
     TIMESTAMP   = "i"
@@ -24,12 +24,8 @@ class JsonKey(Enum):
     FROM        = "f"
     TO          = "t"
     SYSTEM      = "s"
-    ERROR       = "e"
-    VALUE       = "v"
+    ACTION      = "a"
     ROGER       = "r"
-    NAME        = "n"
-    INDEX       = "x"
-    DESCRIPTION = "d"
 
 
 class TalkieCode(IntEnum):
@@ -48,33 +44,33 @@ class TalkieCode(IntEnum):
             return None
 
 
-class SourceData(TalkieCode):
+class SourceValue(TalkieCode):
     REMOTE, LOCAL, HERE = range(3)
 
 
-class MessageData(TalkieCode):
+class MessageValue(TalkieCode):
     TALK, CHANNEL, PING, CALL, LIST, SYS, ECHO, ERROR, NOISE = range(9)
 
     @classmethod
     def validate_to_words(cls, words: list[str]) -> bool:
-        if len(words) > 1 and MessageData.from_name(words[1]) is not None:
-            match MessageData.from_name(words[1]):  # word[0] is the device name
-                case MessageData.CALL:
+        if len(words) > 1 and MessageValue.from_name(words[1]) is not None:
+            match MessageValue.from_name(words[1]):  # word[0] is the device name
+                case MessageValue.CALL:
                     return len(words) == 3
-                case MessageData.SYS | MessageData.CHANNEL:
+                case MessageValue.SYS | MessageValue.CHANNEL:
                     return True
                 case _: return len(words) == 2
         return False
 
 
-class SystemData(TalkieCode):
-    BOARD, DROPS, DELAY, MUTE, UNMUTE, MUTED, SOCKET, TALKER, MANIFESTO = range(9)
+class SystemValue(TalkieCode):
+    BOARD, DROPS, DELAY, MUTE, SOCKET, TALKER, MANIFESTO = range(7)
 
 
-class EchoData(TalkieCode):
+class RogerValue(TalkieCode):
     ROGER, SAY_AGAIN, NEGATIVE, NIL = range(4)
 
 
-class ErrorData(TalkieCode):
+class ErrorValue(TalkieCode):
     FROM, FIELD, CHECKSUM, MESSAGE, IDENTITY, DELAY, KEY, DATA = range(8)
 

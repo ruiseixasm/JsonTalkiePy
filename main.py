@@ -84,8 +84,8 @@ class Talker:
     #     2 - NONE
 
     def echo(self, message: Dict[str, Any]) -> bool:
-        if JsonKey.FROM.value in message:
-            print(f"\t[{message[ JsonKey.FROM.value ]}", end='')
+        if TalkieKey.FROM.value in message:
+            print(f"\t[{message[ TalkieKey.FROM.value ]}", end='')
             if "w" in message:
                 what: str = "echo"
                 if isinstance(message["w"], int) and message["w"] >= 0 and message["w"] <= 6:
@@ -104,27 +104,27 @@ class Talker:
                             what = "sys"
                     if "g" in message:
                         roger: str = "FAIL"
-                        match message[ JsonKey.ROGER.value ]:
+                        match message[ TalkieKey.ROGER.value ]:
                             case 0:
                                 roger = "ROGER"
                             case 1:
                                 roger = "UNKNOWN"
                             case 2:
                                 roger = "NONE"
-                        if JsonKey.NAME.value in message:
-                            print(f" {what} {message[ JsonKey.NAME.value ]}]\t{roger}")
+                        if TalkieKey.NAME.value in message:
+                            print(f" {what} {message[ TalkieKey.NAME.value ]}]\t{roger}")
                         else:
                             print(f" {what}]\t{roger}")
-                    elif JsonKey.VALUE.value in message and JsonKey.NAME.value in message:
-                        print(f" {what} {message[ JsonKey.NAME.value ]}]\t{message[ JsonKey.VALUE.value ]}")
-                    elif JsonKey.NAME.value in message and JsonKey.DESCRIPTION.value in message:
-                        print(f" {what} {message[ JsonKey.NAME.value ]}]\t{message[ JsonKey.DESCRIPTION.value ]}")
-                    elif JsonKey.NAME.value in message and str(0) in message:
-                        print(f" {what} {message[ JsonKey.NAME.value ]}]\t{message[  str(0)  ]}")
+                    elif TalkieKey.VALUE.value in message and TalkieKey.NAME.value in message:
+                        print(f" {what} {message[ TalkieKey.NAME.value ]}]\t{message[ TalkieKey.VALUE.value ]}")
+                    elif TalkieKey.NAME.value in message and TalkieKey.DESCRIPTION.value in message:
+                        print(f" {what} {message[ TalkieKey.NAME.value ]}]\t{message[ TalkieKey.DESCRIPTION.value ]}")
+                    elif TalkieKey.NAME.value in message and str(0) in message:
+                        print(f" {what} {message[ TalkieKey.NAME.value ]}]\t{message[  str(0)  ]}")
                     elif str(0) in message:
                         print(f" {what}]\t{message[  str(0)  ]}")
-            elif JsonKey.DESCRIPTION.value in message:
-                print(f"]\t{message[ JsonKey.DESCRIPTION.value ]}")
+            elif TalkieKey.DESCRIPTION.value in message:
+                print(f"]\t{message[ TalkieKey.DESCRIPTION.value ]}")
         return True
 
 
@@ -137,12 +137,12 @@ class Talker:
     #     5 - Set command arrived too late
 
     def error(self, message: Dict[str, Any]) -> bool:
-        if JsonKey.FROM.value in message:
-            print(f"\t[{message[ JsonKey.FROM.value ]}", end='')
-            if JsonKey.ERROR.value in message:
-                if isinstance(message[ JsonKey.ERROR.value ], int):
+        if TalkieKey.FROM.value in message:
+            print(f"\t[{message[ TalkieKey.FROM.value ]}", end='')
+            if TalkieKey.ERROR.value in message:
+                if isinstance(message[ TalkieKey.ERROR.value ], int):
                     print(f"]\tERROR", end='')
-                    match message[ JsonKey.ERROR.value ]:
+                    match message[ TalkieKey.ERROR.value ]:
                         case 0:
                             print(f"\tUnknown sender")
                         case 1:
@@ -179,10 +179,10 @@ if __name__ == "__main__":
     
     try:
         messages: tuple[Dict[str, Any]] = (
-            {JsonKey.MESSAGE.value: 1, JsonKey.TO.value: '*'},
-            {JsonKey.MESSAGE.value: 2, JsonKey.NAME.value: 'buzz', JsonKey.TO.value: 'Buzzer'},
-            {JsonKey.MESSAGE.value: 2, JsonKey.NAME.value: 'on', JsonKey.TO.value: 'Buzzer'},
-            {JsonKey.MESSAGE.value: 2, JsonKey.NAME.value: 'off', JsonKey.TO.value: 'Buzzer'}
+            {TalkieKey.MESSAGE.value: 1, TalkieKey.TO.value: '*'},
+            {TalkieKey.MESSAGE.value: 2, TalkieKey.NAME.value: 'buzz', TalkieKey.TO.value: 'Buzzer'},
+            {TalkieKey.MESSAGE.value: 2, TalkieKey.NAME.value: 'on', TalkieKey.TO.value: 'Buzzer'},
+            {TalkieKey.MESSAGE.value: 2, TalkieKey.NAME.value: 'off', TalkieKey.TO.value: 'Buzzer'}
         )
 
         # Main loop

@@ -21,7 +21,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.patch_stdout import patch_stdout
 
 from json_talkie import JsonTalkie
-from talkie_codes import JsonKey, SourceData, MessageData, SystemData, EchoData
+from talkie_codes import TalkieKey, SourceValue, MessageValue, SystemValue, RogerValue
 
 
 
@@ -81,30 +81,30 @@ class CommandLine:
         else:
             words = cmd.split()
             if words:
-                message_data = MessageData.from_name(words[0])
+                message_data = MessageValue.from_name(words[0])
                 if message_data is not None:
                     num_of_keys: int = len(words)
                     message = {
-                        JsonKey.MESSAGE.value: message_data.value
+                        TalkieKey.MESSAGE.value: message_data.value
                     }
                     if num_of_keys > 1:
-                        if (SourceData.from_name(words[1]) == SourceData.HERE):
-                            message[ JsonKey.SOURCE.value ] = SourceData.HERE.value
+                        if (SourceValue.from_name(words[1]) == SourceValue.HERE):
+                            message[ TalkieKey.SOURCE.value ] = SourceValue.HERE.value
                         else:
                             try:
-                                message[ JsonKey.TO.value ] = int(words[1]) # Check if it's a Channel first
+                                message[ TalkieKey.TO.value ] = int(words[1]) # Check if it's a Channel first
                             except ValueError:
-                                message[ JsonKey.TO.value ] = words[1]
+                                message[ TalkieKey.TO.value ] = words[1]
 
                     match message_data:
 
-                        case MessageData.CALL:
+                        case MessageValue.CALL:
                             if num_of_keys > 2:
                                 # Action index or name
                                 try:
-                                    message[ JsonKey.INDEX.value ] = int(words[2])
+                                    message[ TalkieKey.INDEX.value ] = int(words[2])
                                 except ValueError:
-                                    message[ JsonKey.NAME.value ] = words[2]
+                                    message[ TalkieKey.NAME.value ] = words[2]
                                 message_keys: int = 3
                                 if num_of_keys > message_keys:  # Extra values
                                     for value_i in range(num_of_keys - message_keys):
@@ -117,15 +117,15 @@ class CommandLine:
                                 print(f"\t'{words[0]}' misses arguments!")
                                 return
 
-                        case MessageData.LIST:
+                        case MessageValue.LIST:
                             if num_of_keys < 2:
                                 print(f"\t'{words[0]}' misses arguments!")
                                 return
                             
-                        case MessageData.SYS:
+                        case MessageValue.SYS:
                             if num_of_keys > 2:
-                                if SystemData.from_name(words[2]) is not None:
-                                    message[ JsonKey.SYSTEM.value ] = SystemData.from_name(words[2]).value
+                                if SystemValue.from_name(words[2]) is not None:
+                                    message[ TalkieKey.SYSTEM.value ] = SystemValue.from_name(words[2]).value
                                 else:
                                     print(f"\t'{words[2]}' isn't a valid SystemData code!")
                                     return
@@ -144,10 +144,10 @@ class CommandLine:
                                 self._print_sys()
                                 return
 
-                        case MessageData.TALK:
+                        case MessageValue.TALK:
                             pass
 
-                        case MessageData.CHANNEL:
+                        case MessageValue.CHANNEL:
                             message_keys: int = 2
                             if num_of_keys > message_keys:  # Extra values
                                 for value_i in range(num_of_keys - message_keys):
@@ -157,7 +157,7 @@ class CommandLine:
                                     except ValueError:
                                         message[ str(value_i) ] = value_word
 
-                        case MessageData.PING:
+                        case MessageValue.PING:
                             message_keys: int = 2
                             if num_of_keys > message_keys:  # Extra values
                                 for value_i in range(num_of_keys - message_keys):
@@ -211,35 +211,35 @@ class CommandLine:
         """Generate aligned prefix for messages"""
         parts = []
 
-        if JsonKey.FROM.value in message:
-            from_talker = message[JsonKey.FROM.value]
-        elif JsonKey.SOURCE.value in message and message[JsonKey.SOURCE.value] == SourceData.HERE.value:
+        if TalkieKey.FROM.value in message:
+            from_talker = message[TalkieKey.FROM.value]
+        elif TalkieKey.SOURCE.value in message and message[TalkieKey.SOURCE.value] == SourceValue.HERE.value:
             from_talker = json_talkie._manifesto['talker']['name']
         else:
             return ""
 
         original_message = json_talkie._original_message
-        original_message_data = original_message.get( JsonKey.MESSAGE.value )
-        if original_message_data == MessageData.LIST:
-            parts.append(f"\t[{str(MessageData.CALL)}")
+        original_message_data = original_message.get( TalkieKey.MESSAGE.value )
+        if original_message_data == MessageValue.LIST:
+            parts.append(f"\t[{str(MessageValue.CALL)}")
         else:
-            parts.append(f"\t[{str(MessageData( original_message_data ))}")
+            parts.append(f"\t[{str(MessageValue( original_message_data ))}")
         parts.append(f" {from_talker}")
         
         match original_message_data:
-            case MessageData.LIST:
-                if JsonKey.INDEX.value in message and JsonKey.NAME.value in message:
-                    parts.append(f" {message[JsonKey.INDEX.value]}")
-                    parts.append(f"|{message[JsonKey.NAME.value]}")
+            case MessageValue.LIST:
+                if TalkieKey.INDEX.value in message and TalkieKey.NAME.value in message:
+                    parts.append(f" {message[TalkieKey.INDEX.value]}")
+                    parts.append(f"|{message[TalkieKey.NAME.value]}")
 
-            case MessageData.SYS:
-                parts.append(f" {str(SystemData(message[JsonKey.SYSTEM.value]))}")
+            case MessageValue.SYS:
+                parts.append(f" {str(SystemValue(message[TalkieKey.SYSTEM.value]))}")
 
             case _:
-                if JsonKey.INDEX.value in original_message:
-                    parts.append(f" {original_message[JsonKey.INDEX.value]}")
-                elif JsonKey.NAME.value in original_message:
-                    parts.append(f" {original_message[JsonKey.NAME.value]}")
+                if TalkieKey.INDEX.value in original_message:
+                    parts.append(f" {original_message[TalkieKey.INDEX.value]}")
+                elif TalkieKey.NAME.value in original_message:
+                    parts.append(f" {original_message[TalkieKey.NAME.value]}")
 
         parts.append("]")
         
@@ -252,26 +252,26 @@ class CommandLine:
             prefix = self.generate_prefix(message)
             padded_prefix = prefix.ljust(self.max_prefix_length)
 
-            original_message_data = json_talkie._original_message.get( JsonKey.MESSAGE.value )
+            original_message_data = json_talkie._original_message.get( TalkieKey.MESSAGE.value )
             match original_message_data:
-                case MessageData.TALK | MessageData.LIST:
-                    print(f"{padded_prefix}\t   {str(message[JsonKey.DESCRIPTION.value])}")
-                case MessageData.SYS:
+                case MessageValue.TALK | MessageValue.LIST:
+                    print(f"{padded_prefix}\t   {str(message[ str(0) ])}")
+                case MessageValue.SYS:
                     if str(0) in message:
-                        print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}", end="")
+                        print(f"{padded_prefix}\t   {str(RogerValue(message[TalkieKey.ROGER.value]))}", end="")
                         print(f"\t   {str(message[ str(0) ])}")
                     else:
-                        print(f"{padded_prefix}\t   {str(EchoData(message[JsonKey.ROGER.value]))}")
+                        print(f"{padded_prefix}\t   {str(RogerValue(message[TalkieKey.ROGER.value]))}")
                 case _:
-                    if original_message_data == MessageData.CALL:
-                        roger = message.get(JsonKey.ROGER.value)
+                    if original_message_data == MessageValue.CALL:
+                        roger = message.get(TalkieKey.ROGER.value)
                         if roger is None:   # Implicit ROGER for CALL
-                            message[JsonKey.ROGER.value] = EchoData.ROGER
+                            message[TalkieKey.ROGER.value] = RogerValue.ROGER
                     print(f"{padded_prefix}", end="")
-                    if JsonKey.ROGER.value in message:
-                        print(f"\t   {str(EchoData(message[JsonKey.ROGER.value]))}", end="")
-                    elif JsonKey.DESCRIPTION.value in message:
-                        print(f"\t   {message[JsonKey.DESCRIPTION.value]}", end="")
+                    if TalkieKey.ROGER.value in message:
+                        print(f"\t   {str(RogerValue(message[TalkieKey.ROGER.value]))}", end="")
+                    elif TalkieKey.DESCRIPTION.value in message:
+                        print(f"\t   {message[TalkieKey.DESCRIPTION.value]}", end="")
                     for value_i in range(10):
                         if str(value_i) in message:
                             print(f"\t   {str(message[ str(value_i) ])}", end="")
@@ -288,9 +288,9 @@ class CommandLine:
 
     def error(self, message: Dict[str, Any]) -> bool:
         """Handle error messages"""
-        if JsonKey.FROM.value in message:
+        if TalkieKey.FROM.value in message:
             print(f"\t[{message['f']}", end='')
-            if JsonKey.ERROR.value in message and isinstance(message[ JsonKey.ERROR.value ], int):
+            if TalkieKey.ERROR.value in message and isinstance(message[ TalkieKey.ERROR.value ], int):
                 error_messages = {
                     0: "Message NOT for me",
                     1: "Unknown sender",

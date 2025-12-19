@@ -20,7 +20,7 @@ import platform
 
 from broadcast_socket import BroadcastSocket
 
-from talkie_codes import JsonKey, SourceData, MessageData, SystemData, EchoData
+from talkie_codes import TalkieKey, SourceValue, MessageValue, SystemValue, RogerValue
 
 
 
@@ -31,7 +31,7 @@ class JsonTalkie:
         self._manifesto: Dict[str, Dict[str, Any]] = manifesto
         self._channel: int = 0
         self._original_message: Dict[str, Any] = {}
-        self._received_message_data: MessageData = MessageData.NOISE
+        self._received_message_data: MessageValue = MessageValue.NOISE
         self._verbose: bool = verbose
         # State variables
         self._devices_address: Dict[str, Tuple[str, int]] = {}
@@ -56,10 +56,10 @@ class JsonTalkie:
         self._socket.close()
 
     @staticmethod
-    def getMessageData(message: Dict[str, Any], json_key: JsonKey) -> Union[MessageData, None]:
+    def getMessageData(message: Dict[str, Any], json_key: TalkieKey) -> Union[MessageValue, None]:
         message_data = message.get(json_key.value)
         if message_data is not None:
-            return MessageData(message_data)
+            return MessageValue(message_data)
         return None
 
 
@@ -75,11 +75,11 @@ class JsonTalkie:
                     message: Dict[str, Any] = JsonTalkie.decode(data)
                     if self.validate_message(message):
                         # Add info to echo message right away accordingly to the message original type
-                        if message[JsonKey.MESSAGE.value] == MessageData.ECHO.value:
-                            match JsonTalkie.getMessageData(self._original_message, JsonKey.MESSAGE):
-                                case MessageData.PING:
+                        if message[TalkieKey.MESSAGE.value] == MessageValue.ECHO.value:
+                            match JsonTalkie.getMessageData(self._original_message, TalkieKey.MESSAGE):
+                                case MessageValue.PING:
                                     actual_time: int = self.message_id()
-                                    out_time_ms: int = message[JsonKey.TIMESTAMP.value]
+                                    out_time_ms: int = message[TalkieKey.TIMESTAMP.value]
                                     delay_ms: int = actual_time - out_time_ms
                                     if delay_ms < 0:    # do overflow as if uint16_t in c++
                                         delay_ms += 0xFFFF + 1  # 2^16
@@ -88,8 +88,8 @@ class JsonTalkie:
 
                         if self._verbose:
                             print(message)
-                        if JsonKey.FROM.value in message:
-                            self._devices_address[message[ JsonKey.FROM.value ]] = ip_port
+                        if TalkieKey.FROM.value in message:
+                            self._devices_address[message[ TalkieKey.FROM.value ]] = ip_port
 
                         self.processMessage(message)
                 except (UnicodeDecodeError, json.JSONDecodeError) as e:
@@ -100,25 +100,25 @@ class JsonTalkie:
 
     def remoteSend(self, message: Dict[str, Any]) -> bool:
         """Sends messages without network awareness."""
-        message[ JsonKey.SOURCE.value ] = SourceData.REMOTE.value
-        if message.get( JsonKey.FROM.value ) is not None:
-            if message[JsonKey.FROM.value] != self._manifesto['talker']['name']:
-                message[JsonKey.TO.value] = message[JsonKey.FROM.value]
-                message[ JsonKey.FROM.value ] = self._manifesto['talker']['name']
+        message[ TalkieKey.SOURCE.value ] = SourceValue.REMOTE.value
+        if message.get( TalkieKey.FROM.value ) is not None:
+            if message[TalkieKey.FROM.value] != self._manifesto['talker']['name']:
+                message[TalkieKey.TO.value] = message[TalkieKey.FROM.value]
+                message[ TalkieKey.FROM.value ] = self._manifesto['talker']['name']
         else:
-            message[ JsonKey.FROM.value ] = self._manifesto['talker']['name']
+            message[ TalkieKey.FROM.value ] = self._manifesto['talker']['name']
 
-        if JsonKey.IDENTITY.value not in message:
-            message[ JsonKey.IDENTITY.value ] = JsonTalkie.message_id()
-            if message[JsonKey.MESSAGE.value] < MessageData.ECHO.value:
+        if TalkieKey.IDENTITY.value not in message:
+            message[ TalkieKey.IDENTITY.value ] = JsonTalkie.message_id()
+            if message[TalkieKey.MESSAGE.value] < MessageValue.ECHO.value:
                 self._original_message = message
         JsonTalkie.valid_checksum(message)
         if self._verbose:
             print(message)
         # Avoids broadcasting flooding
         sent_result: bool = False
-        if JsonKey.TO.value in message and message[ JsonKey.TO.value ] in self._devices_address:
-            sent_result = self._socket.send( JsonTalkie.encode(message), self._devices_address[message[ JsonKey.TO.value ]] )
+        if TalkieKey.TO.value in message and message[ TalkieKey.TO.value ] in self._devices_address:
+            sent_result = self._socket.send( JsonTalkie.encode(message), self._devices_address[message[ TalkieKey.TO.value ]] )
             if self._verbose:
                 print("--> DIRECT SENDING -->")
         else:
@@ -129,14 +129,14 @@ class JsonTalkie:
     
 
     def hereSend(self, message: Dict[str, Any]) -> bool:
-        message[ JsonKey.SOURCE.value ] = SourceData.HERE.value
+        message[ TalkieKey.SOURCE.value ] = SourceValue.HERE.value
         return self.processMessage(message)
     
 
     def transmitMessage(self, message: Dict[str, Any]) -> bool:
-        source_data = SourceData( message.get(JsonKey.SOURCE.value, SourceData.REMOTE) )   # get is safer than []
+        source_data = SourceValue( message.get(TalkieKey.SOURCE.value, SourceValue.REMOTE) )   # get is safer than []
         match source_data:
-            case SourceData.HERE:
+            case SourceValue.HERE:
                 return self.hereSend(message)
             case _: # Default is remote
                 return self.remoteSend(message)
@@ -145,68 +145,68 @@ class JsonTalkie:
     def processMessage(self, message: Dict[str, Any]) -> bool:
         """Handles message content only."""
 
-        message_data = MessageData(message[JsonKey.MESSAGE.value])
+        message_data = MessageValue(message[TalkieKey.MESSAGE.value])
 
         if message_data is not None:
 
-            if message[JsonKey.MESSAGE.value] < MessageData.ECHO.value:
-                self._received_message_data = MessageData(message[JsonKey.MESSAGE.value])
-                message[JsonKey.MESSAGE.value] = MessageData.ECHO.value
+            if message[TalkieKey.MESSAGE.value] < MessageValue.ECHO.value:
+                self._received_message_data = MessageValue(message[TalkieKey.MESSAGE.value])
+                message[TalkieKey.MESSAGE.value] = MessageValue.ECHO.value
 
             match message_data:
 
-                case MessageData.CALL:
-                    if JsonKey.NAME.value in message and 'run' in self._manifesto:
-                        if message[JsonKey.NAME.value] in self._manifesto['run']:
+                case MessageValue.CALL:
+                    if TalkieKey.NAME.value in message and 'run' in self._manifesto:
+                        if message[TalkieKey.NAME.value] in self._manifesto['run']:
                             self.transmitMessage(message)
-                            roger: bool = self._manifesto['run'][message[JsonKey.NAME.value]]['function'](message)
+                            roger: bool = self._manifesto['run'][message[TalkieKey.NAME.value]]['function'](message)
                             if roger:
-                                message[JsonKey.ROGER.value] = EchoData.ROGER
+                                message[TalkieKey.ROGER.value] = RogerValue.ROGER
                             else:
-                                message[JsonKey.ROGER.value] = EchoData.NEGATIVE
+                                message[TalkieKey.ROGER.value] = RogerValue.NEGATIVE
                             return self.transmitMessage(message)
                         else:
-                            message[JsonKey.ROGER.value] = EchoData.SAY_AGAIN
+                            message[TalkieKey.ROGER.value] = RogerValue.SAY_AGAIN
                             self.transmitMessage(message)
 
-                case MessageData.LIST:
+                case MessageValue.LIST:
                     if 'run' in self._manifesto:
                         for name, content in self._manifesto['run'].items():
-                            message[JsonKey.NAME.value] = name
-                            message[JsonKey.DESCRIPTION.value] = content['description']
+                            message[TalkieKey.NAME.value] = name
+                            message[TalkieKey.DESCRIPTION.value] = content['description']
                             self.transmitMessage(message)
                     if 'set' in self._manifesto:
                         for name, content in self._manifesto['set'].items():
-                            message[JsonKey.NAME.value] = name
-                            message[JsonKey.DESCRIPTION.value] = content['description']
+                            message[TalkieKey.NAME.value] = name
+                            message[TalkieKey.DESCRIPTION.value] = content['description']
                             self.transmitMessage(message)
                     if 'get' in self._manifesto:
                         for name, content in self._manifesto['get'].items():
-                            message[JsonKey.NAME.value] = name
-                            message[JsonKey.DESCRIPTION.value] = content['description']
+                            message[TalkieKey.NAME.value] = name
+                            message[TalkieKey.DESCRIPTION.value] = content['description']
                             self.transmitMessage(message)
                     return True
                 
-                case MessageData.TALK:
-                    message[JsonKey.DESCRIPTION.value] = f"{self._manifesto['talker']['description']}"
+                case MessageValue.TALK:
+                    message[TalkieKey.DESCRIPTION.value] = f"{self._manifesto['talker']['description']}"
                     return self.transmitMessage(message)
                 
-                case MessageData.CHANNEL:
-                    if JsonKey.VALUE.value in message and isinstance(message[JsonKey.VALUE.value], int):
-                        self._channel = message[JsonKey.VALUE.value]
+                case MessageValue.CHANNEL:
+                    if TalkieKey.VALUE.value in message and isinstance(message[TalkieKey.VALUE.value], int):
+                        self._channel = message[TalkieKey.VALUE.value]
                     else:
-                        message[JsonKey.VALUE.value] = self._channel
+                        message[TalkieKey.VALUE.value] = self._channel
                     return self.transmitMessage(message)
                 
-                case MessageData.PING:
+                case MessageValue.PING:
                     # Does nothing, sends it right away
                     return self.transmitMessage(message)
                 
-                case MessageData.SYS:
-                    message[JsonKey.DESCRIPTION.value] = f"{platform.platform()}"
+                case MessageValue.SYS:
+                    message[TalkieKey.DESCRIPTION.value] = f"{platform.platform()}"
                     return self.transmitMessage(message)
                 
-                case MessageData.ECHO:
+                case MessageValue.ECHO:
 
                     # Echo codes (g):
                     #     0 - ROGER
@@ -214,11 +214,11 @@ class JsonTalkie:
                     #     2 - NONE
 
                     if "echo" in self._manifesto:
-                        message_id = message[JsonKey.IDENTITY.value]
-                        if message_id == self._original_message.get(JsonKey.IDENTITY.value):
+                        message_id = message[TalkieKey.IDENTITY.value]
+                        if message_id == self._original_message.get(TalkieKey.IDENTITY.value):
                             self._manifesto["echo"](message)
 
-                case MessageData.ERROR:
+                case MessageValue.ERROR:
 
                     # Error types:
                     #     0 - Unknown sender
@@ -237,25 +237,25 @@ class JsonTalkie:
 
 
     def validate_message(self, message: Dict[str, Any]) -> bool:
-        if isinstance(message, dict) and JsonKey.CHECKSUM.value in message:
+        if isinstance(message, dict) and TalkieKey.CHECKSUM.value in message:
             if JsonTalkie.valid_checksum(message):
-                if JsonKey.MESSAGE.value not in message:
+                if TalkieKey.MESSAGE.value not in message:
                     return False
-                if not isinstance(message[JsonKey.MESSAGE.value], int):
+                if not isinstance(message[TalkieKey.MESSAGE.value], int):
                     return False
-                if not (JsonKey.FROM.value in message and JsonKey.IDENTITY.value in message):
+                if not (TalkieKey.FROM.value in message and TalkieKey.IDENTITY.value in message):
                     return False
-                if JsonKey.TO.value in message:
-                    if isinstance(message[ JsonKey.TO.value ], int):
-                        if message[ JsonKey.TO.value ] != self._channel:
+                if TalkieKey.TO.value in message:
+                    if isinstance(message[ TalkieKey.TO.value ], int):
+                        if message[ TalkieKey.TO.value ] != self._channel:
                             return False
-                    elif message[ JsonKey.TO.value ] != self._manifesto['talker']['name']:
+                    elif message[ TalkieKey.TO.value ] != self._manifesto['talker']['name']:
                         return False
             else:
                 return False
         else:
             return False
-        message[JsonKey.CHECKSUM.value] = SourceData.REMOTE.value
+        message[TalkieKey.CHECKSUM.value] = SourceValue.REMOTE.value
         return True
 
 
@@ -288,9 +288,9 @@ class JsonTalkie:
         #     (',', ': ') otherwise. To get the most compact JSON representation,
         #     you should specify (',', ':') to eliminate whitespace.
         message_checksum: int = 0
-        if JsonKey.CHECKSUM.value in message:
-            message_checksum = message[ JsonKey.CHECKSUM.value ]
-        message[ JsonKey.CHECKSUM.value ] = 0
+        if TalkieKey.CHECKSUM.value in message:
+            message_checksum = message[ TalkieKey.CHECKSUM.value ]
+        message[ TalkieKey.CHECKSUM.value ] = 0
         data = json.dumps(message, separators=(',', ':')).encode('utf-8')
         # 16-bit word and XORing
         checksum = 0
@@ -301,6 +301,6 @@ class JsonTalkie:
                 chunk |= data[i+1]
             checksum ^= chunk
         checksum &= 0xFFFF
-        message[ JsonKey.CHECKSUM.value ] = checksum
+        message[ TalkieKey.CHECKSUM.value ] = checksum
         return message_checksum == checksum
 
