@@ -274,17 +274,7 @@ class CommandLine:
                     else:
                         print(f"\t   {RogerValue(message[TalkieKey.ROGER.value])}", end="")
                     self.print_message_data(message)
-                case MessageValue.SYS:
-                    if str(0) in message:
-                        print(f"{padded_prefix}\t   {str(RogerValue(message[TalkieKey.ROGER.value]))}", end="")
-                        print(f"\t   {str(message[ str(0) ])}")
-                    else:
-                        print(f"{padded_prefix}\t   {str(RogerValue(message[TalkieKey.ROGER.value]))}")
                 case _:
-                    if original_message_data == MessageValue.CALL:
-                        roger = message.get(TalkieKey.ROGER.value)
-                        if roger is None:   # Implicit ROGER for CALL
-                            message[TalkieKey.ROGER.value] = RogerValue.ROGER
                     print(f"{padded_prefix}", end="")
                     self.print_message_data(message)
 
