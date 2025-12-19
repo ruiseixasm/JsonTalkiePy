@@ -228,9 +228,9 @@ class CommandLine:
         
         match original_message_data:
             case MessageValue.LIST:
-                if TalkieKey.ACTION.value in message and TalkieKey.ACTION.value in message:
-                    parts.append(f" {message[TalkieKey.ACTION.value]}")
-                    parts.append(f"|{message[TalkieKey.ACTION.value]}")
+                if str(0) in message and str(1) in message:
+                    parts.append(f" {message[ str(0) ]}")
+                    parts.append(f"|{message[ str(1) ]}")
 
             case MessageValue.SYS:
                 parts.append(f" {str(SystemValue(message[TalkieKey.SYSTEM.value]))}")
@@ -263,9 +263,12 @@ class CommandLine:
 
             original_message_data = json_talkie._original_message.get( TalkieKey.MESSAGE.value )
             match original_message_data:
-                case MessageValue.TALK | MessageValue.LIST:
+                case MessageValue.TALK:
                     print(f"{padded_prefix}", end="")
                     self.print_message_data(message)
+                case MessageValue.LIST:
+                    print(f"{padded_prefix}", end="")
+                    self.print_message_data(message, 2)
                 case MessageValue.SYS:
                     if str(0) in message:
                         print(f"{padded_prefix}\t   {str(RogerValue(message[TalkieKey.ROGER.value]))}", end="")
