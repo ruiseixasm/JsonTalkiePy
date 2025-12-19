@@ -269,6 +269,13 @@ class CommandLine:
                 case MessageValue.LIST:
                     print(f"{padded_prefix}", end="")
                     self.print_message_data(message, 2)
+                case MessageValue.CALL:
+                    print(f"{padded_prefix}", end="")
+                    if TalkieKey.ROGER.value not in message:
+                        print(f"\t   {str(RogerValue.ROGER)}", end="")
+                    else:
+                        print(f"\t   {RogerValue(message[TalkieKey.ROGER.value])}", end="")
+                    self.print_message_data(message)
                 case MessageValue.SYS:
                     if str(0) in message:
                         print(f"{padded_prefix}\t   {str(RogerValue(message[TalkieKey.ROGER.value]))}", end="")
