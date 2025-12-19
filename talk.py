@@ -286,16 +286,7 @@ class CommandLine:
                         if roger is None:   # Implicit ROGER for CALL
                             message[TalkieKey.ROGER.value] = RogerValue.ROGER
                     print(f"{padded_prefix}", end="")
-                    if TalkieKey.ROGER.value in message:
-                        print(f"\t   {str(RogerValue(message[TalkieKey.ROGER.value]))}", end="")
-                    elif str(0) in message:
-                        print(f"\t   {message[ str(0) ]}", end="")
-                    for value_i in range(10):
-                        if str(value_i) in message:
-                            print(f"\t   {str(message[ str(value_i) ])}", end="")
-                        else:
-                            break
-                    print() # Just to add a new line
+                    self.print_message_data(message)
 
             return True
         except Exception as e:
