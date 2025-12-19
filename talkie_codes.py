@@ -45,7 +45,7 @@ class TalkieCode(IntEnum):
 
 
 class SourceValue(TalkieCode):
-    REMOTE, LOCAL, SELF = range(3)
+    REMOTE, LOCAL, SELF, NONE = range(4)
 
 
 class MessageValue(TalkieCode):
