@@ -68,7 +68,7 @@ class SystemValue(TalkieCode):
 
 
 class RogerValue(TalkieCode):
-    ROGER, SAY_AGAIN, NEGATIVE, NIL = range(4)
+    ROGER, NEGATIVE, SAY_AGAIN, NIL = range(4)
 
 
 class ErrorValue(TalkieCode):
