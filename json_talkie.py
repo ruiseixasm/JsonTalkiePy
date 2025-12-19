@@ -130,7 +130,10 @@ class JsonTalkie:
 
     def hereSend(self, message: Dict[str, Any]) -> bool:
         message[ TalkieKey.SOURCE.value ] = SourceValue.HERE.value
-        message[ TalkieKey.IDENTITY.value ] = JsonTalkie.message_id()   # All messages must have an 'i'
+        if TalkieKey.IDENTITY.value not in message: # All messages must have an 'i'
+            message[ TalkieKey.IDENTITY.value ] = JsonTalkie.message_id()
+            if message[TalkieKey.MESSAGE.value] < MessageValue.ECHO.value:
+                self._original_message = message
         return self.processMessage(message)
     
 
