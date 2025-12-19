@@ -253,6 +253,10 @@ class CommandLine:
                         case _:
                             print(f"{padded_prefix}\t   {str(message[JsonKey.VALUE.value])}")
                 case _:
+                    if original_message_data == MessageData.CALL:
+                        roger = message.get(JsonKey.ROGER.value)
+                        if roger is None:   # Implicit ROGER for CALL
+                            message[JsonKey.ROGER.value] = EchoData.ROGER
                     print(f"{padded_prefix}", end="")
                     if JsonKey.ROGER.value in message:
                         print(f"\t   {str(EchoData(message[JsonKey.ROGER.value]))}", end="")
