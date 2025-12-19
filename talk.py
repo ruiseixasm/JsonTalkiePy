@@ -106,8 +106,7 @@ class CommandLine:
                                 except ValueError:
                                     message[ JsonKey.NAME.value ] = words[2]
                                 message_keys: int = 3
-                                if num_of_keys > message_keys:
-                                    # Extra values
+                                if num_of_keys > message_keys:  # Extra values
                                     for value_i in range(num_of_keys - message_keys):
                                         value_word: str = words[message_keys + value_i]
                                         try:
@@ -130,6 +129,14 @@ class CommandLine:
                                 else:
                                     print(f"\t'{words[2]}' isn't a valid SystemData code!")
                                     return
+                                message_keys: int = 3
+                                if num_of_keys > message_keys:  # Extra values
+                                    for value_i in range(num_of_keys - message_keys):
+                                        value_word: str = words[message_keys + value_i]
+                                        try:
+                                            message[ str(value_i) ] = int(value_word)
+                                        except ValueError:
+                                            message[ str(value_i) ] = value_word
                             elif num_of_keys == 2:
                                 print(f"\t'{words[0]}' misses arguments!")
                                 return
@@ -142,8 +149,7 @@ class CommandLine:
 
                         case MessageData.CHANNEL:
                             message_keys: int = 2
-                            if num_of_keys > message_keys:
-                                # Extra values
+                            if num_of_keys > message_keys:  # Extra values
                                 for value_i in range(num_of_keys - message_keys):
                                     value_word: str = words[message_keys + value_i]
                                     try:
@@ -152,8 +158,14 @@ class CommandLine:
                                         message[ str(value_i) ] = value_word
 
                         case MessageData.PING:
-                            if num_of_keys > 2:
-                                message[ JsonKey.DESCRIPTION.value ] = words[2]
+                            message_keys: int = 2
+                            if num_of_keys > message_keys:  # Extra values
+                                for value_i in range(num_of_keys - message_keys):
+                                    value_word: str = words[message_keys + value_i]
+                                    try:
+                                        message[ str(value_i) ] = int(value_word)
+                                    except ValueError:
+                                        message[ str(value_i) ] = value_word
 
                         case _:
                             self._print_help()
