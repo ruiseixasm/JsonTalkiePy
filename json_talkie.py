@@ -111,7 +111,7 @@ class JsonTalkie:
         if TalkieKey.IDENTITY.value not in message:
             message[ TalkieKey.IDENTITY.value ] = JsonTalkie.message_id()
             if message[TalkieKey.MESSAGE.value] < MessageValue.ECHO.value:
-                self._original_message = message
+                self._original_message = message.copy() # Shouldn't use the same
         JsonTalkie.valid_checksum(message)
         if self._verbose:
             print(message)
@@ -133,7 +133,17 @@ class JsonTalkie:
         if TalkieKey.IDENTITY.value not in message: # All messages must have an 'i'
             message[ TalkieKey.IDENTITY.value ] = JsonTalkie.message_id()
             if message[TalkieKey.MESSAGE.value] < MessageValue.ECHO.value:
-                self._original_message = message
+                self._original_message = message.copy() # Shouldn't use the same
+        if message[TalkieKey.MESSAGE.value] == MessageValue.ECHO.value:
+            match JsonTalkie.getMessageData(self._original_message, TalkieKey.MESSAGE):
+                case MessageValue.PING:
+                    actual_time: int = self.message_id()
+                    out_time_ms: int = message[TalkieKey.TIMESTAMP.value]
+                    delay_ms: int = actual_time - out_time_ms
+                    if delay_ms < 0:    # do overflow as if uint16_t in c++
+                        delay_ms += 0xFFFF + 1  # 2^16
+                    if str(0) not in message:  # Don't change value already set
+                        message[ str(0) ] = delay_ms
         return self.processMessage(message)
     
 
