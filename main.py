@@ -101,7 +101,7 @@ class Talker:
                         case 4:
                             what = "get"
                         case 5:
-                            what = "sys"
+                            what = "info"
                     if "g" in message:
                         roger: str = "FAIL"
                         match message[ TalkieKey.ROGER.value ]:

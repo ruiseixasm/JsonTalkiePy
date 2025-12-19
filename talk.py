@@ -122,10 +122,10 @@ class CommandLine:
                                 print(f"\t'{words[0]}' misses arguments!")
                                 return
                             
-                        case MessageValue.SYS:
+                        case MessageValue.INFO:
                             if num_of_keys > 2:
                                 if SystemValue.from_name(words[2]) is not None:
-                                    message[ TalkieKey.SYSTEM.value ] = SystemValue.from_name(words[2]).value
+                                    message[ TalkieKey.INFO.value ] = SystemValue.from_name(words[2]).value
                                 else:
                                     print(f"\t'{words[2]}' isn't a valid SystemData code!")
                                     return
@@ -141,7 +141,7 @@ class CommandLine:
                                 print(f"\t'{words[0]}' misses arguments!")
                                 return
                             else:
-                                self._print_sys()
+                                self._print_info()
                                 return
 
                         case MessageValue.TALK:
@@ -187,21 +187,21 @@ class CommandLine:
         print("\t[list <talker>]            List the entire Talker manifesto.")
         print("\t[call <talker> <name>]     Calls a named action.")
         print("\t[message here  ...]        The keyword 'here' applies to self Talker alone.")
-        print("\t[sys]                      Prints available options for the Talker system.")
+        print("\t[info]                     Prints available options for the Talker info.")
         print("\t[exit]                     Exits the command line (Ctrl+D).")
         print("\t[help]                     Shows the present help.")
 
 
-    def _print_sys(self):
-        """Print system help"""
-        print("\t[sys <talker> board]       Prints the board description (OS).")
-        print("\t[sys <talker> drops]       Returns the number of drops associated to out of time messages.")
-        print("\t[sys <talker> delay]       Returns the maximum delay for dropping the message in milliseconds.")
-        print("\t[sys <talker> delay d]     Sets a new delay, where 0 means no delay processed (no drops).")
-        print("\t[sys <talker> mute]        Gets or sets the Talker Calls muted state, 1 for silent and 0 for not.")
-        print("\t[sys <talker> socket]      Prints the socket class name.")
-        print("\t[sys <talker> talker]      Prints the Talker class name.")
-        print("\t[sys <talker> manifesto]   Prints the manifesto class name.")
+    def _print_info(self):
+        """Print information help"""
+        print("\t[info <talker> board]      Prints the board description (OS).")
+        print("\t[info <talker> drops]      Returns the number of drops associated to out of time messages.")
+        print("\t[info <talker> delay]      Returns the maximum delay for dropping the message in milliseconds.")
+        print("\t[info <talker> delay d]    Sets a new delay, where 0 means no delay processed (no drops).")
+        print("\t[info <talker> mute]       Gets or sets the Talker Calls muted state, 1 for silent and 0 for not.")
+        print("\t[info <talker> socket]     Prints the socket class name.")
+        print("\t[info <talker> talker]     Prints the Talker class name.")
+        print("\t[info <talker> manifesto]  Prints the manifesto class name.")
         
 
 
@@ -230,8 +230,8 @@ class CommandLine:
                     parts.append(f" {message[ str(0) ]}")
                     parts.append(f"|{message[ str(1) ]}")
 
-            case MessageValue.SYS:
-                parts.append(f" {str(SystemValue(message[TalkieKey.SYSTEM.value]))}")
+            case MessageValue.INFO:
+                parts.append(f" {str(SystemValue(message[TalkieKey.INFO.value]))}")
 
             case _:
                 if TalkieKey.ACTION.value in original_message:

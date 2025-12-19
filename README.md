@@ -26,8 +26,8 @@ rui@acer:~/GitHub/JsonTalkie/Python$ python3.13 talk.py
 >>> talk
 	[Talker-1b talk]     	A simple Talker!
 	[Nano talk]          	I do a 500ms buzz!
->>> Nano sys
-	[Nano sys]            	Arduino Uno/Nano (ATmega328P)
+>>> Nano info
+	[Nano info]            	Arduino Uno/Nano (ATmega328P)
 >>> Nano list
 	[Nano run buzz]      	Triggers buzzing
 	[Nano run on]        	Turns led On
@@ -43,7 +43,7 @@ rui@acer:~/GitHub/JsonTalkie/Python$ python3.13 talk.py
 	['device' run 'what']   Runs the named function.
 	['device' set 'what']   Sets the named variable.
 	['device' get 'what']   Gets the named variable value.
-	[sys]                   Prints the platform of the Device.
+	[info]                   Prints the platform of the Device.
 	[port]                  Gets the Broadcast Socket port.
 	[port n]                Sets the Broadcast Socket port.
 	[exit]                  Exits the command line (Ctrl+D).
