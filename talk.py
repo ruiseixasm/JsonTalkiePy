@@ -88,8 +88,8 @@ class CommandLine:
                         TalkieKey.MESSAGE.value: message_data.value
                     }
                     if num_of_keys > 1:
-                        if (SourceValue.from_name(words[1]) == SourceValue.HERE):
-                            message[ TalkieKey.SOURCE.value ] = SourceValue.HERE.value
+                        if (SourceValue.from_name(words[1]) == SourceValue.SELF):
+                            message[ TalkieKey.SOURCE.value ] = SourceValue.SELF.value
                         else:
                             try:
                                 message[ TalkieKey.TO.value ] = int(words[1]) # Check if it's a Channel first
@@ -211,7 +211,7 @@ class CommandLine:
 
         if TalkieKey.FROM.value in message:
             from_talker = message[TalkieKey.FROM.value]
-        elif TalkieKey.SOURCE.value in message and message[TalkieKey.SOURCE.value] == SourceValue.HERE.value:
+        elif TalkieKey.SOURCE.value in message and message[TalkieKey.SOURCE.value] == SourceValue.SELF.value:
             from_talker = json_talkie._manifesto['talker']['name']
         else:
             return ""
