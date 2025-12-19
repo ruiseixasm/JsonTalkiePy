@@ -246,6 +246,15 @@ class CommandLine:
         return "".join(parts)
 
 
+    @staticmethod
+    def print_message_data(message: Dict[str, Any], start_at: int = 0):
+        value_i: int = start_at
+        while(str(value_i) in message):
+            print(f"\t   {str(message[ str(value_i) ])}", end="")
+            value_i += 1
+        print() # Adds the final new line
+
+
     def echo(self, message: Dict[str, Any]) -> bool:
         """Handle echo messages with proper alignment"""
         try:
@@ -255,7 +264,8 @@ class CommandLine:
             original_message_data = json_talkie._original_message.get( TalkieKey.MESSAGE.value )
             match original_message_data:
                 case MessageValue.TALK | MessageValue.LIST:
-                    print(f"{padded_prefix}\t   {str(message[ str(0) ])}")
+                    print(f"{padded_prefix}", end="")
+                    self.print_message_data(message)
                 case MessageValue.SYS:
                     if str(0) in message:
                         print(f"{padded_prefix}\t   {str(RogerValue(message[TalkieKey.ROGER.value]))}", end="")
