@@ -14,7 +14,7 @@ https://github.com/ruiseixasm/JsonTalkie
 import json
 import threading
 import uuid
-from typing import Dict, Tuple, Any, TYPE_CHECKING, Callable
+from typing import Dict, Tuple, Any, TYPE_CHECKING, Callable, Union
 import time
 import platform
 
@@ -55,6 +55,13 @@ class JsonTalkie:
             self._thread.join()
         self._socket.close()
 
+    @staticmethod
+    def getMessageData(message: Dict[str, Any], json_key: JsonKey) -> Union[MessageData, None]:
+        message_data = message.get(json_key.value)
+        if message_data is not None:
+            return MessageData(message_data)
+        return None
+
 
     def listen(self):
         """Processes raw bytes from socket."""
@@ -69,7 +76,7 @@ class JsonTalkie:
                     if self.validate_message(message):
                         # Add info to echo message right away accordingly to the message original type
                         if message[JsonKey.MESSAGE.value] == MessageData.ECHO.value:
-                            match self._original_message:
+                            match JsonTalkie.getMessageData(self._original_message, JsonKey.MESSAGE):
                                 case MessageData.PING:
                                     actual_time: int = self.message_id()
                                     out_time_ms: int = message[JsonKey.TIMESTAMP.value]
