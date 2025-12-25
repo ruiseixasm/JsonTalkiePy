@@ -120,17 +120,21 @@ class JsonTalkie:
             message[ TalkieKey.IDENTITY.value ] = JsonTalkie.message_id()
             if message[TalkieKey.MESSAGE.value] < MessageValue.ECHO.value:
                 self._original_message = message.copy() # Shouldn't use the same
-        JsonTalkie.valid_checksum(message)
+
+        encoded_message: bytes = json.dumps(message, separators=(',', ':')).encode('utf-8')
+        data_array: bytearray = bytearray(encoded_message)
+        encoded_message = JsonTalkie.insert_checksum(data_array)
+
         if self._verbose:
-            print(message)
+            print(encoded_message)
         # Avoids broadcasting flooding
         sent_result: bool = False
         if TalkieKey.TO.value in message and message[ TalkieKey.TO.value ] in self._devices_address:
-            sent_result = self._socket.send( JsonTalkie.encode(message), self._devices_address[message[ TalkieKey.TO.value ]] )
+            sent_result = self._socket.send( encoded_message, self._devices_address[message[ TalkieKey.TO.value ]] )
             if self._verbose:
                 print("--> DIRECT SENDING -->")
         else:
-            sent_result = self._socket.send( JsonTalkie.encode(message) )
+            sent_result = self._socket.send( encoded_message )
             if self._verbose:
                 print("--> BROADCAST SENDING -->")
         return sent_result
