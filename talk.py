@@ -89,7 +89,7 @@ class CommandLine:
                     }
                     if num_of_keys > 1:
                         if (BroadcastValue.from_name(words[1]) == BroadcastValue.SELF):
-                            message[ TalkieKey.SOURCE.value ] = BroadcastValue.SELF.value
+                            message[ TalkieKey.BROADCAST.value ] = BroadcastValue.SELF.value
                         else:
                             try:
                                 message[ TalkieKey.TO.value ] = int(words[1]) # Check if it's a Channel first
@@ -211,7 +211,7 @@ class CommandLine:
 
         if TalkieKey.FROM.value in message:
             from_talker = message[TalkieKey.FROM.value]
-        elif TalkieKey.SOURCE.value in message and message[TalkieKey.SOURCE.value] == BroadcastValue.SELF.value:
+        elif TalkieKey.BROADCAST.value in message and message[TalkieKey.BROADCAST.value] == BroadcastValue.SELF.value:
             from_talker = json_talkie._manifesto['talker']['name']
         else:
             return ""

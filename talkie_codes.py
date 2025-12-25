@@ -16,7 +16,7 @@ from typing import Union, cast, Optional
 
 
 class TalkieKey(Enum):
-    SOURCE      = "b"
+    BROADCAST   = "b"
     CHECKSUM    = "c"
     TIMESTAMP   = "i"
     IDENTITY    = "i"

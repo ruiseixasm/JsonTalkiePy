@@ -100,7 +100,7 @@ class JsonTalkie:
 
     def remoteSend(self, message: Dict[str, Any]) -> bool:
         """Sends messages without network awareness."""
-        message[ TalkieKey.SOURCE.value ] = BroadcastValue.REMOTE.value
+        message[ TalkieKey.BROADCAST.value ] = BroadcastValue.REMOTE.value
         if message.get( TalkieKey.FROM.value ) is not None:
             if message[TalkieKey.FROM.value] != self._manifesto['talker']['name']:
                 message[TalkieKey.TO.value] = message[TalkieKey.FROM.value]
@@ -129,7 +129,7 @@ class JsonTalkie:
     
 
     def hereSend(self, message: Dict[str, Any]) -> bool:
-        message[ TalkieKey.SOURCE.value ] = BroadcastValue.SELF.value
+        message[ TalkieKey.BROADCAST.value ] = BroadcastValue.SELF.value
         if TalkieKey.IDENTITY.value not in message: # All messages must have an 'i'
             message[ TalkieKey.IDENTITY.value ] = JsonTalkie.message_id()
             if message[TalkieKey.MESSAGE.value] < MessageValue.ECHO.value:
@@ -148,7 +148,7 @@ class JsonTalkie:
     
 
     def transmitMessage(self, message: Dict[str, Any]) -> bool:
-        source_data = BroadcastValue( message.get(TalkieKey.SOURCE.value, BroadcastValue.REMOTE) )   # get is safer than []
+        source_data = BroadcastValue( message.get(TalkieKey.BROADCAST.value, BroadcastValue.REMOTE) )   # get is safer than []
         match source_data:
             case BroadcastValue.SELF:
                 return self.hereSend(message)
