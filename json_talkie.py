@@ -318,3 +318,182 @@ class JsonTalkie:
         message[ TalkieKey.CHECKSUM.value ] = checksum
         return message_checksum == checksum
 
+
+    @staticmethod
+    def get_colon_position(payload: bytes, key: int, colon_position: int = 4) -> int:
+        """
+        payload: compact JSON as bytes
+        key: ASCII value of the key character (e.g. ord('k'))
+        colon_position: start index (default 4, same as C++)
+        returns: index of ':' or 0 if not found
+        """
+        json_length = len(payload)
+
+        # {"k":x} -> minimum length is 7
+        if json_length > 6:
+            for i in range(colon_position, json_length):
+                if (
+                    payload[i] == ord(':') and
+                    payload[i - 2] == key and
+                    payload[i - 3] == ord('"') and
+                    payload[i - 1] == ord('"')
+                ):
+                    return i
+
+        return 0
+
+    # ValueType equivalent
+    class ValueType:
+        STRING = 0
+        INTEGER = 1
+        OTHER = 2
+
+
+
+    def get_value_position(payload: bytes, key: int, colon_position: int = 4) -> int:
+        colon_position = JsonTalkie.get_colon_position(payload, key, colon_position)
+        if colon_position:
+            return colon_position + 1  # {"k":x}
+        return 0
+
+    def get_key_position(payload: bytes, key: int, colon_position: int = 4) -> int:
+        colon_position = JsonTalkie.get_colon_position(payload, key, colon_position)
+        if colon_position:
+            return colon_position - 2  # {"k":x}
+        return 0
+
+
+    def get_field_length(payload: bytes, key: int, colon_position: int = 4) -> int:
+        field_length = 0
+        json_length = len(payload)
+
+        json_i = JsonTalkie.get_value_position(payload, key, colon_position)
+        if json_i:
+            field_length = 4  # '"k":'
+
+            value_type = JsonTalkie.get_value_type(payload, key, json_i - 1)
+
+            if value_type == JsonTalkie.ValueType.STRING:
+                field_length += 2  # the surrounding quotes
+                json_i += 1
+                while json_i < json_length and payload[json_i] != ord('"'):
+                    field_length += 1
+                    json_i += 1
+
+            elif value_type == JsonTalkie.ValueType.INTEGER:
+                while (
+                    json_i < json_length and
+                    ord('0') <= payload[json_i] <= ord('9')
+                ):
+                    field_length += 1
+                    json_i += 1
+
+        return field_length
+
+
+    def get_number(json_payload: bytes, json_length: int, key: int, colon_position: int = 4) -> int:
+        json_number = 0
+        json_i = JsonTalkie.get_value_position(json_payload, json_length, key, colon_position)
+
+        if json_i:
+            ZERO = ord('0')
+            NINE = ord('9')
+
+            while json_i < json_length and ZERO <= json_payload[json_i] <= NINE:
+                json_number = json_number * 10 + (json_payload[json_i] - ZERO)
+                json_i += 1
+
+        return json_number
+
+
+    def remove(json_payload: bytearray, json_length: int, key: int, colon_position: int = 4) -> int:
+        colon_position = JsonTalkie.get_colon_position(json_payload, json_length, key, colon_position)
+
+        if colon_position:
+            # All keys occupy 3 chars '"k"' to the left of the colon
+            field_position = colon_position - 3
+
+            # Length of '"k":value' (without leading/trailing comma)
+            field_length = JsonTalkie.get_field_length(json_payload, json_length, key, colon_position)
+
+            # Remove heading comma if present
+            if field_position > 0 and json_payload[field_position - 1] == ord(','):
+                field_position -= 1
+                field_length += 1
+
+            # Otherwise remove trailing comma if present
+            elif (field_position + field_length < json_length and
+                json_payload[field_position + field_length] == ord(',')):
+                field_length += 1
+
+            # Shift payload left
+            end = json_length - field_length
+            for i in range(field_position, end):
+                json_payload[i] = json_payload[i + field_length]
+
+            # Update length
+            json_length -= field_length
+
+            return json_length  # updated length (truthy)
+
+        return 0  # false / not removed
+
+
+    def number_of_digits(number: int) -> int:
+        length = 1  # 0 has 1 digit
+        while number > 9:
+            number //= 10  # integer division
+            length += 1
+        return length
+
+
+    # equivalent to BROADCAST_SOCKET_BUFFER_SIZE
+    def set_number(json_payload: bytearray, json_length: int, key: int, number: int, colon_position: int = 4, buffer_size: int = 128) -> int:
+        # Find the colon position
+        colon_position = JsonTalkie.get_colon_position(json_payload, json_length, key, colon_position)
+
+        # Remove existing key if present
+        if colon_position:
+            json_length = JsonTalkie.remove(json_payload, json_length, key, colon_position)
+            if not json_length:
+                return 0  # failed to remove
+
+        # Prepare for new number insertion
+        number_size = JsonTalkie.number_of_digits(number)
+        new_length = json_length + number_size + 4 + 1  # 4 for '"k":', 1 for possible ','
+
+        if new_length > buffer_size:
+            return 0  # not enough space
+
+        # Build the key sequence
+        json_key = bytearray(b',\"k\":')
+        json_key[2] = key
+
+        # Insert the key before the final '}'
+        if json_length > 2:
+            for j in range(5):
+                json_payload[json_length - 1 + j] = json_key[j]
+        elif json_length == 2:  # Edge case '{}'
+            new_length -= 1  # remove extra ','
+            for j in range(1, 5):
+                json_payload[json_length - 1 + j - 1] = json_key[j]
+        else:
+            # Something wrong, reset
+            json_payload[:] = b'{}'
+            return 0
+
+        # Insert the number digits (right to left)
+        if number:
+            json_i = new_length - 2
+            while number:
+                json_payload[json_i] = ord('0') + (number % 10)
+                number //= 10
+                json_i -= 1
+        else:
+            json_payload[new_length - 2] = ord('0')
+
+        # Final closing brace
+        json_payload[new_length - 1] = ord('}')
+        return new_length  # return updated length
+
+
