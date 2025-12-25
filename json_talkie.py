@@ -17,6 +17,7 @@ import uuid
 from typing import Dict, Tuple, Any, TYPE_CHECKING, Callable, Union
 import time
 import platform
+from enum import Enum, IntEnum
 
 from broadcast_socket import BroadcastSocket
 
@@ -341,7 +342,7 @@ class JsonTalkie:
 
 
 
-    def get_colon_position(payload: bytes, key: int, colon_position: int = 4) -> int:
+    def get_colon_position(payload: bytes, key: str, colon_position: int = 4) -> int:
         """
         payload: compact JSON as bytes
         key: ASCII value of the key character (e.g. ord('k'))
@@ -349,13 +350,14 @@ class JsonTalkie:
         returns: index of ':' or 0 if not found
         """
         json_length = len(payload)
+        key_byte: int = ord(key)
 
         # {"k":x} -> minimum length is 7
         if json_length > 6:
             for i in range(colon_position, json_length):
                 if (
                     payload[i] == ord(':') and
-                    payload[i - 2] == key and
+                    payload[i - 2] == key_byte and
                     payload[i - 3] == ord('"') and
                     payload[i - 1] == ord('"')
                 ):
@@ -371,20 +373,57 @@ class JsonTalkie:
         OTHER = 2
 
 
-    def get_value_position(payload: bytes, key: int, colon_position: int = 4) -> int:
+    def get_value_position(payload: bytes, key: str, colon_position: int = 4) -> int:
         colon_position = JsonTalkie.get_colon_position(payload, key, colon_position)
         if colon_position:
             return colon_position + 1  # {"k":x}
         return 0
 
-    def get_key_position(payload: bytes, key: int, colon_position: int = 4) -> int:
+    def get_key_position(payload: bytes, key: str, colon_position: int = 4) -> int:
         colon_position = JsonTalkie.get_colon_position(payload, key, colon_position)
         if colon_position:
             return colon_position - 2  # {"k":x}
         return 0
 
 
-    def get_field_length(payload: bytes, key: int, colon_position: int = 4) -> int:
+    class ValueType(IntEnum):
+        STRING = 0
+        INTEGER = 1
+        OTHER = 2
+        VOID = 3
+
+
+    def get_value_type(payload: bytearray, key: str, colon_position: int = 4) -> ValueType:
+        key_byte = ord(key)
+        json_i = JsonTalkie.get_value_position(payload, key_byte, colon_position)
+
+        if not json_i:
+            return JsonTalkie.ValueType.VOID
+
+        length = len(payload)
+
+        # STRING
+        if payload[json_i] == ord('"'):
+            json_i += 1
+            while json_i < length and payload[json_i] != ord('"'):
+                json_i += 1
+            if json_i == length:
+                return JsonTalkie.ValueType.VOID
+            return JsonTalkie.ValueType.STRING
+
+        # INTEGER / OTHER
+        while json_i < length and payload[json_i] not in (ord(','), ord('}')):
+            if payload[json_i] < ord('0') or payload[json_i] > ord('9'):
+                return JsonTalkie.ValueType.OTHER
+            json_i += 1
+
+        if json_i == length:
+            return JsonTalkie.ValueType.VOID
+
+        return JsonTalkie.ValueType.INTEGER
+
+
+    def get_field_length(payload: bytes, key: str, colon_position: int = 4) -> int:
         field_length = 0
         json_length = len(payload)
 
@@ -412,7 +451,7 @@ class JsonTalkie:
         return field_length
 
 
-    def get_number(json_payload: bytes, key: int, colon_position: int = 4) -> int:
+    def get_number(json_payload: bytes, key: str, colon_position: int = 4) -> int:
 
         json_length: int = len(json_payload)
         json_number: int = 0
@@ -429,7 +468,7 @@ class JsonTalkie:
         return json_number
 
 
-    def remove(json_payload: bytearray, key: int, colon_position: int = 4) -> int:
+    def remove(json_payload: bytearray, key: str, colon_position: int = 4) -> int:
         
         json_length: int = len(json_payload)
         colon_position = JsonTalkie.get_colon_position(json_payload, key, colon_position)
@@ -473,9 +512,10 @@ class JsonTalkie:
 
 
     # equivalent to BROADCAST_SOCKET_BUFFER_SIZE
-    def set_number(json_payload: bytearray, key: int, number: int, colon_position: int = 4, buffer_size: int = 128) -> int:
+    def set_number(json_payload: bytearray, key: str, number: int, colon_position: int = 4, buffer_size: int = 128) -> int:
         
         json_length: int = len(json_payload)
+        key_byte: int = ord(key)
         # Find the colon position
         colon_position = JsonTalkie.get_colon_position(json_payload, key, colon_position)
 
@@ -494,7 +534,7 @@ class JsonTalkie:
 
         # Build the key sequence
         json_key = bytearray(b',\"k\":')
-        json_key[2] = key
+        json_key[2] = key_byte
 
         # Insert the key before the final '}'
         if json_length > 2:
