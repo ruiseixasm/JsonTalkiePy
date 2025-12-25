@@ -72,7 +72,15 @@ class JsonTalkie:
                 try:
                     if self._verbose:
                         print(data)
-                    message: Dict[str, Any] = JsonTalkie.decode(data)
+
+                    data_array: bytearray = bytearray(data)
+                    message_checksum: int = JsonTalkie.get_number(data_array, 'c')
+                    JsonTalkie.remove(data_array, 'c')
+                    checksum: int = JsonTalkie.generate_checksum(data_array)
+                    if message_checksum != checksum:
+                        pass    # Checksum not validated
+
+                    message: Dict[str, Any] = JsonTalkie.decode( bytes(data_array) )
                     if self.validate_message(message):
                         # Add info to echo message right away accordingly to the message original type
                         if message[TalkieKey.MESSAGE.value] == MessageValue.ECHO.value:
@@ -251,25 +259,22 @@ class JsonTalkie:
 
 
     def validate_message(self, message: Dict[str, Any]) -> bool:
-        if isinstance(message, dict) and TalkieKey.CHECKSUM.value in message:
-            if JsonTalkie.valid_checksum(message):
-                if TalkieKey.MESSAGE.value not in message:
-                    return False
-                if not isinstance(message[TalkieKey.MESSAGE.value], int):
-                    return False
-                if not (TalkieKey.FROM.value in message and TalkieKey.IDENTITY.value in message):
-                    return False
-                if TalkieKey.TO.value in message:
-                    if isinstance(message[ TalkieKey.TO.value ], int):
-                        if message[ TalkieKey.TO.value ] != self._channel:
-                            return False
-                    elif message[ TalkieKey.TO.value ] != self._manifesto['talker']['name']:
-                        return False
-            else:
+        if isinstance(message, dict) and TalkieKey.CHECKSUM.value not in message:
+            if TalkieKey.MESSAGE.value not in message:
                 return False
+            if not isinstance(message[TalkieKey.MESSAGE.value], int):
+                return False
+            if not (TalkieKey.FROM.value in message and TalkieKey.IDENTITY.value in message):
+                return False
+            if TalkieKey.TO.value in message:
+                if isinstance(message[ TalkieKey.TO.value ], int):
+                    if message[ TalkieKey.TO.value ] != self._channel:
+                        return False
+                elif message[ TalkieKey.TO.value ] != self._manifesto['talker']['name']:
+                    return False
         else:
             return False
-        message[TalkieKey.CHECKSUM.value] = BroadcastValue.REMOTE.value
+        message[TalkieKey.BROADCAST.value] = BroadcastValue.REMOTE.value
         return True
 
 
@@ -317,6 +322,15 @@ class JsonTalkie:
         checksum &= 0xFFFF
         message[ TalkieKey.CHECKSUM.value ] = checksum
         return message_checksum == checksum
+
+
+    def insert_checksum(json_payload: bytes) -> bytes:
+        payload = bytearray(json_payload)   # Becomes mutable
+
+        checksum = JsonTalkie.generate_checksum(payload)
+        JsonTalkie.set_number(payload, 'c', checksum)
+
+        return bytes(payload)   # Back to read-only again
 
 
 
@@ -394,9 +408,11 @@ class JsonTalkie:
         return field_length
 
 
-    def get_number(json_payload: bytes, json_length: int, key: int, colon_position: int = 4) -> int:
-        json_number = 0
-        json_i = JsonTalkie.get_value_position(json_payload, json_length, key, colon_position)
+    def get_number(json_payload: bytes, key: int, colon_position: int = 4) -> int:
+
+        json_length: int = len(json_payload)
+        json_number: int = 0
+        json_i = JsonTalkie.get_value_position(json_payload, key, colon_position)
 
         if json_i:
             ZERO = ord('0')
@@ -409,15 +425,17 @@ class JsonTalkie:
         return json_number
 
 
-    def remove(json_payload: bytearray, json_length: int, key: int, colon_position: int = 4) -> int:
-        colon_position = JsonTalkie.get_colon_position(json_payload, json_length, key, colon_position)
+    def remove(json_payload: bytearray, key: int, colon_position: int = 4) -> int:
+        
+        json_length: int = len(json_payload)
+        colon_position = JsonTalkie.get_colon_position(json_payload, key, colon_position)
 
         if colon_position:
             # All keys occupy 3 chars '"k"' to the left of the colon
             field_position = colon_position - 3
 
             # Length of '"k":value' (without leading/trailing comma)
-            field_length = JsonTalkie.get_field_length(json_payload, json_length, key, colon_position)
+            field_length = JsonTalkie.get_field_length(json_payload, key, colon_position)
 
             # Remove heading comma if present
             if field_position > 0 and json_payload[field_position - 1] == ord(','):
@@ -451,13 +469,15 @@ class JsonTalkie:
 
 
     # equivalent to BROADCAST_SOCKET_BUFFER_SIZE
-    def set_number(json_payload: bytearray, json_length: int, key: int, number: int, colon_position: int = 4, buffer_size: int = 128) -> int:
+    def set_number(json_payload: bytearray, key: int, number: int, colon_position: int = 4, buffer_size: int = 128) -> int:
+        
+        json_length: int = len(json_payload)
         # Find the colon position
-        colon_position = JsonTalkie.get_colon_position(json_payload, json_length, key, colon_position)
+        colon_position = JsonTalkie.get_colon_position(json_payload, key, colon_position)
 
         # Remove existing key if present
         if colon_position:
-            json_length = JsonTalkie.remove(json_payload, json_length, key, colon_position)
+            json_length = JsonTalkie.remove(json_payload, key, colon_position)
             if not json_length:
                 return 0  # failed to remove
 
@@ -500,8 +520,9 @@ class JsonTalkie:
         return new_length  # return updated length
 
 
-    def generate_checksum(json_payload: bytearray, json_length: int) -> int:
+    def generate_checksum(json_payload: bytearray) -> int:
         """16-bit XOR checksum over 2-byte chunks"""
+        json_length: int = len(json_payload)
         checksum = 0
         for i in range(0, json_length, 2):
             chunk = json_payload[i] << 8
@@ -511,11 +532,12 @@ class JsonTalkie:
         return checksum
 
 
-    def extract_checksum(json_payload: bytearray, json_length: int) -> tuple[int, int]:
+    def extract_checksum(json_payload: bytearray) -> tuple[int, int]:
         """
         Extract checksum from the key 'c' and zero out the digits in the payload.
         Returns: (new_json_length, extracted_checksum)
         """
+        json_length: int = len(json_payload)
         data_checksum = 0
         at_c = False
         new_index = 4  # Optimized {"c": ...
