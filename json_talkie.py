@@ -20,7 +20,7 @@ import platform
 
 from broadcast_socket import BroadcastSocket
 
-from talkie_codes import TalkieKey, SourceValue, MessageValue, SystemValue, RogerValue
+from talkie_codes import TalkieKey, BroadcastValue, MessageValue, SystemValue, RogerValue
 
 
 
@@ -100,7 +100,7 @@ class JsonTalkie:
 
     def remoteSend(self, message: Dict[str, Any]) -> bool:
         """Sends messages without network awareness."""
-        message[ TalkieKey.SOURCE.value ] = SourceValue.REMOTE.value
+        message[ TalkieKey.SOURCE.value ] = BroadcastValue.REMOTE.value
         if message.get( TalkieKey.FROM.value ) is not None:
             if message[TalkieKey.FROM.value] != self._manifesto['talker']['name']:
                 message[TalkieKey.TO.value] = message[TalkieKey.FROM.value]
@@ -129,7 +129,7 @@ class JsonTalkie:
     
 
     def hereSend(self, message: Dict[str, Any]) -> bool:
-        message[ TalkieKey.SOURCE.value ] = SourceValue.SELF.value
+        message[ TalkieKey.SOURCE.value ] = BroadcastValue.SELF.value
         if TalkieKey.IDENTITY.value not in message: # All messages must have an 'i'
             message[ TalkieKey.IDENTITY.value ] = JsonTalkie.message_id()
             if message[TalkieKey.MESSAGE.value] < MessageValue.ECHO.value:
@@ -148,9 +148,9 @@ class JsonTalkie:
     
 
     def transmitMessage(self, message: Dict[str, Any]) -> bool:
-        source_data = SourceValue( message.get(TalkieKey.SOURCE.value, SourceValue.REMOTE) )   # get is safer than []
+        source_data = BroadcastValue( message.get(TalkieKey.SOURCE.value, BroadcastValue.REMOTE) )   # get is safer than []
         match source_data:
-            case SourceValue.SELF:
+            case BroadcastValue.SELF:
                 return self.hereSend(message)
             case _: # Default is remote
                 return self.remoteSend(message)
@@ -269,7 +269,7 @@ class JsonTalkie:
                 return False
         else:
             return False
-        message[TalkieKey.CHECKSUM.value] = SourceValue.REMOTE.value
+        message[TalkieKey.CHECKSUM.value] = BroadcastValue.REMOTE.value
         return True
 
 

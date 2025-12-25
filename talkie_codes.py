@@ -16,7 +16,7 @@ from typing import Union, cast, Optional
 
 
 class TalkieKey(Enum):
-    SOURCE      = "c"
+    SOURCE      = "b"
     CHECKSUM    = "c"
     TIMESTAMP   = "i"
     IDENTITY    = "i"
@@ -44,7 +44,7 @@ class TalkieCode(IntEnum):
             return None
 
 
-class SourceValue(TalkieCode):
+class BroadcastValue(TalkieCode):
     REMOTE, LOCAL, SELF, NONE = range(4)
 
 

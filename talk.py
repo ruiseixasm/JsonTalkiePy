@@ -21,7 +21,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.patch_stdout import patch_stdout
 
 from json_talkie import JsonTalkie
-from talkie_codes import TalkieKey, SourceValue, MessageValue, SystemValue, RogerValue
+from talkie_codes import TalkieKey, BroadcastValue, MessageValue, SystemValue, RogerValue
 
 
 
@@ -88,8 +88,8 @@ class CommandLine:
                         TalkieKey.MESSAGE.value: message_data.value
                     }
                     if num_of_keys > 1:
-                        if (SourceValue.from_name(words[1]) == SourceValue.SELF):
-                            message[ TalkieKey.SOURCE.value ] = SourceValue.SELF.value
+                        if (BroadcastValue.from_name(words[1]) == BroadcastValue.SELF):
+                            message[ TalkieKey.SOURCE.value ] = BroadcastValue.SELF.value
                         else:
                             try:
                                 message[ TalkieKey.TO.value ] = int(words[1]) # Check if it's a Channel first
@@ -211,7 +211,7 @@ class CommandLine:
 
         if TalkieKey.FROM.value in message:
             from_talker = message[TalkieKey.FROM.value]
-        elif TalkieKey.SOURCE.value in message and message[TalkieKey.SOURCE.value] == SourceValue.SELF.value:
+        elif TalkieKey.SOURCE.value in message and message[TalkieKey.SOURCE.value] == BroadcastValue.SELF.value:
             from_talker = json_talkie._manifesto['talker']['name']
         else:
             return ""
