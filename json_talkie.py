@@ -319,7 +319,10 @@ class JsonTalkie:
         return message_checksum == checksum
 
 
-    @staticmethod
+
+
+
+
     def get_colon_position(payload: bytes, key: int, colon_position: int = 4) -> int:
         """
         payload: compact JSON as bytes
@@ -342,12 +345,12 @@ class JsonTalkie:
 
         return 0
 
+
     # ValueType equivalent
     class ValueType:
         STRING = 0
         INTEGER = 1
         OTHER = 2
-
 
 
     def get_value_position(payload: bytes, key: int, colon_position: int = 4) -> int:
@@ -497,3 +500,49 @@ class JsonTalkie:
         return new_length  # return updated length
 
 
+    def generate_checksum(json_payload: bytearray, json_length: int) -> int:
+        """16-bit XOR checksum over 2-byte chunks"""
+        checksum = 0
+        for i in range(0, json_length, 2):
+            chunk = json_payload[i] << 8
+            if i + 1 < json_length:
+                chunk |= json_payload[i + 1]
+            checksum ^= chunk
+        return checksum
+
+
+    def extract_checksum(json_payload: bytearray, json_length: int) -> tuple[int, int]:
+        """
+        Extract checksum from the key 'c' and zero out the digits in the payload.
+        Returns: (new_json_length, extracted_checksum)
+        """
+        data_checksum = 0
+        at_c = False
+        new_index = 4  # Optimized {"c": ...
+        i = 4
+
+        while i < json_length:
+            char = json_payload[i]
+            if char == ord(':'):
+                if (
+                    json_payload[i - 2] == ord('c') and
+                    json_payload[i - 3] == ord('"') and
+                    json_payload[i - 1] == ord('"')
+                ):
+                    at_c = True
+            elif at_c:
+                if char < ord('0') or char > ord('9'):
+                    at_c = False
+                elif json_payload[i - 1] == ord(':'):
+                    data_checksum = char - ord('0')
+                    json_payload[i] = ord('0')
+                else:
+                    data_checksum = data_checksum * 10 + (char - ord('0'))
+                    i += 1
+                    continue  # Skip copying the char
+            json_payload[new_index] = char
+            new_index += 1
+            i += 1
+
+        return new_index, data_checksum  # updated length and checksum
+    
