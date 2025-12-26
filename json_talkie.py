@@ -495,6 +495,9 @@ class JsonTalkie:
             for i in range(field_position, end):
                 json_payload[i] = json_payload[i + field_length]
 
+            # Remove the slice from the bytearray
+            del json_payload[field_position:field_position + field_length]
+
             # Update length
             json_length -= field_length
 
