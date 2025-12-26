@@ -511,12 +511,16 @@ class JsonTalkie:
         return length
 
 
-    # equivalent to BROADCAST_SOCKET_BUFFER_SIZE
-    def set_number(json_payload: bytearray, key: str, number: int, colon_position: int = 4, buffer_size: int = 128) -> int:
+    def set_number(json_payload: bytearray, key: str, number: int, colon_position: int = 4) -> bytearray:
+        """
+        Sets the JSON key `key` to the given integer `number` in the bytearray payload.
+        Automatically inserts the key if it does not exist and handles edge cases like '{}'.
+        """
         
         json_length: int = len(json_payload)
         key_byte: int = ord(key)
-        # Find the colon position
+
+        # Find the colon position for the key
         colon_position = JsonTalkie.get_colon_position(json_payload, key, colon_position)
 
         # Remove existing key if present
@@ -525,43 +529,38 @@ class JsonTalkie:
             if not json_length:
                 return 0  # failed to remove
 
-        # Prepare for new number insertion
-        number_size = JsonTalkie.number_of_digits(number)
-        new_length = json_length + number_size + 4 + 1  # 4 for '"k":', 1 for possible ','
-
-        if new_length > buffer_size:
-            return 0  # not enough space
-
         # Build the key sequence
         json_key = bytearray(b',\"k\":')
         json_key[2] = key_byte
 
         # Insert the key before the final '}'
         if json_length > 2:
-            for j in range(5):
-                json_payload[json_length - 1 + j] = json_key[j]
+            insert_pos = json_length - 1
+            json_payload[insert_pos:insert_pos] = json_key  # grows payload
         elif json_length == 2:  # Edge case '{}'
-            new_length -= 1  # remove extra ','
-            for j in range(1, 5):
-                json_payload[json_length - 1 + j - 1] = json_key[j]
+            json_key = json_key[1:]  # skip ',' for '{}'
+            insert_pos = json_length - 1
+            json_payload[insert_pos:insert_pos] = json_key
         else:
             # Something wrong, reset
             json_payload[:] = b'{}'
             return 0
 
-        # Insert the number digits (right to left)
+        # Insert the number digits as bytes (ASCII)
         if number:
-            json_i = new_length - 2
-            while number:
-                json_payload[json_i] = ord('0') + (number % 10)
-                number //= 10
-                json_i -= 1
+            digits = bytearray()
+            n = number
+            while n:
+                digits.append(ord('0') + n % 10)
+                n //= 10
+            digits.reverse()
         else:
-            json_payload[new_length - 2] = ord('0')
+            digits = b'0'
 
-        # Final closing brace
-        json_payload[new_length - 1] = ord('}')
-        return new_length  # return updated length
+        insert_pos = len(json_payload) - 1
+        json_payload[insert_pos:insert_pos] = digits  # safe insertion
+
+        return json_payload
 
 
     def generate_checksum(json_payload: bytearray) -> int:
