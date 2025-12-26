@@ -395,7 +395,7 @@ class JsonTalkie:
 
     def get_value_type(payload: bytearray, key: str, colon_position: int = 4) -> ValueType:
         key_byte = ord(key)
-        json_i = JsonTalkie.get_value_position(payload, key_byte, colon_position)
+        json_i = JsonTalkie.get_value_position(payload, key, colon_position)
 
         if not json_i:
             return JsonTalkie.ValueType.VOID
