@@ -23,7 +23,7 @@ class TalkieKey(Enum):
     MESSAGE     = "m"
     FROM        = "f"
     TO          = "t"
-    INFO        = "s"
+    SYSTEM      = "s"
     ACTION      = "a"
     ROGER       = "r"
 
@@ -57,7 +57,7 @@ class BroadcastValue(TalkieCode):
 
 
 class MessageValue(TalkieCode):
-    TALK, CHANNEL, PING, CALL, LIST, INFO, ECHO, ERROR, NOISE = range(9)
+    TALK, CHANNEL, PING, CALL, LIST, SYSTEM, ECHO, ERROR, NOISE = range(9)
 
     @classmethod
     def validate_to_words(cls, words: list[str]) -> bool:
@@ -65,13 +65,13 @@ class MessageValue(TalkieCode):
             match MessageValue.from_name(words[1]):  # word[0] is the device name
                 case MessageValue.CALL:
                     return len(words) == 3
-                case MessageValue.INFO | MessageValue.CHANNEL:
+                case MessageValue.SYSTEM | MessageValue.CHANNEL:
                     return True
                 case _: return len(words) == 2
         return False
 
 
-class InfoValue(TalkieCode):
+class SystemValue(TalkieCode):
     BOARD, MUTE, DROPS, DELAY, SOCKET, MANIFESTO, UNDEFINED = range(7)
 
 

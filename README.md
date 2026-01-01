@@ -43,7 +43,7 @@ rui@acer:~/GitHub/JsonTalkie/Python$ python3.13 talk.py
 	['device' run 'what']   Runs the named function.
 	['device' set 'what']   Sets the named variable.
 	['device' get 'what']   Gets the named variable value.
-	[info]                   Prints the platform of the Device.
+	[system]                   Prints the platform of the Device.
 	[port]                  Gets the Broadcast Socket port.
 	[port n]                Sets the Broadcast Socket port.
 	[exit]                  Exits the command line (Ctrl+D).

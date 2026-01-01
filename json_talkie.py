@@ -21,7 +21,7 @@ from enum import Enum, IntEnum
 
 from broadcast_socket import BroadcastSocket
 
-from talkie_codes import TalkieKey, BroadcastValue, MessageValue, InfoValue, RogerValue
+from talkie_codes import TalkieKey, BroadcastValue, MessageValue, SystemValue, RogerValue
 
 
 
@@ -229,7 +229,7 @@ class JsonTalkie:
                     # Does nothing, sends it right away
                     return self.transmitMessage(message)
                 
-                case MessageValue.INFO:
+                case MessageValue.SYSTEM:
                     message[ str(0) ] = f"{platform.platform()}"
                     return self.transmitMessage(message)
                 
