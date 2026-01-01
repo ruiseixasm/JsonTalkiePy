@@ -20,6 +20,17 @@ from broadcast_socket import BroadcastSocket
 DEBUG = False  # Set to False to disable debug prints
 
 
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # Doesn't need to be reachable
+        s.connect(("10.255.255.255", 1))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
+    return ip
+
+
 def get_my_broadcast():
     """
     Simple one-call function to get broadcast address - no internet required!
@@ -65,7 +76,7 @@ class BroadcastSocket_UDP(BroadcastSocket):
         self._socket = None  # Not initialized until open()
 
         # ===== [SELF IP] cache local IP =====
-        self._local_ip = self._get_local_ip()
+        self._local_ip = get_local_ip()
     
 
     # ===== [SELF IP] =====
