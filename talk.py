@@ -21,7 +21,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.patch_stdout import patch_stdout
 
 from json_talkie import JsonTalkie
-from talkie_codes import TalkieKey, BroadcastValue, MessageValue, SystemValue, RogerValue
+from talkie_codes import TalkieKey, BroadcastValue, MessageValue, InfoValue, RogerValue
 
 
 
@@ -124,8 +124,8 @@ class CommandLine:
                             
                         case MessageValue.INFO:
                             if num_of_keys > 2:
-                                if SystemValue.from_name(words[2]) is not None:
-                                    message[ TalkieKey.INFO.value ] = SystemValue.from_name(words[2]).value
+                                if InfoValue.from_name(words[2]) is not None:
+                                    message[ TalkieKey.INFO.value ] = InfoValue.from_name(words[2]).value
                                 else:
                                     print(f"\t'{words[2]}' isn't a valid SystemData code!")
                                     return
@@ -231,7 +231,7 @@ class CommandLine:
                     parts.append(f"|{message[ str(1) ]}")
 
             case MessageValue.INFO:
-                parts.append(f" {str(SystemValue(message[TalkieKey.INFO.value]))}")
+                parts.append(f" {str(InfoValue(message[TalkieKey.INFO.value]))}")
 
             case _:
                 if TalkieKey.ACTION.value in original_message:

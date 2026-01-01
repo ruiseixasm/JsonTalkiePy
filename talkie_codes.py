@@ -44,6 +44,14 @@ class TalkieCode(IntEnum):
             return None
 
 
+class LinkType(TalkieCode):
+    NONE, DOWN_LINKED, UP_LINKED, UP_BRIDGED = range(4)
+
+
+class TalkerMatch(TalkieCode):
+    NONE, ANY, BY_CHANNEL, BY_NAME, FAIL = range(5)
+
+
 class BroadcastValue(TalkieCode):
     REMOTE, LOCAL, SELF, NONE = range(4)
 
@@ -63,12 +71,12 @@ class MessageValue(TalkieCode):
         return False
 
 
-class SystemValue(TalkieCode):
-    BOARD, DROPS, DELAY, MUTE, SOCKET, TALKER, MANIFESTO = range(7)
+class InfoValue(TalkieCode):
+    BOARD, MUTE, DROPS, DELAY, SOCKET, MANIFESTO, UNDEFINED = range(7)
 
 
 class RogerValue(TalkieCode):
-    ROGER, NEGATIVE, SAY_AGAIN, NIL = range(4)
+    ROGER, NEGATIVE, SAY_AGAIN, NIL, NO_JOY = range(5)
 
 
 class ErrorValue(TalkieCode):

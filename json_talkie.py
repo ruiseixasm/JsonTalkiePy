@@ -21,7 +21,7 @@ from enum import Enum, IntEnum
 
 from broadcast_socket import BroadcastSocket
 
-from talkie_codes import TalkieKey, BroadcastValue, MessageValue, SystemValue, RogerValue
+from talkie_codes import TalkieKey, BroadcastValue, MessageValue, InfoValue, RogerValue
 
 
 
