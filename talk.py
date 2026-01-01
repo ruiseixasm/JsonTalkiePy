@@ -279,6 +279,8 @@ class CommandLine:
                     self.print_message_data(message)
                 case _:
                     print(f"{padded_prefix}", end="")
+                    if TalkieKey.ROGER.value in message:
+                        print(f"\t   {RogerValue(message[TalkieKey.ROGER.value])}", end="")
                     self.print_message_data(message)
 
             return True
