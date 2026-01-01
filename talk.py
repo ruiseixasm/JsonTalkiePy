@@ -265,7 +265,11 @@ class CommandLine:
                     self.print_message_data(message)
                 case MessageValue.LIST:
                     print(f"{padded_prefix}", end="")
-                    self.print_message_data(message, 2)
+                    if TalkieKey.ROGER.value in message:
+                        print(f"\t   {RogerValue(message[TalkieKey.ROGER.value])}", end="")
+                        self.print_message_data(message, 0)
+                    else:
+                        self.print_message_data(message, 2)
                 case MessageValue.CALL:
                     print(f"{padded_prefix}", end="")
                     if TalkieKey.ROGER.value not in message:
