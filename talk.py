@@ -187,20 +187,20 @@ class CommandLine:
         print("\t[list <talker>]            List the entire Talker manifesto.")
         print("\t[call <talker> <name>]     Calls a named action.")
         print("\t[message here  ...]        The keyword 'here' applies to self Talker alone.")
-        print("\t[system]                   Prints available options for the Talker info.")
+        print("\t[system]                   Prints available options for the Talker system.")
         print("\t[exit]                     Exits the command line (Ctrl+D).")
         print("\t[help]                     Shows the present help.")
 
 
     def _print_info(self):
         """System help:"""
-        print("\t[system <talker> board]      Prints the board description (OS).")
-        print("\t[system <talker> mute]       Gets or sets the Talker Calls muted state, 1 for silent and 0 for not.")
-        print("\t[system <talker> drops]      Returns the number of drops associated to out of time messages.")
-        print("\t[system <talker> delay]      Returns the maximum delay for dropping the message in milliseconds.")
-        print("\t[system <talker> delay d]    Sets a new delay, where 0 means no delay processed (no drops).")
-        print("\t[system <talker> socket]     Prints the socket class name.")
-        print("\t[system <talker> manifesto]  Prints the manifesto class name.")
+        print("\t[system <talker> board]    Prints the board description (OS).")
+        print("\t[system <talker> mute]     Gets or sets the Talker Calls muted state, 1 for silent and 0 for not.")
+        print("\t[system <talker> drops]    Returns the number of drops associated to out of time messages.")
+        print("\t[system <talker> delay]    Returns the maximum delay for dropping the message in milliseconds.")
+        print("\t[system <talker> delay d]  Sets a new delay, where 0 means no delay processed (no drops).")
+        print("\t[system <talker> socket]   Prints the socket class name.")
+        print("\t[system <talker> manifesto]Prints the manifesto class name.")
         
 
 
