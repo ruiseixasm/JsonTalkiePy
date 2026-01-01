@@ -195,12 +195,11 @@ class CommandLine:
     def _print_info(self):
         """Print information help"""
         print("\t[info <talker> board]      Prints the board description (OS).")
+        print("\t[info <talker> mute]       Gets or sets the Talker Calls muted state, 1 for silent and 0 for not.")
         print("\t[info <talker> drops]      Returns the number of drops associated to out of time messages.")
         print("\t[info <talker> delay]      Returns the maximum delay for dropping the message in milliseconds.")
         print("\t[info <talker> delay d]    Sets a new delay, where 0 means no delay processed (no drops).")
-        print("\t[info <talker> mute]       Gets or sets the Talker Calls muted state, 1 for silent and 0 for not.")
         print("\t[info <talker> socket]     Prints the socket class name.")
-        print("\t[info <talker> talker]     Prints the Talker class name.")
         print("\t[info <talker> manifesto]  Prints the manifesto class name.")
         
 
