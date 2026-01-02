@@ -26,6 +26,7 @@ class TalkieKey(Enum):
     SYSTEM      = "s"
     ACTION      = "a"
     ROGER       = "r"
+    ERROR       = "e"
 
 
 class TalkieCode(IntEnum):
@@ -42,6 +43,10 @@ class TalkieCode(IntEnum):
             return cls[name.upper()]    # TalkieCode is in upper case
         except KeyError:
             return None
+
+
+class ValueType(TalkieCode):
+    STRING, INTEGER, OTHER, VOID = range(4)
 
 
 class LinkType(TalkieCode):
@@ -80,5 +85,5 @@ class RogerValue(TalkieCode):
 
 
 class ErrorValue(TalkieCode):
-    FROM, FIELD, CHECKSUM, MESSAGE, IDENTITY, DELAY, KEY, DATA = range(8)
+    CHECKSUM, MESSAGE, IDENTITY, FIELD, FROM, TO, DELAY, KEY, VALUE, UNDEFINED = range(10)
 
