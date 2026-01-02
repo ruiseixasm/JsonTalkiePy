@@ -21,7 +21,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.patch_stdout import patch_stdout
 
 from json_talkie import JsonTalkie
-from talkie_codes import TalkieKey, BroadcastValue, MessageValue, SystemValue, RogerValue
+from talkie_codes import TalkieKey, BroadcastValue, MessageValue, SystemValue, RogerValue, ErrorValue
 
 
 
@@ -291,22 +291,21 @@ class CommandLine:
 
 
     def error(self, message: Dict[str, Any]) -> bool:
-        """Handle error messages"""
-        if TalkieKey.FROM.value in message:
-            print(f"\t[{message['f']}", end='')
-            if TalkieKey.ERROR.value in message and isinstance(message[ TalkieKey.ERROR.value ], int):
-                error_messages = {
-                    0: "Message NOT for me",
-                    1: "Unknown sender",
-                    2: "Message corrupted",
-                    3: "Wrong message code",
-                    4: "Message NOT identified",
-                    5: "Set command arrived too late"
-                }
-                print(f"]\tERROR\t{error_messages.get(message['e'], 'Unknown')}")
-            else:
-                print("]\tUnknown error")
-        return True
+        """Handle echo messages with proper alignment"""
+        try:
+            prefix = self.generate_prefix(message)
+            padded_prefix = prefix.ljust(self.max_prefix_length)
+
+            print(f"{padded_prefix}", end="")
+            print(f"\t   {MessageValue(message[TalkieKey.MESSAGE.value])}", end="")
+            print(f"\t   {ErrorValue(message[TalkieKey.ERROR.value])}", end="")
+            self.print_message_data(message)
+
+            return True
+        except Exception as e:
+            print(f"\nFormat error: {e}")
+            return False
+        
 
 if __name__ == "__main__":
     # Parse command line arguments
