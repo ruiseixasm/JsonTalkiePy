@@ -313,7 +313,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--socket", 
         choices=["UDP", "SERIAL", "DUMMY"], 
-        default="SERIAL",
+        default="UDP",
         help="Socket type to use (default: UDP)"
     )
     parser.add_argument(

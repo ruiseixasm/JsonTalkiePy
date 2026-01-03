@@ -20,13 +20,15 @@ from broadcast_socket import BroadcastSocket
 
 class BroadcastSocket_Serial(BroadcastSocket):
     """Dummy broadcast socket with explicit lifecycle control."""
+
+    BROADCAST_SOCKET_BUFFER_SIZE = 128
     
     def __init__(self, port: str = 'COM4'):
         super().__init__()
         self._port = port
         self._socket = None  # Not initialized until open()
         self._reading_serial = False
-        self._received_buffer = bytearray(128)
+        self._received_buffer = bytearray(self.BROADCAST_SOCKET_BUFFER_SIZE)
         self._received_length = 0
     
     def open(self) -> bool:
