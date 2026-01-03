@@ -331,7 +331,7 @@ if __name__ == "__main__":
     
     if SOCKET == "SERIAL":
         from broadcast_socket_serial import BroadcastSocket_Serial
-        broadcast_socket = BroadcastSocket_Serial("COM4")
+        broadcast_socket = BroadcastSocket_Serial("COM5")
     elif SOCKET == "DUMMY":
         from broadcast_socket_dummy import BroadcastSocket_Dummy
         broadcast_socket = BroadcastSocket_Dummy()
