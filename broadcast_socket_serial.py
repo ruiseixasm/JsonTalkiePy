@@ -31,7 +31,7 @@ class BroadcastSocket_Serial(BroadcastSocket):
         try:
             self._socket = serial.Serial(
                 port=self._port,
-                baudrate=9600,
+                baudrate=115200,
                 timeout=1   # seconds
             )
             return True
