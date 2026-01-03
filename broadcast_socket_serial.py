@@ -25,6 +25,9 @@ class BroadcastSocket_Serial(BroadcastSocket):
         super().__init__()
         self._port = port
         self._socket = None  # Not initialized until open()
+        self._reading_serial = False
+        self._received_buffer = bytearray(128)
+        self._received_length = 0
     
     def open(self) -> bool:
         """Initialize and bind the socket."""
@@ -72,18 +75,67 @@ class BroadcastSocket_Serial(BroadcastSocket):
             print(f"Send failed: {e}")
             return False
     
+
     def receive(self) -> Optional[Tuple[bytes, Tuple[str, int]]]:
-        """Non-blocking receive."""
         if not self._socket:
             return None
+
         try:
-            data: bytes = self._socket.readline()
-            if data:
-                return (data, None) # As data_tuple
+            while self._socket.in_waiting > 0:
+                c = self._socket.read(1)
+                if not c:
+                    break
+
+                c = c[0]  # int 0–255
+
+                if self._reading_serial:
+                    if self._received_length < self.BROADCAST_SOCKET_BUFFER_SIZE:
+                        if (
+                            c == ord('}')
+                            and self._received_length
+                            and self._received_buffer[self._received_length - 1] != ord('\\')
+                        ):
+                            self._reading_serial = False
+                            self._received_buffer[self._received_length] = c
+                            self._received_length += 1
+
+                            data = bytes(self._received_buffer[:self._received_length])
+                            self._received_length = 0
+                            return (data, None)
+                        else:
+                            self._received_buffer[self._received_length] = c
+                            self._received_length += 1
+                    else:
+                        self._reading_serial = False
+                        self._received_length = 0  # overflow → reset
+
+                elif c == ord('{'):
+                    self._reading_serial = True
+                    self._received_length = 0
+                    self._received_buffer[self._received_length] = c
+                    self._received_length += 1
+
             return None
-        except BlockingIOError:
+
+        except Exception:
+            # Only truly unexpected failures land here
+            self._reading_serial = False
+            self._received_length = 0
             return None
-        except Exception as e:
-            print(f"Receive error: {e}")
-            return None
+
+        
+    # def receive(self) -> Optional[Tuple[bytes, Tuple[str, int]]]:
+    #     """Non-blocking receive."""
+    #     if not self._socket:
+    #         return None
+    #     try:
+    #         data: bytes = self._socket.readline()
+    #         if data:
+    #             return (data, None) # As data_tuple
+    #         return None
+    #     except BlockingIOError:
+    #         return None
+    #     except Exception as e:
+    #         print(f"Receive error: {e}")
+    #         return None
 
