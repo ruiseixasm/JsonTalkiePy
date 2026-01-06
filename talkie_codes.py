@@ -46,7 +46,7 @@ class TalkieCode(IntEnum):
 
 
 class ValueType(TalkieCode):
-    STRING, INTEGER, OTHER, VOID = range(4)
+    VOID, OTHER, INTEGER, STRING = range(4)
 
 
 class LinkType(TalkieCode):
@@ -77,7 +77,7 @@ class MessageValue(TalkieCode):
 
 
 class SystemValue(TalkieCode):
-    BOARD, MUTE, DROPS, DELAY, SOCKET, MANIFESTO, UNDEFINED = range(7)
+    UNDEFINED, BOARD, MUTE, DROPS, DELAY, SOCKET, MANIFESTO = range(7)
 
 
 class RogerValue(TalkieCode):
@@ -85,5 +85,5 @@ class RogerValue(TalkieCode):
 
 
 class ErrorValue(TalkieCode):
-    CHECKSUM, MESSAGE, IDENTITY, FIELD, FROM, TO, DELAY, KEY, VALUE, UNDEFINED = range(10)
+    UNDEFINED, CHECKSUM, MESSAGE, IDENTITY, FIELD, FROM, TO, DELAY, KEY, VALUE = range(10)
 
