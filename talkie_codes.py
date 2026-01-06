@@ -58,7 +58,7 @@ class TalkerMatch(TalkieCode):
 
 
 class BroadcastValue(TalkieCode):
-    REMOTE, LOCAL, SELF, NONE = range(4)
+    NONE, REMOTE, LOCAL, SELF = range(4)
 
 
 class MessageValue(TalkieCode):
