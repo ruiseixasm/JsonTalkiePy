@@ -62,7 +62,7 @@ class BroadcastValue(TalkieCode):
 
 
 class MessageValue(TalkieCode):
-    TALK, CHANNEL, PING, CALL, LIST, SYSTEM, ECHO, ERROR, NOISE = range(9)
+    NOISE, TALK, CHANNEL, PING, CALL, LIST, SYSTEM, ECHO, ERROR = range(9)
 
     @classmethod
     def validate_to_words(cls, words: list[str]) -> bool:
