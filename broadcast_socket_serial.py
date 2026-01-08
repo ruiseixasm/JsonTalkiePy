@@ -22,52 +22,161 @@ class BroadcastSocket_Serial(BroadcastSocket):
     """Dummy broadcast socket with explicit lifecycle control."""
 
     BROADCAST_SOCKET_BUFFER_SIZE = 128
+    DEFAULT_BAUDRATE = 115200
+    DEFAULT_TIMEOUT = 1.0  # seconds
     
-    def __init__(self, port: str = 'COM4'):
+    
+    def __init__(self, port: str = 'COM5', baudrate: int = None, timeout: float = None):
+        """
+        Initialize serial broadcast socket.
+        
+        Args:
+            port: Serial port (e.g., 'COM5', '/dev/ttyUSB0')
+            baudrate: Baud rate for serial communication (default: 115200)
+            timeout: Read timeout in seconds (default: 1.0)
+        """
         super().__init__()
         self._port = port
+        self._baudrate = baudrate or self.DEFAULT_BAUDRATE
+        self._timeout = timeout or self.DEFAULT_TIMEOUT
         self._socket = None  # Not initialized until open()
         self._reading_serial = False
         self._received_buffer = bytearray(self.BROADCAST_SOCKET_BUFFER_SIZE)
         self._received_length = 0
-    
+
+
+    def __str__(self) -> str:
+        status = "open" if self.is_open() else "closed"
+        return f"BroadcastSocket_Serial(port={self._port}, baud={self._baudrate}, status={status})"
+
+
     def open(self) -> bool:
         """Initialize and bind the socket."""
         try:
             self._socket = serial.Serial(
                 port=self._port,
-                baudrate=115200,
-                timeout=1   # seconds
+                baudrate=self._baudrate,
+                timeout=self._timeout,
+                write_timeout=self._timeout,
+                bytesize=serial.EIGHTBITS,
+                parity=serial.PARITY_NONE,
+                stopbits=serial.STOPBITS_ONE
             )
             return True
         except Exception as e:
             print(f"Socket open failed: {e}")
             return False
-    
+
+
     def close(self):
         """Release socket resources."""
         if self._socket:
             self._socket.close()
             self._socket = None
+
+
+    def set_baudrate(self, baudrate: int) -> bool:
+        """Change baud rate and reopen connection.
+        
+        Args:
+            baudrate: New baud rate (e.g., 9600, 115200, 57600)
+        
+        Returns:
+            True if successful, False if failed to reopen.
+        """
+        # Close existing connection if open
+        was_open = self._socket and self._socket.is_open
+        if was_open:
+            self.close()
+
+        old_baud = self._baudrate
+        self._baudrate = baudrate
+
+        # Reopen if it was previously open
+        if was_open:
+            success = self.open()
+            if success:
+                print(f"Changed baudrate from {old_baud} to {baudrate}")
+            else:
+                print(f"Failed to reopen at {baudrate} baud, reverting to {old_baud}")
+                self._baudrate = old_baud
+                self.open()  # Try to reopen with old baudrate
+            return success
+        return True
+    
+
+    def get_baudrate(self) -> int:
+        return self._baudrate
+    
+
+    def get_timeout(self) -> float:
+        return self._timeout
+    
+
+    def get_settings(self) -> dict:
+        return {
+            'port': self._port,
+            'baudrate': self._baudrate,
+            'timeout': self._timeout,
+            'is_open': self._socket.is_open if self._socket else False
+        }
     
 
     def set_port(self, new_port: int) -> bool:
-        """Change port and immediately rebind the socket.
-        Returns True if successful, False if failed to rebind.
-        """
-        if not 1 <= new_port <= 65535:
-            raise ValueError("Port must be between 1 and 65535")
+        """Change serial port and reopen connection.
         
+        Args:
+            new_port: New serial port (e.g., 'COM3', '/dev/ttyUSB1')
+        
+        Returns:
+            True if successful, False if failed to reopen.
+        """
+        # Close existing connection if open
+        was_open = self._socket and self._socket.is_open
+        if was_open:
+            self.close()
+
+        old_port = self._port
         self._port = new_port
+
+        # Reopen if it was previously open
+        if was_open:
+            success = self.open()
+            if success:
+                print(f"Changed serial port from {old_port} to {new_port}")
+            else:
+                print(f"Failed to reopen serial port {new_port}, reverting to {old_port}")
+                self._port = old_port
+                self.open()  # Try to reopen old port
+            return success
         return True
-            
+
+
     def get_port(self) -> int:
         """Returns current port number"""
         return self._port
 
 
+    def flush(self):
+        if self._socket and self._socket.is_open:
+            self._socket.reset_input_buffer()
+            self._socket.reset_output_buffer()
+
+
+    def is_open(self) -> bool:
+        return self._socket is not None and self._socket.is_open
+
+
     def send(self, data: bytes, device_address: Tuple[str, int] = None) -> bool:
-        """Broadcast data if socket is active."""
+        """Send data through serial port.
+        
+        Args:
+            data: Bytes to send
+            device_address: Ignored for serial (kept for interface compatibility)
+        
+        Returns:
+            True if successful, False if failed.
+        """
         if not self._socket:
             return False
         try:
@@ -126,18 +235,3 @@ class BroadcastSocket_Serial(BroadcastSocket):
             return None
 
         
-    # def receive(self) -> Optional[Tuple[bytes, Tuple[str, int]]]:
-    #     """Non-blocking receive."""
-    #     if not self._socket:
-    #         return None
-    #     try:
-    #         data: bytes = self._socket.readline()
-    #         if data:
-    #             return (data, None) # As data_tuple
-    #         return None
-    #     except BlockingIOError:
-    #         return None
-    #     except Exception as e:
-    #         print(f"Receive error: {e}")
-    #         return None
-

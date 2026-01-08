@@ -305,7 +305,7 @@ class CommandLine:
         except Exception as e:
             print(f"\nFormat error: {e}")
             return False
-        
+
 
 if __name__ == "__main__":
     # Parse command line arguments
@@ -315,6 +315,17 @@ if __name__ == "__main__":
         choices=["UDP", "SERIAL", "DUMMY"], 
         default="UDP",
         help="Socket type to use (default: UDP)"
+    )
+    parser.add_argument(
+        "--port",
+        default="COM5",
+        help="Serial port to use when socket type is SERIAL (default: COM5)"
+    )
+    parser.add_argument(
+        "--baud",
+        type=int,
+        default=115200,
+        help="Baud rate for serial communication (default: 115200)"
     )
     parser.add_argument(
         "--verbose",
@@ -327,15 +338,18 @@ if __name__ == "__main__":
     
     # Socket configuration from command line
     SOCKET: str = args.socket
+    SERIAL_PORT: str = args.port
+    SERIAL_BAUD: int = args.baud
     VERBOSE: bool = args.verbose
     
+    # Create appropriate socket instance
     if SOCKET == "SERIAL":
         from broadcast_socket_serial import BroadcastSocket_Serial
-        broadcast_socket = BroadcastSocket_Serial("COM5")
+        broadcast_socket = BroadcastSocket_Serial(SERIAL_PORT, SERIAL_BAUD)
     elif SOCKET == "DUMMY":
         from broadcast_socket_dummy import BroadcastSocket_Dummy
         broadcast_socket = BroadcastSocket_Dummy()
-    else:
+    else:  # UDP
         from broadcast_socket_udp import BroadcastSocket_UDP
         broadcast_socket = BroadcastSocket_UDP()
 
@@ -355,6 +369,5 @@ if __name__ == "__main__":
         asyncio.run(cli.run())
     finally:
         json_talkie.off()
-
 
 
