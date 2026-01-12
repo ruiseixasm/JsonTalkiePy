@@ -27,6 +27,7 @@ class TalkieKey(Enum):
     ACTION      = "a"
     ROGER       = "r"
     ERROR       = "e"
+    NO_REPLY    = "n"
 
 
 class TalkieCode(IntEnum):
