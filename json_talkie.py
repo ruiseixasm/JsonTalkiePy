@@ -72,15 +72,19 @@ class JsonTalkie:
                 data, ip_port = received  # Explicitly ignore (ip, port)
                 try:
                     if self._verbose:
-                        print(data)
+                        print(data, end="")
 
                     data_array: bytearray = bytearray(data)
                     message_checksum: int = JsonTalkie.get_number(data_array, 'c')
                     JsonTalkie.remove(data_array, 'c')
                     checksum: int = JsonTalkie.generate_checksum(data_array)
                     if message_checksum != checksum:
+                        if self._verbose:
+                            print(" | FAIL CHECKSUM")
                         pass    # Checksum not validated
-
+                    if self._verbose:
+                        print(" | ", end="")
+                        print(checksum)
                     message: Dict[str, Any] = JsonTalkie.decode( bytes(data_array) )
                     if self.validate_message(message):
                         # Add info to echo message right away accordingly to the message original type
