@@ -73,6 +73,8 @@ class JsonTalkie:
                 try:
                     if self._verbose:
                         print(data, end="")
+                        print(" | from ip: ", end="")
+                        print(ip_port, end="")
 
                     data_array: bytearray = bytearray(data)
                     message_checksum: int = JsonTalkie.get_number(data_array, 'c')
