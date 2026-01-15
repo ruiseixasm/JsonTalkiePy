@@ -89,17 +89,34 @@ class JsonTalkie:
                         print(checksum)
                     message: Dict[str, Any] = JsonTalkie.decode( bytes(data_array) )
                     if self.validate_message(message):
-                        # Add info to echo message right away accordingly to the message original type
-                        if message[TalkieKey.MESSAGE.value] == MessageValue.ECHO.value:
-                            match JsonTalkie.getMessageData(self._original_message, TalkieKey.MESSAGE):
-                                case MessageValue.PING:
-                                    actual_time: int = self.message_id()
-                                    out_time_ms: int = message[TalkieKey.TIMESTAMP.value]
-                                    delay_ms: int = actual_time - out_time_ms
-                                    if delay_ms < 0:    # do overflow as if uint16_t in c++
-                                        delay_ms += 0xFFFF + 1  # 2^16
-                                    if str(0) not in message:  # Don't change value already set
-                                        message[ str(0) ] = delay_ms
+
+                        match message[TalkieKey.MESSAGE.value]:
+
+                            # Add info to echo message right away accordingly to the message original type
+                            case MessageValue.ECHO.value:
+
+                                match JsonTalkie.getMessageData(self._original_message, TalkieKey.MESSAGE):
+                                    case MessageValue.PING:
+                                        actual_time: int = self.message_id()
+                                        out_time_ms: int = message[TalkieKey.TIMESTAMP.value]
+                                        delay_ms: int = actual_time - out_time_ms
+                                        if delay_ms < 0:    # do overflow as if uint16_t in c++
+                                            delay_ms += 0xFFFF + 1  # 2^16
+                                        if str(0) not in message:  # Don't change value already set
+                                            message[ str(0) ] = delay_ms
+
+                            
+                            case MessageValue.ERROR.value:
+                                
+                                match JsonTalkie.getMessageData(message, TalkieKey.ERROR):
+                                    case ErrorValue.CHECKSUM:
+
+                                        message_id: int = message[TalkieKey.IDENTITY.value]
+                                        original_id: int = self._original_message[TalkieKey.IDENTITY.value]
+
+                                        if message_id == original_id:
+                                            self.remoteSend(self._original_message)
+
 
                         if self._verbose:
                             print(message)
@@ -275,7 +292,7 @@ class JsonTalkie:
                 return False
             if not isinstance(message[TalkieKey.MESSAGE.value], int):
                 return False
-            if not (TalkieKey.FROM.value in message and TalkieKey.IDENTITY.value in message):
+            if not (TalkieKey.IDENTITY.value in message):
                 return False
             if TalkieKey.TO.value in message:
                 if isinstance(message[ TalkieKey.TO.value ], int):
@@ -285,7 +302,6 @@ class JsonTalkie:
                     return False
         else:
             return False
-        message[TalkieKey.BROADCAST.value] = BroadcastValue.REMOTE.value
         return True
 
 
