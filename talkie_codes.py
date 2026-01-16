@@ -78,7 +78,7 @@ class MessageValue(TalkieCode):
 
 
 class SystemValue(TalkieCode):
-    UNDEFINED, BOARD, MUTE, ERRORS, DROPS, DELAY, SOCKET, MANIFESTO = range(8)
+    UNDEFINED, BOARD, MUTE, ERRORS, DROPS, DELAY, SOCKETS, MANIFESTO = range(8)
 
 
 class RogerValue(TalkieCode):

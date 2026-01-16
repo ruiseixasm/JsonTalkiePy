@@ -196,10 +196,11 @@ class CommandLine:
         """System help:"""
         print("\t[system <talker> board]    Prints the board description (OS).")
         print("\t[system <talker> mute]     Gets or sets the Talker Calls muted state, 1 for silent and 0 for not.")
+        print("\t[system <talker> errors]   Returns the number of errors per socket, bad checksum transfers.")
         print("\t[system <talker> drops]    Returns the number of drops associated to out of time messages.")
         print("\t[system <talker> delay]    Returns the maximum delay for dropping the message in milliseconds.")
         print("\t[system <talker> delay d]  Sets a new delay, where 0 means no delay processed (no drops).")
-        print("\t[system <talker> socket]   Prints the socket class name.")
+        print("\t[system <talker> sockets]  Prints all connected sockets to the talker.")
         print("\t[system <talker> manifesto]Prints the manifesto class name.")
         
 
