@@ -199,7 +199,7 @@ class CommandLine:
         print("\t[system <talker> sockets]  Prints all connected sockets to the talker.")
         print("\t[system <talker> mute]     Gets or sets the Talker Calls muted state, 1 for silent and 0 for not.")
         print("\t[system <talker> delay]    Gets or sets the maximum Socket configuration delay in milliseconds.")
-        print("\t[system <talker> errors]   Returns the number of errors per Socket (misses, drops and fails).")
+        print("\t[system <talker> errors]   Returns the number of errors per Socket (invalids, misses, drops and fails).")
         
 
 
