@@ -115,7 +115,8 @@ class JsonTalkie:
                                         original_id: int = self._original_message[TalkieKey.IDENTITY.value]
 
                                         if message_id == original_id:
-                                            self.remoteSend(self._original_message)
+                                            recovery_message = {'M' if k == 'm' else k: v for k, v in self._original_message.items()}
+                                            self.remoteSend(recovery_message)
 
 
                         if self._verbose:
