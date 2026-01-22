@@ -32,6 +32,7 @@ class JsonTalkie:
         self._manifesto: Dict[str, Dict[str, Any]] = manifesto
         self._channel: int = 0
         self._original_message: Dict[str, Any] = {}
+        self._active_message = False
         self._received_message_data: MessageValue = MessageValue.NOISE
         self._verbose: bool = verbose
         # State variables
@@ -67,6 +68,11 @@ class JsonTalkie:
     def listen(self):
         """Processes raw bytes from socket."""
         while self._running:
+            if self._active_message:
+                message_identity: int = self._original_message[TalkieKey.IDENTITY.value]
+                if (self.message_id() - message_identity) & 0xFFFF > 500:
+                    self._active_message = False
+
             received = self._socket.receive()
             if received:
                 data, ip_port = received  # Explicitly ignore (ip, port)
@@ -107,17 +113,20 @@ class JsonTalkie:
 
                             
                             case MessageValue.ERROR.value:
+
+                                if TalkieKey.ERROR.value not in message:
+                                    message[ TalkieKey.ERROR.value ] = ErrorValue.CHECKSUM  # Default value
                                 
                                 match JsonTalkie.getMessageData(message, TalkieKey.ERROR):
                                     case ErrorValue.CHECKSUM:
 
-                                        message_id: int = message[TalkieKey.IDENTITY.value]
                                         original_id: int = self._original_message[TalkieKey.IDENTITY.value]
+                                        if self._active_message \
+                                            and (TalkieKey.IDENTITY.value not in message or message[TalkieKey.IDENTITY.value] == original_id):
 
-                                        if message_id == original_id:
-                                            if 'M' not in self._original_message:   # Only sends once
                                                 self._original_message = {'M' if k == 'm' else k: v for k, v in self._original_message.items()}
                                                 self.remoteSend(self._original_message)
+                                                self._active_message = False
 
 
                         if self._verbose:
