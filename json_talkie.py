@@ -158,6 +158,7 @@ class JsonTalkie:
                 self._original_message = message.copy() # Shouldn't use the same
             if message[TalkieKey.MESSAGE.value] != MessageValue.NOISE.value:
                 self._recoverable_message = message.copy() # Shouldn't use the same
+                self._active_message = True
 
         encoded_message: bytes = json.dumps(message, separators=(',', ':')).encode('utf-8')
         data_array: bytearray = bytearray(encoded_message)
