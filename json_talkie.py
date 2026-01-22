@@ -32,6 +32,7 @@ class JsonTalkie:
         self._manifesto: Dict[str, Dict[str, Any]] = manifesto
         self._channel: int = 0
         self._original_message: Dict[str, Any] = {}
+        self._recoverable_message: Dict[str, Any] = {}
         self._active_message = False
         self._received_message_data: MessageValue = MessageValue.NOISE
         self._verbose: bool = verbose
@@ -69,7 +70,7 @@ class JsonTalkie:
         """Processes raw bytes from socket."""
         while self._running:
             if self._active_message:
-                message_identity: int = self._original_message[TalkieKey.IDENTITY.value]
+                message_identity: int = self._recoverable_message[TalkieKey.IDENTITY.value]
                 if (self.message_id() - message_identity) & 0xFFFF > 500:
                     self._active_message = False
 
@@ -120,12 +121,12 @@ class JsonTalkie:
                                 match JsonTalkie.getMessageData(message, TalkieKey.ERROR):
                                     case ErrorValue.CHECKSUM:
 
-                                        original_id: int = self._original_message[TalkieKey.IDENTITY.value]
+                                        original_id: int = self._recoverable_message[TalkieKey.IDENTITY.value]
                                         if self._active_message \
                                             and (TalkieKey.IDENTITY.value not in message or message[TalkieKey.IDENTITY.value] == original_id):
 
-                                                self._original_message = {'M' if k == 'm' else k: v for k, v in self._original_message.items()}
-                                                self.remoteSend(self._original_message)
+                                                self._recoverable_message = {'M' if k == 'm' else k: v for k, v in self._recoverable_message.items()}
+                                                self.remoteSend(self._recoverable_message)
                                                 self._active_message = False
 
 
@@ -155,6 +156,8 @@ class JsonTalkie:
             message[ TalkieKey.IDENTITY.value ] = JsonTalkie.message_id()
             if message[TalkieKey.MESSAGE.value] < MessageValue.ECHO.value:
                 self._original_message = message.copy() # Shouldn't use the same
+            if message[TalkieKey.MESSAGE.value] != MessageValue.NOISE.value:
+                self._recoverable_message = message.copy() # Shouldn't use the same
 
         encoded_message: bytes = json.dumps(message, separators=(',', ':')).encode('utf-8')
         data_array: bytearray = bytearray(encoded_message)
