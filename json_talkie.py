@@ -142,7 +142,6 @@ class JsonTalkie:
                 except (UnicodeDecodeError, json.JSONDecodeError) as e:
                     if self._verbose:
                         print(f"\tInvalid message: {e}")
-                    pass
 
 
     def remoteSend(self, message: Dict[str, Any]) -> bool:
