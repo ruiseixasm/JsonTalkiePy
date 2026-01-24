@@ -125,9 +125,10 @@ class JsonTalkie:
                                         if self._active_message \
                                             and (TalkieKey.IDENTITY.value not in message or message[TalkieKey.IDENTITY.value] == original_id):
 
+                                                if 'M' in self._recoverable_message:    # Allows 2 sends
+                                                    self._active_message = False
                                                 self._recoverable_message = {'M' if k == 'm' else k: v for k, v in self._recoverable_message.items()}
                                                 self.remoteSend(self._recoverable_message)
-                                                self._active_message = False
 
 
                         if self._verbose:
