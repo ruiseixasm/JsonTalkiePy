@@ -122,14 +122,12 @@ class JsonTalkie:
                                     case ErrorValue.CHECKSUM:
 
                                         if self._active_message:
-                                            original_id: int = self._recoverable_message[TalkieKey.IDENTITY.value]
-                                            if  TalkieKey.IDENTITY.value not in message or message[TalkieKey.IDENTITY.value] == original_id:
 
-                                                if 'M' in self._recoverable_message:    # Allows 2 sends
-                                                    self._active_message = False
-                                                else:
-                                                    self._recoverable_message = {'M' if k == 'm' else k: v for k, v in self._recoverable_message.items()}
-                                                self.remoteSend(self._recoverable_message)
+                                            if 'M' in self._recoverable_message:    # Allows 2 sends
+                                                self._active_message = False
+                                            else:
+                                                self._recoverable_message = {'M' if k == 'm' else k: v for k, v in self._recoverable_message.items()}
+                                            self.remoteSend(self._recoverable_message)
                                         
                                         continue    # Don't process or print Checksum errors
 
