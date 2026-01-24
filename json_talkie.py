@@ -90,7 +90,7 @@ class JsonTalkie:
                     if message_checksum != checksum:
                         if self._verbose:
                             print(" | FAIL CHECKSUM")
-                        pass    # Checksum not validated
+                        continue    # Checksum not validated
                     if self._verbose:
                         print(" | ", end="")
                         print(checksum)
@@ -130,7 +130,7 @@ class JsonTalkie:
                                                 self._recoverable_message = {'M' if k == 'm' else k: v for k, v in self._recoverable_message.items()}
                                                 self.remoteSend(self._recoverable_message)
                                         
-                                        pass    # Don't process or print Checksum errors
+                                        continue    # Don't process or print Checksum errors
 
 
                         if self._verbose:
