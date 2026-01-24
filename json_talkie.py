@@ -121,9 +121,9 @@ class JsonTalkie:
                                 match JsonTalkie.getMessageData(message, TalkieKey.ERROR):
                                     case ErrorValue.CHECKSUM:
 
-                                        original_id: int = self._recoverable_message[TalkieKey.IDENTITY.value]
-                                        if self._active_message \
-                                            and (TalkieKey.IDENTITY.value not in message or message[TalkieKey.IDENTITY.value] == original_id):
+                                        if self._active_message:
+                                            original_id: int = self._recoverable_message[TalkieKey.IDENTITY.value]
+                                            if  TalkieKey.IDENTITY.value not in message or message[TalkieKey.IDENTITY.value] == original_id:
 
                                                 if 'M' in self._recoverable_message:    # Allows 2 sends
                                                     self._active_message = False
