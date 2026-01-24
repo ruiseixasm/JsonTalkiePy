@@ -116,7 +116,7 @@ class JsonTalkie:
                             case MessageValue.ERROR.value:
 
                                 if TalkieKey.ERROR.value not in message:
-                                    message[ TalkieKey.ERROR.value ] = ErrorValue.CHECKSUM  # Default value
+                                    message[ TalkieKey.ERROR.value ] = ErrorValue.CHECKSUM.value    # Default value
                                 
                                 match JsonTalkie.getMessageData(message, TalkieKey.ERROR):
                                     case ErrorValue.CHECKSUM:
