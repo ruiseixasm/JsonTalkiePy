@@ -129,6 +129,8 @@ class JsonTalkie:
                                                     self._active_message = False
                                                 self._recoverable_message = {'M' if k == 'm' else k: v for k, v in self._recoverable_message.items()}
                                                 self.remoteSend(self._recoverable_message)
+                                        
+                                        pass    # Don't process or print Checksum errors
 
 
                         if self._verbose:
