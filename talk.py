@@ -29,7 +29,7 @@ class CommandLine:
     def __init__(self):
         self.manifesto: Dict[str, Dict[str, Any]] = {
             'talker': {
-                'name': f"Talker_{str(uuid.uuid4())[:2]}",
+                'name': f"Talker_{str(uuid.uuid4())[:3]}",
                 'description': 'A simple Talker!'
             },
             'echo': self.echo,
