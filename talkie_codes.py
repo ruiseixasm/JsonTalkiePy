@@ -78,7 +78,7 @@ class MessageValue(TalkieCode):
 
 
 class SystemValue(TalkieCode):
-    MANIFESTO, BOARD, SOCKETS, MUTE, DELAY, ERRORS = range(6)
+    MANIFESTO, BOARD, SOCKETS, MUTE, DELAY, ERRORS, CALLS = range(7)
 
 
 class RogerValue(TalkieCode):
