@@ -121,6 +121,12 @@ class CommandLine:
                             if num_of_keys < 2:
                                 print(f"\t'{words[0]}' misses arguments!")
                                 return
+                            if num_of_keys > 2:
+                                # Action index or name
+                                try:
+                                    message[ TalkieKey.ACTION.value ] = int(words[2])
+                                except ValueError:
+                                    message[ TalkieKey.ACTION.value ] = words[2]
                             
                         case MessageValue.SYSTEM:
                             if num_of_keys > 2:
