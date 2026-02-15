@@ -344,20 +344,25 @@ if __name__ == "__main__":
     
     # Socket configuration from command line
     SOCKET: str = args.socket
-    SERIAL_PORT: str = args.port
+    PORT: str = args.port
     SERIAL_BAUD: int = args.baud
     VERBOSE: bool = args.verbose
     
     # Create appropriate socket instance
     if SOCKET == "SERIAL":
         from broadcast_socket_serial import BroadcastSocket_Serial
-        broadcast_socket = BroadcastSocket_Serial(SERIAL_PORT, SERIAL_BAUD)
+        broadcast_socket = BroadcastSocket_Serial(PORT, SERIAL_BAUD)
     elif SOCKET == "DUMMY":
         from broadcast_socket_dummy import BroadcastSocket_Dummy
         broadcast_socket = BroadcastSocket_Dummy()
     else:  # UDP
         from broadcast_socket_udp import BroadcastSocket_UDP
-        broadcast_socket = BroadcastSocket_UDP()
+        try:
+            # Parse UDP port if provided, otherwise use default
+            udp_port = int(PORT) if PORT is not None else 5005
+            broadcast_socket = BroadcastSocket_UDP(udp_port)
+        except:
+            broadcast_socket = BroadcastSocket_UDP()
 
     cli = CommandLine()
     json_talkie = JsonTalkie(broadcast_socket, cli.manifesto, VERBOSE)
