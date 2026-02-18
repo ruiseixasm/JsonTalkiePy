@@ -86,5 +86,5 @@ class RogerValue(TalkieCode):
 
 
 class ErrorValue(TalkieCode):
-    CHECKSUM, MESSAGE, IDENTITY, FIELD, FROM, TO, DELAY, KEY, VALUE = range(9)
+    CHECKSUM, MESSAGE, IDENTITY, FIELD, FROM, TO, DELAY, KEY, VALUE, MISSING = range(10)
 
